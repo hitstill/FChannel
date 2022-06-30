@@ -1,0 +1,529 @@
+/* i got lazy */
+@media (prefers-color-scheme: light) {
+a, a:link, a:visited, a:hover, a:active {
+  text-decoration: none
+}
+
+a:link, a:visited,  a:active {
+  color: black;
+}
+
+a:hover {
+  color: #de0808;
+}
+
+body {
+  background-color: #eef2fe;
+  color: black;
+  background-color: #eef2fe;
+  color: black;
+  font-family: 'NotoColorEmojiLimited',arial,helvetica,sans-serif;
+  font-size: 10pt
+
+}
+
+body.nsfw {
+  background-color: #ffffee;
+  color: #820404
+}
+
+h1 {
+        font-family: Tahoma,sans-serif;
+        font-size: 28px;
+        font-weight: 700;
+        letter-spacing: -2px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #af0a0f;
+}
+
+.popup-box, #report-box {
+  border: 4px solid #d3caf0;
+  background-color: #eff5ff;
+}
+
+.nsfw .popup-box, .nsfw #report-box {
+  border: 4px solid #f0e2d9;
+  background-color: #f9f9e0;
+}
+
+.box {
+  background-color: #eff5ff;
+}
+
+.nsfw .box {
+  background-color: #f9f9e0;
+}
+
+.box-alt {
+  background-color: #d3caf0;
+}
+
+.nsfw .box-alt {
+  background-color: #f0e2d9;
+}
+
+
+.quote {
+  color: #789922;
+}
+
+.post {
+  background-color: #d5daf0;
+}
+
+.nsfw .post {
+  background-color: #f0e0d6;
+}
+
+:target > div > .post {
+  background-color: #d6bad0;
+}
+
+.nsfw :target > div > .post {
+  background-color: #f0c0b0;
+}
+
+.title {
+  color: #0f0c5d;
+}
+
+.name, .tripcode {
+  color: #117743;
+}
+
+a.reply {
+  color: #af0a0f;
+  text-decoration: 1px underline;
+}
+
+.replyLink {
+  color: #000080;
+  font-size: 0.8em;
+}
+
+#newpostbtn {
+  text-align: center;
+  margin-top: 80px;
+}
+
+#postForm {
+  margin: auto;
+}
+
+#postForm tr > td:first-child {
+  background-color: #98e;
+  border: 1px black;
+  padding-left: 0.5em;
+  padding-right: 0.5em;
+}
+
+.nsfw #postForm tr > td:first-child {
+  background-color: #ea8;
+}
+
+#postForm input[type="text"],
+#postForm textarea,
+#reply-name, #reply-options, #reply-comment {
+  box-sizing: border-box;
+  -webkit-box-sizing:border-box;
+  -moz-box-sizing: border-box;
+}
+
+#postForm input[type="text"],
+#postForm textarea,
+#reply-name, #reply-options, #reply-comment {
+  box-sizing: border-box;
+  -webkit-box-sizing:border-box;
+  -moz-box-sizing: border-box;
+}
+
+#reply-comment {
+  min-width: 300px;
+  width: 396px;
+  height: 200px;
+}
+
+#reply-name {
+  width: 75%;
+  float: left;
+}
+
+#reply-options {
+  width: 25%;
+  float: right;
+}
+
+#reply-header {
+  display: inline-block;
+  width: 100%;
+  cursor: move;
+}
+
+#postForm #captcha {
+  display: block;
+  width: 100%;
+}
+
+.popup-box {
+  position: fixed;
+  min-width: 300px;
+  width: min-content;
+  z-index: 9;
+  display: block;
+}
+
+#report-box {
+  min-width: 300px;
+  width: min-content;
+  z-index: 9;
+  display: block;
+}
+
+/* TODO: rename */
+.box2 {
+  border: 4px solid #f0e2d9;
+  background-color: #f9f9e0;
+}
+
+.newsbox {
+    padding: 25px;
+    border: 4px solid #f0e2d9;
+    background-color: #f9f9e0;
+}
+
+.newsbox h2 {
+    margin: 0;
+    padding: 0;
+}
+
+.newsbox-news {
+    text-align: left;
+    margin-top: 25px;
+    padding: 25px;
+}
+
+.newsbox-news p,
+.newsbox-news h3 {
+    margin: 0;
+}
+
+#stopTablePost {
+  float: right;
+  display: none;
+}
+
+#boardGrid {
+  display: grid;
+  grid-auto-columns: 1fr;
+  border: 4px solid #f0e2d9;
+  background-color: #f9f9e0;
+}
+
+#boardGridHeader {
+  border-bottom: 2px solid #820404;
+  display: inline-grid;
+}
+
+.boardGridCell {
+  white-space: nowrap;
+  display: inline-grid;
+  text-align: left;
+  padding: 5px;
+}
+
+/* these may or may not work. my CSS is poor so i just kinda did stuff until it worked. */
+.boardGridCell:nth-child(-n+4) {
+  border-top: none;
+}
+
+.boardGridCell:nth-child(3n+2) {
+  border-left: none;
+}
+
+#threadfooter {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+#threadfooter td {
+  padding: 0;
+  margin: 0;
+}
+
+#threadfooter #threadStats {
+  float: right;
+}
+
+#navlinks, #boardlinks {
+  padding: 0;
+  margin: 0;
+}
+
+#navlinks > li,
+#boardlinks > li {
+  display: inline;
+}
+}
+
+@media (prefers-color-scheme: dark) {
+a, a:link, a:visited, a:hover, a:active {
+	text-decoration: none
+}
+
+a:link, a:visited,  a:active {
+	color: #81a2be;
+}
+
+a:hover {
+	color: #5f89ac;
+}
+
+h1 {
+  font-family: Tahoma,sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -2px;
+}
+
+body {
+	background-color: #1d1f21;
+	color: #c5c8c6;
+	font-family: 'NotoColorEmojiLimited',arial,helvetica,sans-serif;
+	font-size: 10pt
+}
+
+/* TODO: make archive index look better */
+.popup-box {
+	border: 4px solid #33363b;
+	background-color: #282A2E;
+}
+
+.box {
+	background-color: #282A2E;
+}
+
+.box-alt {
+	background-color: #000;
+}
+
+
+.quote {
+	color: #b5bd68;
+}
+
+.post {
+	background-color: #282a2e;
+}
+
+:target > div > .post {
+	background-color: #1d1d21;
+  border: 1px solid #111; 
+}
+
+.subject {
+	color: #b294bb;
+}
+
+.title {
+	color: #0f0c5d;
+}
+
+/* post No. and ID */
+.timestamp > a {
+	color: #c5c8c6;
+}
+.timestamp > a:hover {
+	color: #5f89ac;
+}
+
+/* report and open buttons */
+.timestamp > a:nth-child(3), .timestamp > a:nth-child(4) {
+  color: #81a2be;
+}
+.timestamp > a:nth-child(3):hover, .timestamp > a:nth-child(4):hover {
+  color: #5f89ac;
+}
+
+a.reply {
+	text-decoration: 1px underline;
+}
+
+a.replyLink {
+	color: #5f89ac;
+	font-size: 0.8em;
+}
+
+a.replyLink:hover {
+  color: #81a2be;
+}
+
+#newpostbtn {
+	text-align: center;
+	margin-top: 70px!important;
+  margin-bottom: 70px!important;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+#postForm {
+  margin: auto;
+}
+
+#postForm tr > td:first-child {
+  background-color: #282a2e;
+  border: 1px black;
+  padding-left: 0.5em;
+  padding-right: 0.5em;
+}
+
+#postForm input[type="text"],
+#postForm textarea,
+#reply-name, #reply-options, #reply-comment {
+  box-sizing: border-box;
+  -webkit-box-sizing:border-box;
+  -moz-box-sizing: border-box;
+}
+
+#postForm input[type="text"],
+#postForm textarea,
+#reply-name, #reply-options, #reply-comment {
+  box-sizing: border-box;
+  -webkit-box-sizing:border-box;
+  -moz-box-sizing: border-box;
+  background-color: #282a2e;
+	color: #c5c8c6;
+}
+
+#reply-comment {
+	min-width: 300px;
+	width: 396px;
+	height: 200px;
+}
+
+#reply-name {
+	width: 75%;
+	float: left;
+}
+
+#reply-options {
+	width: 25%;
+	float: right;
+}
+
+#reply-header {
+	display: inline-block;
+	width: 100%;
+	cursor: move;
+}
+
+#postForm #captcha {
+	display: block;
+	width: 100%;
+}
+
+.popup-box {
+	position: fixed;
+	min-width: 300px;
+	width: min-content;
+	z-index: 9;
+	display: block;
+}
+
+/* TODO: rename */
+.box2 {
+	border: 4px solid #c5c8c6;
+	background-color: #282A2E;
+}
+
+.newsbox {
+    padding: 25px;
+    border: 4px solid #c5c8c6;
+    background-color: #282A2E;
+}
+
+.newsbox h2 {
+    margin: 0;
+    padding: 0;
+}
+
+.newsbox-news {
+    text-align: left;
+    margin-top: 25px;
+    padding: 25px;
+}
+
+.newsbox-news p,
+.newsbox-news h3 {
+    margin: 0;
+}
+
+#stopTablePost {
+	float: right;
+	display: none;
+}
+
+#boardGrid {
+	display: grid;
+	grid-auto-columns: 1fr;
+	border: 4px solid #c5c8c6;
+	background-color: #1D1F21;
+}
+
+#boardGridHeader {
+	border-bottom: 2px solid #c5c8c6;
+	display: inline-grid;
+}
+
+.boardGridCell {
+	white-space: nowrap;
+	display: inline-grid;
+	text-align: left;
+	padding: 5px;
+	border-top: 2px solid #c5c8c6;
+	border-left: 2px solid #c5c8c6;
+}
+
+/* these may or may not work. my CSS is poor so i just kinda did stuff until it worked. */
+.boardGridCell:nth-child(-n+4) {
+	border-top: none;
+}
+
+.boardGridCell:nth-child(3n+2) {
+	border-left: none;
+}
+
+#threadfooter {
+	width: 100%;
+	table-layout: fixed;
+	border-collapse: collapse;
+}
+
+#threadfooter td {
+	padding: 0;
+	margin: 0;
+}
+
+#threadfooter #threadStats {
+	float: right;
+}
+
+#navlinks, #boardlinks {
+	padding: 0;
+	margin: 0;
+  font-size: 11pt;
+}
+
+#navlinks > li,
+#boardlinks > li {
+	display: inline;
+}
+}
+
+/* temporary mobile hacks */
+img {
+	max-width: 100%;
+	height: auto;
+}
