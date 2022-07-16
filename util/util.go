@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"mime/multipart"
-	"net/http"
 	"os"
 	"path"
 	"regexp"
@@ -206,7 +205,7 @@ func GetFileContentType(out multipart.File) (string, error) {
 	}
 
 	out.Seek(0, 0)
-	contentType := http.DetectContentType(buffer)
+	contentType := DetectContentType(buffer)
 
 	return contentType, nil
 }
