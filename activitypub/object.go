@@ -122,7 +122,7 @@ func (obj ObjectBase) CreatePreview() *NestedObjectBase {
 	re = regexp.MustCompile(`/public/.+`)
 	objFile := re.FindString(obj.Href)
 
-	cmd := exec.Command("convert", "."+objFile, "-resize", "250x250>", "-strip", "."+href)
+	cmd := exec.Command("convert", "."+objFile, "-coalesce", "-scale", "250x250>", "-fuzz", "2%", "+dither", "-remap", "."+objFile+"[0]", "-layers", "Optimize", "-strip", "."+href)
 
 	if err := cmd.Run(); err != nil {
 		// TODO: previously we would call CheckError here
