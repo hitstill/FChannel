@@ -35,6 +35,7 @@ func main() {
 		WriteTimeout: 30 * time.Second,
 		IdleTimeout:  60 * time.Second,
 		ServerHeader: "FChannel/" + config.InstanceName,
+		ProxyHeader:  "X-Real-IP",
 	})
 
 	app.Use(logger.New())
