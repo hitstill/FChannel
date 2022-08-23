@@ -49,7 +49,7 @@ func CreateNameTripCode(ctx *fiber.Ctx) (string, string, error) {
 		board, modcred := util.GetPasswordFromSession(ctx)
 
 		if hasAuth, _ := util.HasAuth(modcred, board); hasAuth && admin {
-			return tripSecure.ReplaceAllString(input, ""), "#Admin", nil
+			return tripSecure.ReplaceAllString(input, ""), "#Admin ︎🐇︎", nil
 		}
 
 		hash, err := TripCodeSecure(chunck)
@@ -67,7 +67,7 @@ func CreateNameTripCode(ctx *fiber.Ctx) (string, string, error) {
 		board, modcred := util.GetPasswordFromSession(ctx)
 
 		if hasAuth, _ := util.HasAuth(modcred, board); hasAuth && admin {
-			return trip.ReplaceAllString(input, ""), "#Admin", nil
+			return trip.ReplaceAllString(input, ""), "#Admin ︎🐇︎", nil
 		}
 
 		hash, err := TripCode(chunck)

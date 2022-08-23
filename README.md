@@ -1,3 +1,8 @@
+# Usagi fork
+This repo is intended as a convenient way to grab changes from [usagi.reisen](https://usagi.reisen).
+
+You are welcome to use this repo as is, but beware that I force-push to fix mistakes and squash features into single commits.
+
 # About
 
 FChannel is a [libre](https://en.wikipedia.org/wiki/Free_and_open-source_software), [self-hostable](https://en.wikipedia.org/wiki/Self-hosting_(web_services)), [federated](https://en.wikipedia.org/wiki/Federation_(information_technology)), [imageboard](https://en.wikipedia.org/wiki/Imageboard) platform that utilizes [ActivityPub](https://activitypub.rocks/).
