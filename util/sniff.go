@@ -149,7 +149,7 @@ var sniffSignatures = []sniffSig{
 	&maskedSig{
 		mask: []byte("\xFF\xFF\xFF\xFF\xFF"),
 		pat:  []byte("OggS\x00"),
-		ct:   "application/ogg",
+		ct:   "audio/ogg",
 	},
 	&maskedSig{
 		mask: []byte("\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"),
