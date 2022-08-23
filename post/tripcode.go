@@ -12,6 +12,7 @@ import (
 	"github.com/simia-tech/crypt"
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/transform"
+	"os/exec"
 )
 
 const SaltTable = "" +
@@ -26,6 +27,18 @@ const SaltTable = "" +
 
 func CreateNameTripCode(ctx *fiber.Ctx) (string, string, error) {
 	input := ctx.FormValue("name")
+
+	tripPhrase := regexp.MustCompile("###(.+)?")
+
+	if tripPhrase.MatchString(input) {
+		chunck := tripPhrase.FindString(input)
+		chunck = strings.Replace(chunck, "###", "", 1)
+
+		phrase, err := TripPhrase(chunck)
+
+		return tripPhrase.ReplaceAllString(input, ""), phrase, util.MakeError(err, "CreateNameTripCode")
+	}
+
 	tripSecure := regexp.MustCompile("##(.+)?")
 
 	if tripSecure.MatchString(input) {
@@ -107,4 +120,15 @@ func TripCodeSecure(pass string) (string, error) {
 	}
 
 	return enc[len(enc)-10 : len(enc)], nil
+}
+
+func TripPhrase(pass string) (string, error) {
+	pass = TripCodeConvert(pass)
+	//User input in os.exec :(
+	phrase, err := exec.Command("perl", "util/tripphrase/tripphrase.pl", pass, config.Salt).Output()
+	if err != nil {
+		return "", util.MakeError(err, "TripPhrase")
+	}
+
+	return string(phrase), nil
 }
