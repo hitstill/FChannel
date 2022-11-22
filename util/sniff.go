@@ -126,6 +126,19 @@ var sniffSignatures = []sniffSig{
 	&exactSig{[]byte("\xFF\xD8\xFF"), "image/jpeg"},
 	&exactSig{[]byte("\xFF\x0A"), "image/jxl"},
 	&exactSig{[]byte("\x00\x00\x00\x0cJXL\x20\x0d\x0a\x87\x0a"), "image/jxl"},
+	//&exactSig{[]byte("\x00\x00\x00\x20\x66\x74\x79\x70\x61\x76\x69\x66"), "image/avif"},
+	// Still not entirely sure which signatures are valid for AVIF
+	&maskedSig{
+		mask: []byte("\xFF\xFF\xFF\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"),
+		pat:  []byte("\x00\x00\x00\x00ftypavif"),
+		ct:   "image/avif",
+	},
+	// There is also mif1, thought this was supposed to be for HEIC but seems pretty common still
+	&maskedSig{
+		mask: []byte("\xFF\xFF\xFF\x00\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"),
+		pat:  []byte("\x00\x00\x00\x00ftypmif1"),
+		ct:   "image/avif",
+	},
 
 	// Audio and Video types
 	// Enforce the pattern match ordering as prescribed in
