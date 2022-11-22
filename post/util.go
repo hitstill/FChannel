@@ -297,6 +297,16 @@ func ObjectFromForm(ctx *fiber.Ctx, obj activitypub.ObjectBase) (activitypub.Obj
 		}
 	}
 
+	re := regexp.MustCompile(`>>(\S*)`)
+	match := re.FindAllStringSubmatch(obj.Content, -1)
+	for i := 0; i < len(match); i++ {
+		curid := strings.Replace(match[i][0], ">>", "", -1)
+		curid = regexp.MustCompile(`\S*-`).ReplaceAllString(curid, "")
+		replyid, err := db.GetPostIDFromNum(curid)
+		if err == nil {
+			obj.Content = strings.ReplaceAll(obj.Content, match[i][0], ">>"+replyid)
+		}
+	}
 	replyingTo, err := ParseCommentForReplies(ctx.FormValue("comment"), originalPost.Id)
 
 	if err != nil {
