@@ -33,6 +33,7 @@
           <tr>
             <td><label for="file">Image</label></td>
             <td><input type="file" id="file" name="file" {{ if gt $len 1 }} required {{ else }} {{ if eq $len 0 }} required {{ end }} {{ end }} >
+								<span style="float: right;">(7168KiB max)</span>
                 <br><input type="checkbox" name="sensitive">Mark sensitive</input></td>
           </tr>
           <tr>

@@ -8,6 +8,7 @@
     <input id="reply-options" name="options" type="text" placeholder="Options" maxlength="100">
     <textarea id="reply-comment" name="comment" maxlength="4500" oninput="sessionStorage.setItem('element-reply-comment', document.getElementById('reply-comment').value)"></textarea>
     <input id="reply-file" name="file" type="file">
+		<span>(7168KiB max)</span>
     <input id="reply-submit" type="submit" value="Reply" style="float: right;">
     <input type="hidden" id="inReplyTo-box" name="inReplyTo" value="{{ .Board.InReplyTo }}">
     <input type="hidden" id="sendTo" name="sendTo" value="{{ .Board.To }}">
