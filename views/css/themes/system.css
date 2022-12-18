@@ -17,7 +17,7 @@ body {
   color: black;
   background-color: #eef2fe;
   color: black;
-  font-family: 'NotoColorEmojiLimited',arial,helvetica,sans-serif;
+  font-family: arial,helvetica,sans-serif;
   font-size: 10pt
 
 }
@@ -93,6 +93,10 @@ h1, h2, h3, h4, h5, h6 {
   color: #117743;
 }
 
+.tripcode {
+	font-weight: 400!important;
+}
+
 a.reply {
   color: #af0a0f;
   text-decoration: 1px underline;
@@ -104,8 +108,11 @@ a.reply {
 }
 
 #newpostbtn {
-  text-align: center;
-  margin-top: 80px;
+    text-align: center;
+    margin-top: 70px!important;
+    margin-bottom: 70px!important;
+    font-size: 17px;
+    font-weight: 700;
 }
 
 #postForm {
@@ -291,7 +298,7 @@ h1 {
 body {
 	background-color: #1d1f21;
 	color: #c5c8c6;
-	font-family: 'NotoColorEmojiLimited',arial,helvetica,sans-serif;
+	font-family: arial,helvetica,sans-serif;
 	font-size: 10pt
 }
 
@@ -329,6 +336,10 @@ body {
 
 .title {
 	color: #0f0c5d;
+}
+
+.tripcode {
+	font-weight: 400!important;
 }
 
 /* post No. and ID */

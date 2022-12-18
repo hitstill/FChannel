@@ -10,9 +10,18 @@ a:hover {
   color: #de0808;
 }
 
+h1 {
+  font-family: Tahoma,sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -2px;
+}
+
 body {
   background-color: #eef2fe;
   color: black;
+	font-family: arial,helvetica,sans-serif;
+  font-size: 10pt
 }
 
 body.nsfw {
@@ -79,6 +88,10 @@ h1, h2, h3, h4, h5, h6 {
   color: #117743;
 }
 
+.tripcode {
+	font-weight: 400!important;
+}
+
 a.reply {
   color: #af0a0f;
   text-decoration: 1px underline;
@@ -90,8 +103,11 @@ a.reply {
 }
 
 #newpostbtn {
-  text-align: center;
-  margin-top: 80px;
+    text-align: center;
+    margin-top: 70px!important;
+    margin-bottom: 70px!important;
+    font-size: 17px;
+    font-weight: 700;
 }
 
 #postForm {
@@ -246,6 +262,7 @@ a.reply {
 #navlinks, #boardlinks {
   padding: 0;
   margin: 0;
+	font-size: 11pt;
 }
 
 #navlinks > li,
