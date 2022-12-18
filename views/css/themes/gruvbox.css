@@ -238,3 +238,8 @@ input[type="text"] {
 hr {
   border: 1px solid #928374;
 }
+
+.painter-ctrl input[type="text"] {
+  width: 30px !important;
+  text-align: center;
+}

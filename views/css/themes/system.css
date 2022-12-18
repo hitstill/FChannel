@@ -538,3 +538,8 @@ img {
 	max-width: 100%;
 	height: auto;
 }
+
+.painter-ctrl input[type="text"] {
+  width: 30px !important;
+  text-align: center;
+}

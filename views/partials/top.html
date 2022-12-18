@@ -31,11 +31,19 @@
             <td><textarea rows="10" cols="50" id="comment" name="comment" maxlength="4500"></textarea></td>
           </tr>
           <tr>
-            <td><label for="file">Image</label></td>
-            <td><input type="file" id="file" name="file" {{ if gt $len 1 }} required {{ else }} {{ if eq $len 0 }} required {{ end }} {{ end }} >
+            <td><label for="file">File</label></td>
+            <td><b id="form-drawlabel" style="display: none;">Drawing</b><input type="file" id="file" name="file" {{ if gt $len 1 }} required {{ else }} {{ if eq $len 0 }} required {{ end }} {{ end }} >
 								<span style="float: right;">(7168KiB max)</span>
                 <br><input type="checkbox" name="sensitive">Mark sensitive</input></td>
-          </tr>
+			          </tr>
+								<tr data-type="Painter">
+									<td>Draw</td>
+									<td class="painter-ctrl">Size <input type="text" value="400" maxlength="4"> × <input type="text" value="400" maxlength="4">
+									<label><s><input disabled="" type="checkbox" class="painter-replay">Replay </s></label>
+									<button data-dims="400" type="button">Draw</button>
+									<button disabled="" type="button">Clear</button>
+					</td>
+					</tr>
           <tr>
             <td><label for="captcha">Captcha:</label></td>
             <td>
@@ -90,10 +98,19 @@
             <td><textarea rows="10" cols="50" id="comment" name="comment" maxlength="4500"></textarea></td>
           </tr>
           <tr>
-            <td><label for="file">Image</label></td>
-            <td><input type="file" id="file" name="file" {{ if gt $len 1 }} required {{ else }} {{ if eq $len 0 }} required {{ end }} {{ end }} >
+            <td><label for="file">File</label></td>
+            <td><b id="form-drawlabel" style="display: none;">Drawing</b><input type="file" id="file" name="file" {{ if gt $len 1 }} required {{ else }} {{ if eq $len 0 }} required {{ end }} {{ end }} >
+								<span style="float: right;">(7168KiB max)</span>
                 <br><input type="checkbox" name="sensitive">Mark sensitive</input></td>
-          </tr>
+								</tr>
+								<tr data-type="Painter">
+									<td>Draw</td>
+									<td class="painter-ctrl">Size <input type="text" value="400" maxlength="4"> × <input type="text" value="400" maxlength="4">
+									<label><s><input disabled="" type="checkbox" class="painter-replay">Replay </s></label>
+									<button data-dims="400" type="button">Draw</button>
+									<button disabled="" type="button">Clear</button>
+					</td>
+					</tr>
           <tr>
             <td><label for="captcha">Captcha:</label></td>
             <td>

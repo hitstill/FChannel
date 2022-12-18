@@ -269,3 +269,8 @@ a.reply {
 #boardlinks > li {
   display: inline;
 }
+
+.painter-ctrl input[type="text"] {
+  width: 30px !important;
+  text-align: center;
+}

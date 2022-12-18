@@ -7,6 +7,7 @@
     <input id="reply-name" name="name" type="text" placeholder="Name" maxlength="100">
     <input id="reply-options" name="options" type="text" placeholder="Options" maxlength="100">
     <textarea id="reply-comment" name="comment" maxlength="4500" oninput="sessionStorage.setItem('element-reply-comment', document.getElementById('reply-comment').value)"></textarea>
+		<b style="display: none;" id="qr-drawlabel">Drawing</b>
     <input id="reply-file" name="file" type="file">
 		<span>(7168KiB max)</span>
     <input id="reply-submit" type="submit" value="Reply" style="float: right;">
@@ -16,6 +17,13 @@
     <input type="hidden" id="captchaCode" name="captchaCode" value="{{ .Board.CaptchaCode }}">
     <input type="hidden" id="returnTo" name="returnTo" value="{{ .ReturnTo }}"><br>
     <input type="checkbox" name="sensitive"><span>Mark attachment as sensitive</span><br>
+		<br>
+		<br>
+		<span class="painter-ctrl">Size <input type="text" value="400" maxlength="4"> × <input type="text" value="400" maxlength="4">
+									<label><s><input disabled="" type="checkbox" class="painter-replay">Replay </s></label>
+									<button data-dims="400" type="button">Draw</button>
+									<button disabled="" type="button">Clear</button>
+		</span>
     <div style="width: 202px; margin: 0 auto; padding-top: 12px;">
       <label for="captcha">Captcha:</label><br>
       <input style="display: inline-block;"  type="text" id="captcha" name="captcha" autocomplete="off"><br>
