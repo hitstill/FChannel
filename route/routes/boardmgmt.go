@@ -2,7 +2,9 @@ package routes
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
+	"net/smtp"
 	"os"
 	"regexp"
 	"strconv"
@@ -521,6 +523,27 @@ func ReportPost(ctx *fiber.Ctx) error {
 		return ctx.Status(404).Render("404", fiber.Map{
 			"message": "Something broke",
 		})
+	}
+
+	if setup := util.IsEmailSetup(); setup {
+		from := config.SiteEmail
+		user := config.SiteEmailUsername
+		pass := config.SiteEmailPassword
+		to := config.SiteEmailNotifyTo
+		body := fmt.Sprintf("New report: %s\nReason: %s", id, reason)
+
+		msg := "From: FChannel <" + from + ">\n" +
+			"To: " + to + "\n" +
+			"Subject: Image Board Report\n\n" +
+			body
+
+		err := smtp.SendMail(config.SiteEmailServer+":"+config.SiteEmailPort,
+			smtp.PlainAuth(from, user, pass, config.SiteEmailServer),
+			from, []string{to}, []byte(msg))
+
+		if err != nil {
+			config.Log.Printf("Error when sending report email: %s", err)
+		}
 	}
 
 	return ctx.Redirect(id, http.StatusSeeOther)

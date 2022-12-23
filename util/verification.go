@@ -152,17 +152,18 @@ func (verify Verify) SendVerification() error {
 	config.Log.Println("sending email")
 
 	from := config.SiteEmail
+	user := config.SiteEmailUsername
 	pass := config.SiteEmailPassword
 	to := verify.Identifier
 	body := fmt.Sprintf("You can use either\r\nEmail: %s \r\n Verfication Code: %s\r\n for the board %s", verify.Identifier, verify.Code, verify.Board)
 
-	msg := "From: " + from + "\n" +
+	msg := "From: FChannel <" + from + ">\n" +
 		"To: " + to + "\n" +
 		"Subject: Image Board Verification\n\n" +
 		body
 
 	err := smtp.SendMail(config.SiteEmailServer+":"+config.SiteEmailPort,
-		smtp.PlainAuth("", from, pass, config.SiteEmailServer),
+		smtp.PlainAuth(from, user, pass, config.SiteEmailServer),
 		from, []string{to}, []byte(msg))
 
 	return MakeError(err, "SendVerification")

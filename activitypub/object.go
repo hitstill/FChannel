@@ -1472,17 +1472,18 @@ func (obj ObjectBase) SendEmailNotify() error {
 	actor, _ := GetActorFromDB(obj.Actor)
 
 	from := config.SiteEmail
+	user := config.SiteEmailUsername
 	pass := config.SiteEmailPassword
 	to := config.SiteEmailNotifyTo
 	body := fmt.Sprintf("New post: %s", config.Domain+"/"+actor.Name+"/"+util.ShortURL(actor.Outbox, obj.Id))
 
-	msg := "From: " + from + "\n" +
+	msg := "From: FChannel <" + from + ">\n" +
 		"To: " + to + "\n" +
 		"Subject: Image Board Post\n\n" +
 		body
 
 	err := smtp.SendMail(config.SiteEmailServer+":"+config.SiteEmailPort,
-		smtp.PlainAuth("", from, pass, config.SiteEmailServer),
+		smtp.PlainAuth(from, user, pass, config.SiteEmailServer),
 		from, []string{to}, []byte(msg))
 
 	return util.MakeError(err, "SendEmailNotify")
