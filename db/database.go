@@ -120,7 +120,7 @@ func CreateNewBoard(actor activitypub.Actor) (activitypub.Actor, error) {
 			nActivity.Object.Actor = mActor.Id
 			nActivity.To = append(nActivity.To, actor.Id)
 
-			activityRequest := nActivity.AcceptFollow()
+			activityRequest := nActivity.AcceptFollow(mActor)
 
 			if _, err := activityRequest.SetActorFollowing(); err != nil {
 				return actor, util.MakeError(err, "CreateNewBoardDB")

@@ -229,7 +229,7 @@ func ParseOutboxRequest(ctx *fiber.Ctx, actor activitypub.Actor) error {
 				var rActivity activitypub.Activity
 
 				if validActor && validLocalActor {
-					rActivity = activity.AcceptFollow()
+					rActivity = activity.AcceptFollow(actor)
 					rActivity, err = rActivity.SetActorFollowing()
 
 					if err != nil {
