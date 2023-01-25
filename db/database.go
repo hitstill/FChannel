@@ -13,7 +13,7 @@ import (
 	"github.com/FChannel0/FChannel-Server/activitypub"
 	"github.com/FChannel0/FChannel-Server/config"
 	"github.com/FChannel0/FChannel-Server/util"
-	_ "github.com/lib/pq"
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 type NewsItem struct {
@@ -32,7 +32,7 @@ func Connect() error {
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s "+
 		"dbname=%s sslmode=disable", host, port, user, password, dbname)
 
-	_db, err := sql.Open("postgres", psqlInfo)
+	_db, err := sql.Open("pgx", psqlInfo)
 
 	if err != nil {
 		return util.MakeError(err, "Connect")
