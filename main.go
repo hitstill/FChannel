@@ -48,7 +48,8 @@ func main() {
 	}
 
 	app.Use(encryptcookie.New(encryptcookie.Config{
-		Key: cookieKey,
+		Key:    cookieKey,
+		Except: []string{"csrf_", "theme"},
 	}))
 
 	app.Static("/static", "./views")
