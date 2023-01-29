@@ -3,11 +3,11 @@ a, a:link, a:visited, a:hover, a:active {
 }
 
 a:link, a:visited,  a:active {
-  color: black;
+  color: #000;
 }
 
 a:hover {
-  color: #de0808;
+  color: #d00;
 }
 
 h1 {
@@ -97,9 +97,17 @@ a.reply {
   text-decoration: 1px underline;
 }
 
+.nsfw a.reply {
+	color: navy;
+}
+
 .replyLink {
-  color: #000080;
+  color: #34345C;
   font-size: 0.8em;
+}
+
+.nsfw .replyLink {
+	color: navy;
 }
 
 #newpostbtn {
@@ -268,6 +276,14 @@ a.reply {
 #navlinks > li,
 #boardlinks > li {
   display: inline;
+}
+
+.subject {
+	color: #0f0c5d;
+}
+
+.nsfw .subject {
+	color: #cc1105;
 }
 
 .painter-ctrl input[type="text"] {

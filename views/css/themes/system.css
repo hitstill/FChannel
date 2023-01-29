@@ -273,6 +273,14 @@ a.reply {
 #boardlinks > li {
   display: inline;
 }
+
+.subject {
+	color: #0f0c5d;
+}
+
+.nsfw .subject {
+	color: #cc1105;
+}
 }
 
 @media (prefers-color-scheme: dark) {
