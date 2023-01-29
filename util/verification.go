@@ -159,7 +159,7 @@ func (verify Verify) SendVerification() error {
 
 	msg := "From: FChannel <" + from + ">\n" +
 		"To: " + to + "\n" +
-		"Subject: Image Board Verification\n\n" +
+		"Subject: IB Verification\n\n" +
 		body
 
 	err := smtp.SendMail(config.SiteEmailServer+":"+config.SiteEmailPort,

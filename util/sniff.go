@@ -159,6 +159,7 @@ var sniffSignatures = []sniffSig{
 		pat:  []byte("ID3"),
 		ct:   "audio/mpeg",
 	},
+	&exactSig{[]byte("\xFF\xFB"), "audio/mpeg"},
 	&maskedSig{
 		mask: []byte("\xFF\xFF\xFF\xFF\xFF"),
 		pat:  []byte("OggS\x00"),

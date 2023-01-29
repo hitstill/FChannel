@@ -534,7 +534,7 @@ func ReportPost(ctx *fiber.Ctx) error {
 
 		msg := "From: FChannel <" + from + ">\n" +
 			"To: " + to + "\n" +
-			"Subject: Image Board Report\n\n" +
+			"Subject: IB Report\n\n" +
 			body
 
 		err := smtp.SendMail(config.SiteEmailServer+":"+config.SiteEmailPort,

@@ -1479,7 +1479,7 @@ func (obj ObjectBase) SendEmailNotify() error {
 
 	msg := "From: FChannel <" + from + ">\n" +
 		"To: " + to + "\n" +
-		"Subject: Image Board Post\n\n" +
+		"Subject: IB Post\n\n" +
 		body
 
 	err := smtp.SendMail(config.SiteEmailServer+":"+config.SiteEmailPort,
