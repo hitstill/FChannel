@@ -112,6 +112,9 @@ func main() {
 	app.Get("/:actor", routes.ActorPosts)
 	app.Get("/:actor/:post", routes.ActorPost)
 
+	// Settings Routes
+	app.Post("/settheme", routes.SetTheme)
+
 	db.PrintAdminAuth()
 
 	app.Listen(config.Port)

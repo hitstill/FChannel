@@ -158,6 +158,7 @@ func AdminIndex(ctx *fiber.Ctx) error {
 	adminData.Meta.Title = adminData.Title
 
 	adminData.Themes = &config.Themes
+	adminData.ThemeCookie = route.GetThemeCookie(ctx)
 
 	return ctx.Render("admin", fiber.Map{
 		"page":    adminData,

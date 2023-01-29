@@ -6,9 +6,12 @@
 <div style="float: right; margin-bottom: 25px;">
   <p style="font-size: 12px; text-align: right; padding-right: 5px;">v0.1.1</p>
   <span>Theme:</span>
-  <select id="themeSwitcher" onchange="setTheme(this.options[this.selectedIndex].value)">
+	<form action="/settheme" method="post">
+  <select name="theme" id="themeSwitcher" onchange="setTheme(this.options[this.selectedIndex].value)">
     {{ range .Themes }}
-    <option value="{{.}}">{{.}}</option>
+		<option value="{{.}}"{{if eq . $.ThemeCookie}} selected{{end}}>{{.}}</option>
     {{ end }}
   </select>
+	<noscript><input type="submit" value="Set"/></noscript>
+	</form>
 </div>

@@ -38,7 +38,7 @@
     <link rel="alternate stylesheet" type="text/css" href="/static/css/themes/{{.}}.css" title="{{.}}" disabled>
     {{ end }}
   </head>
-  <body {{ if not .page.Board.Restricted }}class="nsfw"{{ end }} onload="applyTheme()">
+  <body {{ if not .page.Board.Restricted }}class="nsfw"{{ end }}>
     <div style="padding-bottom:5px;">
       <ul id="boardlinks">
         {{ $l := len .page.Boards }}
