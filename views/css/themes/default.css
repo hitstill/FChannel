@@ -290,3 +290,15 @@ a.reply {
   width: 30px !important;
   text-align: center;
 }
+
+.capcodeAdmin{
+	color: red !important;
+}
+
+.capcodeMod{
+	color: purple !important;
+}
+
+.capcodeJanitor {
+	color: #426ae1 !important;
+}

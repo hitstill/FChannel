@@ -243,3 +243,15 @@ hr {
   width: 30px !important;
   text-align: center;
 }
+
+.capcodeAdmin{
+        color: #fb4934 !important;
+}
+
+.capcodeMod{
+        color: #d3869b !important;
+}
+
+.capcodeJanitor {
+        color: #83a598 !important;
+}

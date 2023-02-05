@@ -273,3 +273,15 @@ img {
   width: 30px !important;
   text-align: center;
 }
+
+.capcodeAdmin {
+        color: #ff3636 !important;
+}
+
+.capcodeMod {
+        color: #a37cf2 !important;
+}
+
+.capcodeJanitor {
+        color: #78bbff !important;
+}
