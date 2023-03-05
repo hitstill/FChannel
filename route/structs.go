@@ -27,6 +27,8 @@ type PageData struct {
 
 	Themes      *[]string
 	ThemeCookie string
+
+	Referer string
 }
 
 type AdminPage struct {

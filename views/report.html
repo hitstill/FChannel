@@ -4,7 +4,7 @@
 </div>
 
 <div style="height: 500px; width: 420px; margin: 0 auto; margin-top:75px;">
-  <a href="{{ .page.Board.Actor.Id }}/{{ shortURL .page.Board.Actor.Outbox .page.Board.InReplyTo }}">[Back]</a>
+  <a href="{{ .page.Referer }}">[Back]</a>
   <div id="report-box">
     <div id="report-header" style="text-align: center; display: inline-block; z-index: 0;">Report Post No. {{ shortURL .page.Board.Actor.Outbox .page.Board.InReplyTo }}</div>
     <form id="report-post" action="/report" method="post">
@@ -17,6 +17,7 @@
       <input type="hidden" id="boardName" name="board" value="{{ .page.Board.Name }}">
       <input type="hidden" name="close" value="0">
       <input type="hidden" id="captchaCode" name="captchaCode" value="{{ .page.Board.CaptchaCode }}">
+			<input type="hidden" id="referer" name="referer" value="{{ .page.Referer }}">
       <div style="width: 202px; margin: 0 auto; padding-top: 12px;">
         <label for="captcha">Captcha:</label><br>
         <input style="display: inline-block;"  type="text" id="captcha" name="captcha" autocomplete="off"><br>

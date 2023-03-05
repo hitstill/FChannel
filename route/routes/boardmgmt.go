@@ -448,6 +448,10 @@ func ReportPost(ctx *fiber.Ctx) error {
 	board := ctx.FormValue("board")
 	reason := ctx.FormValue("comment")
 	close := ctx.FormValue("close")
+	referer := config.Domain + "/" + board
+	if ctx.FormValue("referer") != "" {
+		referer = ctx.FormValue("referer")
+	}
 
 	actor, err := activitypub.GetActorByNameFromDB(board)
 
@@ -546,7 +550,9 @@ func ReportPost(ctx *fiber.Ctx) error {
 		}
 	}
 
-	return ctx.Redirect(id, http.StatusSeeOther)
+	// TEMP FIX WHILE WAITING FOR NEW FORK
+	return ctx.Redirect(referer, http.StatusSeeOther)
+
 }
 
 func ReportGet(ctx *fiber.Ctx) error {
@@ -583,6 +589,8 @@ func ReportGet(ctx *fiber.Ctx) error {
 	data.Board.ModCred, _ = util.GetPasswordFromSession(ctx)
 	data.Board.Domain = config.Domain
 	data.Boards = webfinger.Boards
+
+	data.Referer = ctx.Get("referer")
 
 	return ctx.Render("report", fiber.Map{"page": data}, "layouts/main")
 }
