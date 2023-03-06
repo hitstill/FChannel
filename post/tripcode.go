@@ -45,11 +45,28 @@ func CreateNameTripCode(ctx *fiber.Ctx) (string, string, error) {
 		chunck := tripSecure.FindString(input)
 		chunck = strings.Replace(chunck, "##", "", 1)
 		ce := regexp.MustCompile(`(?i)Admin`)
+		cemod := regexp.MustCompile(`(?i)Mod`)
+		cejanitor := regexp.MustCompile(`(?i)Janitor`)
 		admin := ce.MatchString(chunck)
+		mod := cemod.MatchString(chunck)
+		janitor := cejanitor.MatchString(chunck)
 		board, modcred := util.GetPasswordFromSession(ctx)
 
-		if hasAuth, _ := util.HasAuth(modcred, board); hasAuth && admin {
-			return tripSecure.ReplaceAllString(input, ""), "#Admin ︎🐇︎", nil
+		if hasAuth, _ := util.HasAuth(modcred, board); hasAuth {
+			if chunck == "" { // If no capcode specified then use modcred as level
+				modlevel := strings.Title(util.GetModLevel(board, modcred))
+				if modlevel == "Admin" {
+					modlevel = "Admin"
+				}
+				return tripSecure.ReplaceAllString(input, ""), "#" + modlevel, nil
+			}
+			if admin {
+				return tripSecure.ReplaceAllString(input, ""), "#Admin", nil
+			} else if mod {
+				return tripSecure.ReplaceAllString(input, ""), "#Mod", nil
+			} else if janitor {
+				return tripSecure.ReplaceAllString(input, ""), "#Janitor", nil
+			}
 		}
 
 		hash, err := TripCodeSecure(chunck)
@@ -63,11 +80,21 @@ func CreateNameTripCode(ctx *fiber.Ctx) (string, string, error) {
 		chunck := trip.FindString(input)
 		chunck = strings.Replace(chunck, "#", "", 1)
 		ce := regexp.MustCompile(`(?i)Admin`)
+		cemod := regexp.MustCompile(`(?i)Mod`)
+		cejanitor := regexp.MustCompile(`(?i)Janitor`)
 		admin := ce.MatchString(chunck)
+		mod := cemod.MatchString(chunck)
+		janitor := cejanitor.MatchString(chunck)
 		board, modcred := util.GetPasswordFromSession(ctx)
 
-		if hasAuth, _ := util.HasAuth(modcred, board); hasAuth && admin {
-			return trip.ReplaceAllString(input, ""), "#Admin ︎🐇︎", nil
+		if hasAuth, _ := util.HasAuth(modcred, board); hasAuth {
+			if admin {
+				return trip.ReplaceAllString(input, ""), "#Admin", nil
+			} else if mod {
+				return trip.ReplaceAllString(input, ""), "#Mod", nil
+			} else if janitor {
+				return trip.ReplaceAllString(input, ""), "#Janitor", nil
+			}
 		}
 
 		hash, err := TripCode(chunck)

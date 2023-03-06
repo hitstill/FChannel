@@ -3,6 +3,7 @@ module github.com/FChannel0/FChannel-Server
 go 1.15
 
 require (
+	github.com/ProtonMail/gopenpgp/v2 v2.5.2
 	github.com/gofiber/fiber/v2 v2.41.0
 	github.com/gofiber/template v1.6.18
 	github.com/jackc/pgx/v5 v5.2.0

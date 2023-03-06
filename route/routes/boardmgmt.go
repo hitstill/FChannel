@@ -536,7 +536,7 @@ func ReportPost(ctx *fiber.Ctx) error {
 		to := config.SiteEmailNotifyTo
 		body := fmt.Sprintf("New report: %s\nReason: %s", id, reason)
 
-		msg := "From: FChannel <" + from + ">\n" +
+		msg := "From: Udonge <" + from + ">\n" +
 			"To: " + to + "\n" +
 			"Subject: IB Report\n\n" +
 			body

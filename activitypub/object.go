@@ -1475,13 +1475,34 @@ func (obj ObjectBase) SendEmailNotify() error {
 	user := config.SiteEmailUsername
 	pass := config.SiteEmailPassword
 	to := config.SiteEmailNotifyTo
-	body := fmt.Sprintf("New post: %s", config.Domain+"/"+actor.Name+"/"+util.ShortURL(actor.Outbox, obj.Id))
+	posturl := config.Domain + "/" + actor.Name + "/" + util.ShortURL(actor.Outbox, obj.Id)
+	// If preview exists assume type image and use that
+	// Else if no preview and Object.Attachment exists
+	// check if video/audio to use correct element
+	// Else if neither fall back to direct link
+	var attachment string
+	if obj.Attachment != nil {
+		switch {
+		case strings.Contains(obj.Attachment[0].MediaType, "video"):
+			attachment = "<video controls style=\"max-width: 250px; max-height: 250px;\" src=\"" + obj.Attachment[0].Href + "\">Video is not supported.</video><br>" + obj.Attachment[0].Name + "<br>"
+		case strings.Contains(obj.Attachment[0].MediaType, "audio"):
+			attachment = "<audio controls style=\"max-width: 250px; max-height: 250px;\" src=\"" + obj.Attachment[0].Href + "\">Audio is not supported.</audio><br>" + obj.Attachment[0].Name + "<br>"
+		case strings.Contains(obj.Attachment[0].MediaType, "image"):
+			attachment = "<img src='" + obj.Preview.Href + "'><br>" + obj.Attachment[0].Name + "<br>"
+		default:
+			attachment = "Unknown attachment: <a href='" + obj.Attachment[0].Href + "'>" + obj.Attachment[0].Name + "</a>"
+		}
+	}
+	//mime := ""
+	//body := fmt.Sprintf("New post: %s\n\n--- Post ---\n%s\n", config.Domain+"/"+actor.Name+"/"+util.ShortURL(actor.Outbox, obj.Id), obj.Content)
+	mime := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";"
+	body := fmt.Sprintf("<html><body>New post: <a href='%s'>%s</a><br><br>%s<br><br><b>%s %s</b><br>%s<br><pre>%s</pre></body></html>", posturl, posturl, attachment, obj.AttributedTo, obj.TripCode, obj.Name, obj.Content)
 
-	msg := "From: FChannel <" + from + ">\n" +
+	msg := "From: Udonge <" + from + ">\n" +
 		"To: " + to + "\n" +
-		"Subject: IB Post\n\n" +
-		body
-
+		"Subject: IB Post\n" +
+		mime + "\n\n" + body
+	//util.GPGEncryptMessage(mime + "\n\n" +body)
 	err := smtp.SendMail(config.SiteEmailServer+":"+config.SiteEmailPort,
 		smtp.PlainAuth(from, user, pass, config.SiteEmailServer),
 		from, []string{to}, []byte(msg))
