@@ -449,7 +449,7 @@ func ReportPost(ctx *fiber.Ctx) error {
 	reason := ctx.FormValue("comment")
 	close := ctx.FormValue("close")
 	referer := config.Domain + "/" + board
-	if ctx.FormValue("referer") != "" {
+	if strings.Contains(ctx.FormValue("referer"), config.Domain+"/"+board) && !strings.Contains(ctx.FormValue("referer"), "make-report") {
 		referer = ctx.FormValue("referer")
 	}
 
@@ -590,7 +590,10 @@ func ReportGet(ctx *fiber.Ctx) error {
 	data.Board.Domain = config.Domain
 	data.Boards = webfinger.Boards
 
-	data.Referer = ctx.Get("referer")
+	data.Referer = config.Domain + "/" + actor.Name
+	if strings.Contains(ctx.Get("referer"), config.Domain+"/"+actor.Name) && !strings.Contains(ctx.Get("referer"), "make-report") {
+		data.Referer = ctx.Get("referer")
+	}
 
 	return ctx.Render("report", fiber.Map{"page": data}, "layouts/main")
 }

@@ -102,6 +102,10 @@ a.reply {
   text-decoration: 1px underline;
 }
 
+.nsfw a.reply {
+	color: navy;
+}
+
 .replyLink {
   color: #000080;
   font-size: 0.8em;
