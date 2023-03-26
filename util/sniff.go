@@ -140,6 +140,10 @@ var sniffSignatures = []sniffSig{
 		ct:   "image/avif",
 	},
 
+	&exactSig{[]byte("\x46\x57\x53"), "application/x-shockwave-flash"},
+	&exactSig{[]byte("\x46\x4C\x56"), "application/x-shockwave-flash"},
+	&exactSig{[]byte("\x43\x57\x53"), "application/x-shockwave-flash"},
+
 	// Audio and Video types
 	// Enforce the pattern match ordering as prescribed in
 	// https://mimesniff.spec.whatwg.org/#matching-an-audio-or-video-type-pattern

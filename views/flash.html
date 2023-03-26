@@ -1,0 +1,137 @@
+{{ $board := .page.Board }}
+
+<script src="/static/ruffle/ruffle.js"></script>
+
+<div style="max-width: 800px; margin: 0 auto;">
+  <h1 style="text-align: center;">/{{ $board.Name }}/ - {{ $board.PrefName }}</h1>
+  <p style="text-align: center;">{{ $board.Summary }}</p>
+  <h3 id="newpostbtn"  state="0" style="display: none; margin-bottom:100px;">[<a href="javascript:startNewPost()">Start a New Thread</a>]</h3>
+  <div id="newpost">
+    <form onsubmit="sessionStorage.setItem('element-closed-reply', true)" id="new-post" action="/post" method="post" enctype="multipart/form-data">
+      <table id="postForm">
+        <tr>
+          <tr>
+            <td><label for="name">Name:</label></td>
+            <td><input type="text" id="name" name="name" placeholder="Anonymous" maxlength="100">
+                <a id="stopTablePost" onclick="stopNewPost()">[X]</a>
+            </td>
+          </tr>
+          <tr>
+            <td><label for="options">Options:</label></td>
+            <td><input type="text" id="options" name="options" maxlength="100" style="margin-right:10px">{{ if $board.InReplyTo }}<input type="submit" value="Post">{{ end }}</td>
+          </tr>
+          {{ if eq $board.InReplyTo "" }}
+          <tr>
+            <td><label for="subject">Subject:</label></td>
+            <td><input type="text" id="subject" name="subject" maxlength="100" style="margin-right:10px"><input type="submit" value="Post"></td>
+          </tr>
+          {{ end }}
+          <tr>
+            <td><label for="comment">Comment:</label></td>
+            <td><textarea rows="10" cols="50" id="comment" name="comment" maxlength="4500"></textarea></td>
+          </tr>
+          <tr>
+            <td><label for="file">File</label></td>
+            <td><b><input type="file" accept=".swf,.flv" id="file" name="file" required>
+								<span style="float: right;">(7168KiB max)</span>
+                <br><input type="checkbox" name="sensitive">Mark sensitive</input></td>
+			          </tr>
+          <tr>
+            <td><label for="captcha">Captcha:</label></td>
+            <td>
+              <div style="height: 65px; display: inline;">
+                <img src="{{ $board.Captcha }}">
+              </div>
+              <input type="text" id="captcha" name="captcha" autocomplete="off">
+            </td>
+          </tr>
+      </table>
+
+      <input type="hidden" id="inReplyTo" name="inReplyTo" value="{{ $board.InReplyTo }}">
+      <input type="hidden" id="sendTo" name="sendTo" value="{{ $board.To }}">
+      <input type="hidden" id="boardName" name="boardName" value="{{ $board.Name }}">
+      <input type="hidden" id="captchaCode" name="captchaCode" value="{{ $board.CaptchaCode }}">
+      <input type="hidden" id="returnTo" name="returnTo" value="{{ .ReturnTo }}">
+    </form>
+  </div>
+</div>
+<script>
+  newpostbtn = document.getElementById("newpostbtn");
+  newpost = document.getElementById("newpost");
+
+  if(newpostbtn)
+      newpostbtn.style.display = "block";
+  if(newpost)
+      newpost.style.display = "none";
+</script>
+
+
+<hr>
+
+<style>.box td:not(.subject), .box-alt td:not(.subject) {text-align: center;}</style>
+{{ if .page.Posts }}
+<table align="center" style="table-layout:fixed;">
+  <tr>
+		<th class="box-header"></th>
+    {{ if eq $board.ModCred $board.Domain $board.Actor.Id }}
+    <th class="box-header"></th>
+    {{ end }}
+    <th class="box-header">No.</th>
+		<th class="box-header">Name</th>
+		<th class="box-header">File</th>
+		<th class="box-header"></th>
+		<th class="box-header">Subject</th>
+		<th class="box-header">Size</th>
+		<th class="box-header">Date</th>
+		<th class="box-header">Replies</th>
+    <th class="box-header"></th>
+  </tr>
+  {{ range $i, $e := .page.Posts }}
+  {{ if mod $i 2 }}
+  <tr class="box-alt">
+		<td>{{ if .Sticky }}<span id="sticky"><img src="/static/pin.png"></span>{{ end }} {{ if .Locked }} <span id="lock"><img src="/static/locked.png"></span>{{ end }}</td>
+    {{ if eq $board.ModCred $board.Domain $board.Actor.Id }}
+    <td>[<a href="/delete?id={{ $e.Id }}&board={{ $board.Name }}">Delete</a>]</td>
+    {{ end }}
+		<td>{{ shortURL $board.Actor.Outbox $e.Id }}</td>
+		<td class="name"><b>{{ if .AttributedTo }} {{.AttributedTo }} {{ else }} Anonymous {{ end }}</b></td>
+		<td>[<a href="{{ proxy (index .Attachment 0).Href}}" download="{{ (index .Attachment 0).Name }}">{{ shortImg (index .Attachment 0).Name  }}</a>]</td>
+		<td>[<a href="#" onclick="swfpopup(this)">Embed</a>]</td>
+		<td class="subject" style="overflow: hidden; word-wrap: break-word; text-overflow: ellipsis; padding-left: 5px;"><b>{{ .Name }}</b></td>
+		<td>{{ convertSize (index .Attachment 0).Size  }}</td>
+		<td class="timestamp" data-utc="{{ .Published | timeToUnix }}">{{ .Published | timeToReadableLong }}</td>
+		<td>{{ .Replies.TotalItems }}</td>
+    <td style="text-align: center;">[<a href="/{{ $board.Actor.Name }}/{{ shortURL $board.Actor.Outbox $e.Id }}">View</a>]</td>
+  </tr>
+  {{ else }}
+  <tr class="box">
+		<td>{{ if .Sticky }}<span id="sticky"><img src="/static/pin.png"></span>{{ end }} {{ if .Locked }} <span id="lock"><img src="/static/locked.png"></span>{{ end }}</td>
+    {{ if eq $board.ModCred $board.Domain $board.Actor.Id }}
+    <td>[<a href="/delete?id={{ $e.Id }}&board={{ $board.Name }}">Delete</a>]</td>
+    {{ end }}
+    <td>{{ shortURL $board.Actor.Outbox $e.Id }}</td>
+		<td class="name"><b>{{ if .AttributedTo }} {{.AttributedTo }} {{ else }} Anonymous {{ end }}</b></td>
+		<td>[<a href="{{ proxy (index .Attachment 0).Href}}" download="{{ (index .Attachment 0).Name }}">{{ shortImg (index .Attachment 0).Name  }}</a>]</td>
+		<td>[<a href="#" onclick="swfpopup(this)">Embed</a>]</td>
+		<td class="subject" style="overflow: hidden; word-wrap: break-word; text-overflow: ellipsis; padding-left: 5px;"><b>{{ .Name }}</b></td>
+		<td>{{ convertSize (index .Attachment 0).Size  }}</td>
+		<td class="timestamp" data-utc="{{ .Published | timeToUnix }}">{{ .Published | timeToReadableLong }}</td>
+		<td>{{ .Replies.TotalItems }}</td>
+    <td style="text-align: center;">[<a href="/{{ $board.Actor.Name }}/{{ shortURL $board.Actor.Outbox $e.Id }}">View</a>]</td>
+  </tr>
+  {{ end }}
+  {{ end }}
+</table>
+{{ end }}
+
+<hr>
+
+{{ template "partials/bottom" .page }}
+{{ template "partials/footer" .page }}
+{{ template "partials/general_scripts" .page }}
+{{ template "partials/post_scripts" .page }}
+
+<script src="/static/ruffle/ruffle.js"></script>
+<script src="/static/js/flashpopup.js"></script>
+
+<div id="swf-embed" style="display: none; width: 100%; height: 100%; position: fixed; top: 0px; left: 0px; background: rgba(128, 128, 128, 0.5);"><div style="background: black; color: white; position: fixed; width: 480px; height: 360px; top: 50%; left: 50%; margin-top: -190px; margin-left: -240px;"><div id="swf-embed-header" class="box-header"><span id="swf-embed-header-text"></span><img id="swf-embed-close" style="cursor: pointer;" src="/static/cross.png" onclick="document.getElementById('swf-embed').style.display='none'; document.getElementById('swf-container').remove();"></div><div id="state" style="display: none"></div></div>

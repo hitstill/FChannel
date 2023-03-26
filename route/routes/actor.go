@@ -510,6 +510,87 @@ func ActorCatalog(ctx *fiber.Ctx) error {
 	}, "layouts/main")
 }
 
+func ActorFlash(ctx *fiber.Ctx) error {
+	actor, err := activitypub.GetActorByNameFromDB("f")
+
+	if err != nil {
+		return ctx.Status(404).Render("404", fiber.Map{})
+	}
+
+	if activitypub.AcceptActivity(ctx.Get("Accept")) {
+		actor.GetInfoResp(ctx)
+		return nil
+	}
+
+	var page int
+	if postNum := ctx.Query("page"); postNum != "" {
+		if page, err = strconv.Atoi(postNum); err != nil {
+			return util.MakeError(err, "OutboxGet")
+		}
+	}
+
+	collection, err := actor.WantToServePage(page)
+	if err != nil {
+		return util.MakeError(err, "OutboxGet")
+	}
+
+	var offset = 15
+	var pages []int
+	pageLimit := (float64(collection.TotalItems) / float64(offset))
+
+	if pageLimit > 11 {
+		pageLimit = 11
+	}
+
+	for i := 0.0; i < pageLimit; i++ {
+		pages = append(pages, int(i))
+	}
+
+	var data route.PageData
+	data.Board.Name = actor.Name
+	data.Board.PrefName = actor.PreferredUsername
+	data.Board.Summary = actor.Summary
+	data.Board.InReplyTo = ""
+	data.Board.To = actor.Outbox
+	data.Board.Actor = actor
+	data.Board.ModCred, _ = util.GetPasswordFromSession(ctx)
+	data.Board.Domain = config.Domain
+	data.Board.Restricted = actor.Restricted
+	data.CurrentPage = page
+	data.ReturnTo = "feed"
+	data.PostType = "new"
+
+	data.Board.Post.Actor = actor.Id
+
+	capt, err := util.GetRandomCaptcha()
+	if err != nil {
+		return util.MakeError(err, "OutboxGet")
+	}
+	data.Board.Captcha = config.Domain + "/" + capt
+	data.Board.CaptchaCode = post.GetCaptchaCode(data.Board.Captcha)
+
+	data.Title = "/" + actor.Name + "/ - " + actor.PreferredUsername
+
+	data.Key = config.Key
+
+	data.Boards = webfinger.Boards
+	data.Posts = collection.OrderedItems
+
+	data.Pages = pages
+	data.TotalPage = len(data.Pages) - 1
+
+	data.Meta.Description = data.Board.Summary
+	data.Meta.Url = data.Board.Actor.Id
+	data.Meta.Title = data.Title
+
+	data.Themes = &config.Themes
+	data.ThemeCookie = route.GetThemeCookie(ctx)
+
+	return ctx.Render("flash", fiber.Map{
+		"page": data,
+	}, "layouts/main")
+}
+
 func ActorPosts(ctx *fiber.Ctx) error {
 	actor, err := activitypub.GetActorByNameFromDB(ctx.Params("actor"))
 

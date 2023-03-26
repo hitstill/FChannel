@@ -123,6 +123,11 @@ func ParseOutboxRequest(ctx *fiber.Ctx, actor activitypub.Actor) error {
 				}
 
 				contentType, _ := util.GetFileContentType(f)
+				if actor.Name == "f" && len(util.EscapeString(ctx.FormValue("inReplyTo"))) == 0 && contentType != "application/x-shockwave-flash" {
+					ctx.Response().Header.SetStatusCode(403)
+					_, err := ctx.Write([]byte("file type not supported"))
+					return util.MakeError(err, "ParseOutboxRequest")
+				}
 
 				if !post.SupportedMIMEType(contentType) {
 					ctx.Response().Header.SetStatusCode(403)

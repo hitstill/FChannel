@@ -474,6 +474,17 @@ func ParseAttachment(obj activitypub.ObjectBase, catalog bool) template.HTML {
 		return template.HTML(media)
 	}
 
+	if regexp.MustCompile(`application\/x-shockwave-flash`).MatchString(obj.Attachment[0].MediaType) {
+		if catalog {
+			media = "<img src=\"/static/flash.png\" style=\"max-width: 180px; max-height: 180px;\"></img>"
+		} else {
+			media = "<img onclick=\"window.open('/static/ruffle.html#" + util.MediaProxy(obj.Attachment[0].Href) + "','temporary flash popup','directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes');\" src=\"/static/flash.png\""
+			media += "style=\"cursor: pointer; float: left; margin-right: 10px; margin-bottom: 10px; max-width: 250px; max-height: 250px;\""
+			media += "></img>"
+		}
+		return template.HTML(media)
+	}
+
 	return template.HTML(media)
 }
 

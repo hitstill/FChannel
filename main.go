@@ -109,6 +109,7 @@ func main() {
 	app.Get("/:actor/following", routes.ActorFollowing)
 	app.Get("/:actor/followers", routes.ActorFollowers)
 	app.Get("/:actor/archive", routes.ActorArchive)
+	app.Get("/f", routes.ActorFlash)
 	app.Get("/:actor", routes.ActorPosts)
 	app.Get("/:actor/:post", routes.ActorPost)
 

@@ -29,6 +29,13 @@ body {
   background-color: #3c3836;
 }
 
+.box-header {
+	background-color: #282828;
+	border: 1px solid #3c3836;
+	padding: 0 5px;
+	color: #ebdbb2;
+}
+
 .quote {
   color: #98971a;
 }
@@ -254,4 +261,17 @@ hr {
 
 .capcodeJanitor {
         color: #83a598 !important;
+}
+
+#swf-embed-header {
+        padding: 0 0 0 3px;
+        font-weight: normal;
+        height: 20px;
+        line-height: 20px;
+}
+
+#swf-embed-close {
+  position: absolute;
+  right: 0;
+  top: 1px;
 }
