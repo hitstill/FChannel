@@ -448,8 +448,8 @@ func ReportPost(ctx *fiber.Ctx) error {
 	board := ctx.FormValue("board")
 	reason := ctx.FormValue("comment")
 	close := ctx.FormValue("close")
-	referer := config.Domain + "/" + board
-	if strings.Contains(ctx.FormValue("referer"), config.Domain+"/"+board) && !strings.Contains(ctx.FormValue("referer"), "make-report") {
+	referer := ctx.BaseURL() + "/" + board
+	if strings.Contains(ctx.FormValue("referer"), ctx.BaseURL()+"/"+board) && !strings.Contains(ctx.FormValue("referer"), "make-report") {
 		referer = ctx.FormValue("referer")
 	}
 

@@ -230,7 +230,7 @@ func MakeActorPost(ctx *fiber.Ctx) error {
 
 	if is, _ := util.IsPostBlacklist(ctx.FormValue("comment")); is {
 		config.Log.Println("Blacklist post blocked")
-		return ctx.Redirect("/", 301)
+		return ctx.Redirect(ctx.BaseURL()+"/", 301)
 	}
 
 	if ctx.FormValue("inReplyTo") == "" || file == nil {
@@ -351,14 +351,14 @@ func MakeActorPost(ctx *fiber.Ctx) error {
 		obj = post.ParseOptions(ctx, obj)
 		for _, e := range obj.Option {
 			if e == "noko" || e == "nokosage" {
-				return ctx.Redirect(config.Domain+"/"+ctx.FormValue("boardName")+"/"+util.ShortURL(ctx.FormValue("sendTo"), string(body)), 301)
+				return ctx.Redirect(ctx.BaseURL()+"/"+ctx.FormValue("boardName")+"/"+util.ShortURL(ctx.FormValue("sendTo"), string(body)), 301)
 			}
 		}
 
 		if ctx.FormValue("returnTo") == "catalog" {
-			return ctx.Redirect(config.Domain+"/"+ctx.FormValue("boardName")+"/catalog", 301)
+			return ctx.Redirect(ctx.BaseURL()+"/"+ctx.FormValue("boardName")+"/catalog", 301)
 		} else {
-			return ctx.Redirect(config.Domain+"/"+ctx.FormValue("boardName"), 301)
+			return ctx.Redirect(ctx.BaseURL()+"/"+ctx.FormValue("boardName"), 301)
 		}
 	}
 
@@ -368,7 +368,7 @@ func MakeActorPost(ctx *fiber.Ctx) error {
 		})
 	}
 
-	return ctx.Redirect(config.Domain+"/"+ctx.FormValue("boardName"), 301)
+	return ctx.Redirect(ctx.BaseURL()+"/"+ctx.FormValue("boardName"), 301)
 }
 
 func ActorPost(ctx *fiber.Ctx) error {
@@ -392,7 +392,7 @@ func ActorPost(ctx *fiber.Ctx) error {
 	// check if actually OP if not redirect to op to get full thread
 	var obj = activitypub.ObjectBase{Id: inReplyTo}
 	if OP, _ := obj.GetOP(); OP != obj.Id {
-		return ctx.Redirect(config.Domain+"/"+actor.Name+"/"+util.ShortURL(actor.Outbox, OP)+"#"+util.ShortURL(actor.Outbox, inReplyTo), http.StatusMovedPermanently)
+		return ctx.Redirect(ctx.BaseURL()+"/"+actor.Name+"/"+util.ShortURL(actor.Outbox, OP)+"#"+util.ShortURL(actor.Outbox, inReplyTo), http.StatusMovedPermanently)
 	}
 
 	collection, err := obj.GetCollectionFromPath()
