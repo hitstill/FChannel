@@ -195,6 +195,12 @@ func ParseOutboxRequest(ctx *fiber.Ctx, actor activitypub.Actor) error {
 				}
 			}
 
+			query := `INSERT INTO "identify" (id, ip) VALUES ($1, $2)`
+			_, err = config.DB.Exec(query, nObj.Id, ctx.Get("PosterIP"))
+			if err != nil {
+				return util.MakeError(err, "ParseOutboxRequest")
+			}
+
 			ctx.Response().Header.Set("Status", "200")
 			_, err = ctx.Write([]byte(id))
 			return util.MakeError(err, "ParseOutboxRequest")

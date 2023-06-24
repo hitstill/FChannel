@@ -11,6 +11,7 @@
   <div id="{{ shortURL $board.Actor.Outbox .Id }}" style="overflow: visible; margin-bottom: 12px;">
     {{ if eq $board.ModCred $board.Domain $board.Actor.Id }}
     [<a href="/delete?id={{ .Id }}&board={{ $board.Actor.Name }}" onclick="return confirm('Delete post?');">Delete Post</a>]
+    [<a href="/ban?actor={{ $board.Actor.Id }}&post={{ .Id }}">Ban</a>]
     {{ end }}
     {{ if .Attachment }}
     {{ if eq $board.ModCred $board.Domain $board.Actor.Id }}
@@ -66,6 +67,7 @@
         <div class="post" style="overflow: auto; padding: 5px; margin-bottom: 2px;">
           {{ if eq $board.ModCred $board.Domain $board.Actor.Id }}
           [<a href="/delete?id={{ .Id }}&board={{ $board.Actor.Name }}" onclick="return confirm('Delete Post?');">Delete Post</a>]
+          [<a href="/ban?actor={{ $board.Actor.Id }}&post={{ .Id }}">Ban</a>]
           {{ end }}
           {{ if (index .Attachment 0).Id }}
           {{ if eq $board.ModCred $board.Domain $board.Actor.Id }}

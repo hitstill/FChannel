@@ -81,6 +81,8 @@ func main() {
 	app.Get("/news", routes.NewsGetAll)
 
 	// Board managment
+	app.Get("/ban", routes.BanGet)
+	app.Post("/ban", routes.BanPost)
 	app.Get("/banmedia", routes.BoardBanMedia)
 	app.Get("/delete", routes.BoardDelete)
 	app.Get("/deleteattach", routes.BoardDeleteAttach)

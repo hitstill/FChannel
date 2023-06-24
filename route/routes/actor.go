@@ -208,6 +208,21 @@ func ActorFollowers(ctx *fiber.Ctx) error {
 }
 
 func MakeActorPost(ctx *fiber.Ctx) error {
+	var ban route.Ban
+	ban.IP, ban.Reason, ban.Date, ban.Expires, _ = db.IsIPBanned(ctx.IP())
+	if len(ban.IP) > 1 {
+		//TEMP until ban page
+		config.Log.Println(ban.Expires)
+		if ban.Expires == "9999-12-31T00:00:00Z" {
+			ban.Expires = "This ban is will not expire."
+		} else {
+			ban.Expires = "This ban expires " + ban.Expires + " (UTC)"
+		}
+		return ctx.Render("403", fiber.Map{
+			"message": "TESTING!!!!!!!! You were banned for: " + ban.Reason + " at " + ban.Date + " (UTC). " + ban.Expires,
+		})
+	}
+
 	header, _ := ctx.FormFile("file")
 
 	if ctx.FormValue("inReplyTo") == "" && header == nil {
@@ -335,6 +350,7 @@ func MakeActorPost(ctx *fiber.Ctx) error {
 	}
 
 	req.Header.Set("Content-Type", we.FormDataContentType())
+	req.Header.Set("PosterIP", ctx.IP())
 
 	resp, err := util.RouteProxy(req)
 

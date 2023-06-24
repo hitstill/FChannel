@@ -159,7 +159,7 @@ func RemovePreviewFromFile(id string) error {
 	return util.MakeError(err, "RemovePreviewFromFile")
 }
 
-//if limit less than 1 return all news items
+// if limit less than 1 return all news items
 func GetNews(limit int) ([]NewsItem, error) {
 	var news []NewsItem
 	var query string
@@ -389,6 +389,19 @@ func IsHashBanned(hash string) (bool, error) {
 	_ = config.DB.QueryRow(query, hash).Scan(&h)
 
 	return h == hash, nil
+}
+
+func IsIPBanned(i string) (string, string, string, string, error) {
+	var ip string
+	var reason string
+	var date string
+	var expires string
+
+	// Worth also including NULL values just incase?
+	query := `select ip, reason, date, expires from bannedips where ip=$1 AND expires > now() ORDER BY "expires" DESC;`
+	_ = config.DB.QueryRow(query, i).Scan(&ip, &reason, &date, &expires)
+
+	return ip, reason, date, expires, nil
 }
 
 func PrintAdminAuth() error {

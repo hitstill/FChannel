@@ -57,3 +57,10 @@ type Meta struct {
 	Url         string
 	Preview     string
 }
+
+type Ban struct {
+	IP      string
+	Reason  string
+	Date    string
+	Expires string
+}

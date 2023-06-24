@@ -1,0 +1,41 @@
+<div style="max-width: 800px; margin: 0 auto;">
+<!--  <h1 style="text-align: center;">/{{ .page.Board.Name }}/ - {{ .page.Board.PrefName }}</h1>
+<p style="text-align: center;">{{ .page.Board.Summary }}</p> -->
+<h1 style="text-align: center;">Ban post</h1>
+<p style="text-align: center;">No. <a href="{{ .page.Board.InReplyTo }}" onclick="window.open('{{ .page.Board.InReplyTo }}','','popup');return false">{{ shortURL .page.Board.Actor.Outbox .page.Board.InReplyTo }}</a></p>
+</div>
+
+<div style="height: 500px; width: 420px; margin: 0 auto; margin-top:75px;">
+  <a href="{{ .page.Referer }}" onclick="history.back()">[Back]</a>
+  <div id="report-box">
+		<br>
+    <form id="report-post" action="/ban" method="post">
+      <label for="comment">Reason:</label><br>
+      <textarea id="report-comment" name="comment" rows="12" cols="54" style="width: 396px;" maxlength="100" oninput="sessionStorage.setItem('element-report-comment', document.getElementById('report-comment').value)"></textarea>
+      <br>
+			<label style="float:left;" for="banmedia">Ban media?</label>
+			<input id="banmedia" name="banmedia" type="checkbox" style="float:left;">
+			<label style="float:left; padding-left: 10px;" for="permanent">Permanent?</label>
+			<input id="permanent" name="permanent" type="checkbox" style="float:left;">
+			<br><br>
+			<label for="expires">Expiry:</label>
+      <input id="report-submit" type="submit" value="Ban" style="float: right;">
+			<br>
+			<input type="datetime-local" id="expires" name="expires" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}"> 
+      <input type="hidden" id="report-inReplyTo-box" name="id" value="{{ .page.Board.InReplyTo }}">
+      <input type="hidden" id="sendTo" name="sendTo" value="{{ .page.Board.To }}">
+      <input type="hidden" id="boardName" name="board" value="{{ .page.Board.Name }}">
+      <input type="hidden" name="close" value="0">
+			<input type="hidden" id="referer" name="referer" value="{{ .page.Referer }}">
+    </form>
+  </div>
+</div>
+
+<script>
+	var now = new Date();
+	now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+	document.getElementById('expires').value = now.toISOString().slice(0,16);
+</script>
+
+{{ template "partials/footer" .page }}
+{{ template "partials/general_scripts" .page }}

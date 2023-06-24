@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/FChannel0/FChannel-Server/activitypub"
 	"github.com/FChannel0/FChannel-Server/config"
@@ -692,4 +693,82 @@ func Lock(ctx *fiber.Ctx) error {
 	} else {
 		return ctx.Redirect(OP, http.StatusSeeOther)
 	}
+}
+
+func BanGet(ctx *fiber.Ctx) error {
+	actor, _ := activitypub.GetActor(ctx.Query("actor"))
+
+	_, auth := util.GetPasswordFromSession(ctx)
+
+	if auth == "" {
+		return util.MakeError(errors.New("no auth"), "Ban")
+	}
+
+	if has, _ := util.HasAuth(auth, actor.Id); !has {
+		return util.MakeError(errors.New("no auth"), "Ban")
+	}
+
+	var data route.PageData
+	data.Board.Actor = actor
+	data.Board.Name = actor.Name
+	data.Board.PrefName = actor.PreferredUsername
+	data.Board.Summary = actor.Summary
+	data.Board.InReplyTo = ctx.Query("post")
+	data.Board.To = actor.Outbox
+	data.Board.Restricted = actor.Restricted
+
+	data.Meta.Description = data.Board.Summary
+	data.Meta.Url = data.Board.Actor.Id
+	data.Meta.Title = data.Title
+
+	data.Instance, _ = activitypub.GetActorFromDB(config.Domain)
+
+	data.Themes = &config.Themes
+	data.ThemeCookie = route.GetThemeCookie(ctx)
+
+	data.Key = config.Key
+	data.Board.ModCred, _ = util.GetPasswordFromSession(ctx)
+	data.Board.Domain = config.Domain
+	data.Boards = webfinger.Boards
+
+	data.Referer = config.Domain + "/" + actor.Name
+	if strings.Contains(ctx.Get("referer"), config.Domain+"/"+actor.Name) && !strings.Contains(ctx.Get("referer"), "ban") {
+		data.Referer = ctx.Get("referer")
+	}
+
+	return ctx.Render("ban", fiber.Map{"page": data}, "layouts/main")
+}
+
+func BanPost(ctx *fiber.Ctx) error {
+	id := ctx.FormValue("id")
+	board := ctx.FormValue("board")
+
+	actor, _ := activitypub.GetActorByNameFromDB(board)
+
+	_, auth := util.GetPasswordFromSession(ctx)
+
+	if id == "" || auth == "" {
+		return util.MakeError(errors.New("no auth"), "Ban")
+	}
+
+	if has, _ := util.HasAuth(auth, actor.Id); !has {
+		return util.MakeError(errors.New("no auth"), "Ban")
+	}
+
+	reason := ctx.FormValue("comment")
+	var expires time.Time
+
+	if ctx.FormValue("permanent") == "on" {
+		expires, _ = time.Parse("2006-01-02", "9999-12-31")
+	} else {
+		expires, _ = time.Parse("2006-01-02T15:04", ctx.FormValue("expires"))
+	}
+
+	query := `INSERT INTO "bannedips" (ip, reason, expires) VALUES ((SELECT ip from identify WHERE id=$1 AND ip !='172.16.0.1'), $2, $3);`
+	_, err := config.DB.Exec(query, id, reason, expires)
+	if err != nil {
+		return util.MakeError(err, "BanPost")
+	}
+
+	return ctx.Redirect("/"+board, http.StatusSeeOther)
 }
