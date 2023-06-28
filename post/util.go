@@ -570,7 +570,7 @@ func ParseLinkComments(board activitypub.Actor, op string, content string, threa
 			}
 		}
 
-		if replyID, isReply, err := db.IsReplyToOP(op, parsedLink); err == nil || !isReply {
+		if replyID, isReply, err := db.IsReplyToOP(op, parsedLink); err == nil && isReply || err == nil && parsedLink == op {
 			id := util.ShortURL(board.Outbox, replyID)
 
 			content = strings.Replace(content, match[i][0], "<a class=\"reply\" title=\""+quoteTitle+"\" href=\"/"+board.Name+"/"+util.ShortURL(board.Outbox, op)+"#"+id+"\">&gt;&gt;"+id+""+isOP+"</a>", -1)
@@ -578,14 +578,19 @@ func ParseLinkComments(board activitypub.Actor, op string, content string, threa
 			//this is a cross post
 
 			parsedOP, err := db.GetReplyOP(parsedLink)
-			if err == nil {
+			if err == nil && len(parsedOP) > 0 {
 				link = parsedOP + "#" + util.ShortURL(parsedOP, parsedLink)
+			} else {
+				// If we want to keep user on same instance then use current actor, or redirect them to the /main/ actor
+				//link, _ = db.GetPostIDFromNum(parsedLink)
+				link = parsedLink
 			}
 
-			actor, err := activitypub.FingerActor(parsedLink)
-			if err == nil && actor.Id != "" {
-				content = strings.Replace(content, match[i][0], "<a class=\"reply\" title=\""+quoteTitle+"\" href=\""+link+"\">&gt;&gt;"+util.ShortURL(board.Outbox, parsedLink)+isOP+" →</a>", -1)
-			}
+			// Disabled due to slow downs with tor
+			//actor, err := activitypub.FingerActor(parsedLink)
+			//if err == nil && actor.Id != "" {
+			content = strings.Replace(content, match[i][0], "<a class=\"reply\" title=\""+quoteTitle+"\" href=\""+link+"\">&gt;&gt;"+util.ShortURL(board.Outbox, parsedLink)+isOP+" →</a>", -1)
+			//}
 		}
 	}
 
