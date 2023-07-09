@@ -36,7 +36,7 @@ func main() {
 		IdleTimeout:  60 * time.Second,
 		ServerHeader: "FChannel/" + config.InstanceName,
 		ProxyHeader:  "X-Real-IP",
-		BodyLimit:    7 * 1024 * 1024,
+		BodyLimit:    12*1024*1024 + 594, // 12 MiB (max file size) + some extra for overhead
 	})
 
 	app.Use(logger.New())
@@ -76,6 +76,8 @@ func main() {
 	app.All("/"+config.Key+"/:actor/follow", routes.AdminFollow)
 	app.Get("/"+config.Key+"/:actor", routes.AdminActorIndex)
 
+	app.Get("/banned", routes.BannedGet)
+
 	// News routes
 	app.Get("/news/:ts", routes.NewsGet)
 	app.Get("/news", routes.NewsGetAll)
@@ -98,6 +100,10 @@ func main() {
 
 	// Webfinger routes
 	app.Get("/.well-known/webfinger", routes.Webfinger)
+
+	// NodeInfo routes
+	app.Get("/.well-known/nodeinfo", routes.NodeInfoDiscover)
+	app.Get("/nodeinfo/:version", routes.NodeInfo)
 
 	// API routes
 	app.Get("/api/media", routes.Media)
