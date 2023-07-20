@@ -348,7 +348,7 @@ func (activity Activity) MakeRequestInbox() error {
 
 			name, instance := GetActorAndInstance(actor.Id)
 
-			if name != "main" {
+			if name != "main" && name != "overboard" {
 				go func(actor Actor, activity Activity) error {
 					var status int
 					var try int

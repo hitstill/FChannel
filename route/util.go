@@ -109,9 +109,9 @@ func ParseOutboxRequest(ctx *fiber.Ctx, actor activitypub.Actor) error {
 			if header != nil {
 				f, _ := header.Open()
 				defer f.Close()
-				if header.Size > (7 << 20) {
+				if header.Size > (12 << 20) {
 					ctx.Response().Header.SetStatusCode(403)
-					_, err := ctx.Write([]byte("7MB max file size"))
+					_, err := ctx.Write([]byte("12MB max file size"))
 					return util.MakeError(err, "ParseOutboxRequest")
 				} else if isBanned, err := post.IsMediaBanned(f); err == nil && isBanned {
 					config.Log.Println("media banned")
@@ -140,6 +140,19 @@ func ParseOutboxRequest(ctx *fiber.Ctx, actor activitypub.Actor) error {
 			nObj, err := post.ObjectFromForm(ctx, nObj)
 			if err != nil {
 				return util.MakeError(err, "ParseOutboxRequest")
+			}
+
+			var id string
+			op := len(nObj.InReplyTo) - 1
+			if op >= 0 {
+				if nObj.InReplyTo[op].Id == "" {
+					if actor.Name == "overboard" {
+						return ctx.SendStatus(400)
+					}
+					id = nObj.Id
+				} else {
+					id = nObj.InReplyTo[0].Id + "|" + nObj.Id
+				}
 			}
 
 			nObj.Actor = config.Domain + "/" + actor.Name
@@ -184,16 +197,6 @@ func ParseOutboxRequest(ctx *fiber.Ctx, actor activitypub.Actor) error {
 					config.Log.Println(err)
 				}
 			}(nObj)
-
-			var id string
-			op := len(nObj.InReplyTo) - 1
-			if op >= 0 {
-				if nObj.InReplyTo[op].Id == "" {
-					id = nObj.Id
-				} else {
-					id = nObj.InReplyTo[0].Id + "|" + nObj.Id
-				}
-			}
 
 			query := `INSERT INTO "identify" (id, ip) VALUES ($1, $2)`
 			_, err = config.DB.Exec(query, nObj.Id, ctx.Get("PosterIP"))
@@ -268,7 +271,7 @@ func ParseOutboxRequest(ctx *fiber.Ctx, actor activitypub.Actor) error {
 				break
 
 			case "Note":
-				ctx.Response().Header.Set("Satus", "403")
+				ctx.Response().Header.Set("Status", "403")
 				_, err = ctx.Write([]byte("could not process activity"))
 				break
 

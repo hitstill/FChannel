@@ -24,6 +24,9 @@ import (
 
 func ActorInbox(ctx *fiber.Ctx) error {
 	actor, _ := activitypub.GetActorFromDB(config.Domain + "/" + ctx.Params("actor"))
+	if actor.Name == "overboard" {
+		return ctx.SendStatus(404)
+	}
 	activity, err := activitypub.GetActivityFromJson(ctx)
 
 	if err != nil {
@@ -211,16 +214,7 @@ func MakeActorPost(ctx *fiber.Ctx) error {
 	var ban route.Ban
 	ban.IP, ban.Reason, ban.Date, ban.Expires, _ = db.IsIPBanned(ctx.IP())
 	if len(ban.IP) > 1 {
-		//TEMP until ban page
-		config.Log.Println(ban.Expires)
-		if ban.Expires == "9999-12-31T00:00:00Z" {
-			ban.Expires = "This ban is will not expire."
-		} else {
-			ban.Expires = "This ban expires " + ban.Expires + " (UTC)"
-		}
-		return ctx.Render("403", fiber.Map{
-			"message": "TESTING!!!!!!!! You were banned for: " + ban.Reason + " at " + ban.Date + " (UTC). " + ban.Expires,
-		})
+		return ctx.Redirect(ctx.BaseURL()+"/banned", 301)
 	}
 
 	header, _ := ctx.FormFile("file")
@@ -237,9 +231,9 @@ func MakeActorPost(ctx *fiber.Ctx) error {
 		file, _ = header.Open()
 	}
 
-	if file != nil && header.Size > (7<<20) {
+	if file != nil && header.Size > (12<<20) {
 		return ctx.Render("403", fiber.Map{
-			"message": "7MB max file size",
+			"message": "12MB max file size",
 		})
 	}
 
@@ -342,6 +336,29 @@ func MakeActorPost(ctx *fiber.Ctx) error {
 	we.Close()
 
 	sendTo := ctx.FormValue("sendTo")
+
+	if sendTo == config.Domain+"/overboard/outbox" {
+		re := regexp.MustCompile(`.+\/`)
+		actorid := strings.TrimSuffix(re.FindString(ctx.FormValue("inReplyTo")), "/")
+		actor, err := activitypub.GetActor(actorid)
+		if err == nil {
+			local, _ := actor.IsLocal()
+			if local {
+				sendTo = actor.Outbox
+			} else {
+				query := `select id from following where following = $1 AND following != $2 LIMIT 1;`
+				if err := config.DB.QueryRow(query, actorid, config.Domain+"/overboard").Scan(&actorid); err == nil {
+					if actor, err := activitypub.GetActor(actorid); err == nil {
+						sendTo = actor.Outbox
+					}
+				}
+			}
+			//actorid := strings.TrimSuffix(re.FindString(ctx.FormValue("inReplyTo")), "/")
+			//sendTo = actorid + "/outbox"
+			//actor, _ := webfinger.GetActorFromPath(actorid, "/")
+			//sendTo = actor.Outbox
+		}
+	}
 
 	req, err := http.NewRequest("POST", sendTo, &b)
 
@@ -644,7 +661,7 @@ func ActorPosts(ctx *fiber.Ctx) error {
 	var pages []int
 	pageLimit := (float64(collection.TotalItems) / float64(offset))
 
-	if pageLimit > 11 {
+	if pageLimit > 11 && actor.Name != "overboard" {
 		pageLimit = 11
 	}
 

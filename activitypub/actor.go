@@ -1112,7 +1112,7 @@ func (actor Actor) WantToServePage(page int) (Collection, error) {
 	var collection Collection
 	var err error
 
-	if page > config.PostCountPerPage {
+	if page > config.PostCountPerPage && actor.Name != "overboard" {
 		return collection, errors.New("above page limit")
 	}
 

@@ -43,6 +43,7 @@
       <ul id="boardlinks">
         {{ $l := len .page.Boards }}
         <li>[<a href="/">Home</a>]</li>
+				<li>[<a href="/overboard">Overboard</a>]</li>
         {{range $i, $e := .page.Boards}}
         {{ if eq (sub $l 1) 0 }}
         <li>[ <a href="{{.Location}}">{{$e.Name}} </a>]</li>
