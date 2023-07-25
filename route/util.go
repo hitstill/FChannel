@@ -1,21 +1,30 @@
 package route
 
 import (
+	"crypto/md5"
+	"crypto/sha256"
+	"encoding/base64"
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"io/ioutil"
+	"math/rand"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
+
+	"github.com/FChannel0/FChannel-Server/util"
 
 	"github.com/FChannel0/FChannel-Server/activitypub"
 	"github.com/FChannel0/FChannel-Server/config"
 	"github.com/FChannel0/FChannel-Server/db"
 	"github.com/FChannel0/FChannel-Server/post"
-	"github.com/FChannel0/FChannel-Server/util"
 	"github.com/FChannel0/FChannel-Server/webfinger"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/template/html"
+	country "github.com/mikekonan/go-countries"
 )
 
 func GetThemeCookie(c *fiber.Ctx) string {
@@ -26,6 +35,19 @@ func GetThemeCookie(c *fiber.Ctx) string {
 	}
 
 	return "default"
+}
+
+func isTorExit(ip string) bool {
+	b, err := ioutil.ReadFile("/tmp/tor-exit-nodes.lst")
+	if err != nil {
+		panic(err)
+	}
+
+	isExit, err := regexp.Match(ip, b)
+	if err != nil {
+		panic(err)
+	}
+	return isExit
 }
 
 func WantToServeCatalog(actorName string) (activitypub.Collection, bool, error) {
@@ -142,17 +164,44 @@ func ParseOutboxRequest(ctx *fiber.Ctx, actor activitypub.Actor) error {
 				return util.MakeError(err, "ParseOutboxRequest")
 			}
 
-			var id string
 			op := len(nObj.InReplyTo) - 1
 			if op >= 0 {
 				if nObj.InReplyTo[op].Id == "" {
 					if actor.Name == "overboard" {
 						return ctx.SendStatus(400)
 					}
-					id = nObj.Id
-				} else {
-					id = nObj.InReplyTo[0].Id + "|" + nObj.Id
 				}
+			}
+
+			//if actor.Name == "int" {
+			//	re := regexp.MustCompile(`[🇦-🇿]{2}|🏴`)
+			//	nObj.AttributedTo = re.ReplaceAllString(nObj.AttributedTo, "${1}")
+			//	if strings.TrimSpace(nObj.AttributedTo) == "" {
+			//		nObj.AttributedTo = "Anonymous"
+			//	}
+			//	nObj.AttributedTo = util.GetFlag(ctx.Get("PosterIP")) + nObj.AttributedTo
+			//}
+
+			if actor.Name == "int" || actor.Name == "bint" {
+				nObj.Alias = nObj.Alias + "cc:" + util.GetCC(ctx.Get("PosterIP"))
+			}
+
+			if actor.Name == "bint" {
+				//TODO: better way to pass IP to
+				if ctx.Get("PosterIP") == "172.16.0.1" || isTorExit(ctx.Get("PosterIP")) {
+					return ctx.Render("403", fiber.Map{
+						"message": "Proxies are not allowed on /" + actor.Name + "/",
+					})
+				}
+
+				input := []byte(ctx.Get("PosterIP"))
+				hasher := sha256.New()
+				hasher.Write(input)
+				sha := base64.URLEncoding.EncodeToString(hasher.Sum(nil))
+
+				uniqID := string(sha)
+
+				nObj.Alias = nObj.Alias + "id:" + uniqID
 			}
 
 			nObj.Actor = config.Domain + "/" + actor.Name
@@ -197,6 +246,19 @@ func ParseOutboxRequest(ctx *fiber.Ctx, actor activitypub.Actor) error {
 					config.Log.Println(err)
 				}
 			}(nObj)
+
+			var id string
+			//op := len(nObj.InReplyTo) - 1
+			if op >= 0 {
+				if nObj.InReplyTo[op].Id == "" {
+					if actor.Name == "overboard" {
+						return ctx.SendStatus(400)
+					}
+					id = nObj.Id
+				} else {
+					id = nObj.InReplyTo[0].Id + "|" + nObj.Id
+				}
+			}
 
 			query := `INSERT INTO "identify" (id, ip) VALUES ($1, $2)`
 			_, err = config.DB.Exec(query, nObj.Id, ctx.Get("PosterIP"))
@@ -437,5 +499,56 @@ func TemplateFunctions(engine *html.Engine) {
 		}
 
 		return true
+	})
+
+	engine.AddFunc("parseIDandFlag", func(input string) template.HTML {
+		var html string
+		re := regexp.MustCompile(`id:\S{8}`)
+		id := re.FindString(input)
+
+		re = regexp.MustCompile(`cc:\S{2}`)
+		cc := re.FindString(input)
+
+		if id != "" {
+			var r, g, b int
+			var txtcol string
+			//var shadcol string
+			id = strings.TrimPrefix(id, "id:")
+			h := md5.New()
+			h.Write([]byte(id))
+			var seed uint64 = binary.BigEndian.Uint64(h.Sum(nil))
+			rand.Seed(int64(seed))
+			r = rand.Intn(256)
+			g = rand.Intn(256)
+			b = rand.Intn(256)
+			bgcol := "rgb(" + strconv.Itoa(r) + ", " + strconv.Itoa(g) + ", " + strconv.Itoa(b) + ")"
+			var l float64 = ((0.299*float64(r) + 0.587*float64(g) + 0.114*float64(b)) / 255)
+			if l > 0.5 {
+				txtcol = "#000"
+			} else {
+				txtcol = "#FFF"
+			}
+			// if (float64(r)*0.299 + float64(g)*0.587 + float64(b)*0.114) > 186 {
+			// 	txtcol = "#000"
+			// 	shadcol = "#FFF"
+			// } else {
+			// 	txtcol = "#FFF"
+			// 	shadcol = "#000"
+			// }
+			//html = " <span class=\"posteruid id_" + id + "\">(ID: <span class=\"id\" style=\"background-color: " + bgcol + "; color: " + txtcol + "; text-shadow: 0px 0px 2px " + shadcol + ";\">" + id + "</span>)</span>"
+			html = " <span class=\"posteruid id_" + id + "\">(ID: <span class=\"id\" style=\"background-color: " + bgcol + "; color: " + txtcol + ";\">" + id + "</span>)</span>"
+		}
+		if cc != "" {
+			var countryname string
+			cc = strings.TrimPrefix(cc, "cc:")
+			//TODO: remove external library for country
+			if posterCountry, ok := country.ByAlpha2CodeStr(cc); ok {
+				countryname = posterCountry.Name().String()
+			} else {
+				countryname = "Unknown/Hidden"
+			}
+			html = html + " <span title=\"" + countryname + "\" class=\"flag flag-" + cc + "\"></span>"
+		}
+		return template.HTML(html)
 	})
 }

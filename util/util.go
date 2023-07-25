@@ -27,6 +27,19 @@ func IsOnion(url string) bool {
 	return false
 }
 
+func isTorExit(ip string) bool {
+	b, err := ioutil.ReadFile("/tmp/tor-exit-nodes.lst")
+	if err != nil {
+		panic(err)
+	}
+
+	isExit, err := regexp.Match(ip, b)
+	if err != nil {
+		panic(err)
+	}
+	return isExit
+}
+
 func StripTransferProtocol(value string) string {
 	re := regexp.MustCompile("(http://|https://)?(www.)?")
 	value = re.ReplaceAllString(value, "")

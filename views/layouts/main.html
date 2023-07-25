@@ -28,6 +28,7 @@
     <link rel="icon" type="image/png"  href="/static/favicon.png">
 
 		<link rel="stylesheet" type="text/css" href="/static/css/tegaki.css">
+		<link rel="stylesheet" type="text/css" href="/static/css/flags.css">
 
     {{ if gt (len .page.ThemeCookie) 0 }}
     <link rel="stylesheet" type="text/css" href="/static/css/themes/{{.page.ThemeCookie}}.css" title="selected theme">
@@ -42,7 +43,7 @@
     <div style="padding-bottom:5px;">
       <ul id="boardlinks">
         {{ $l := len .page.Boards }}
-        <li>[<a href="/">Home</a>]</li>
+        <li>[<a href="/">Home</a>]</li> 
 				<li>[<a href="/overboard">Overboard</a>]</li>
         {{range $i, $e := .page.Boards}}
         {{ if eq (sub $l 1) 0 }}

@@ -275,3 +275,5 @@ hr {
   right: 0;
   top: 1px;
 }
+
+.posteruid .id {padding: 0 5px; border-radius: 6px; font-size: 0.8em;}
