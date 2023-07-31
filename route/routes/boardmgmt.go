@@ -756,16 +756,20 @@ func BanPost(ctx *fiber.Ctx) error {
 	}
 
 	reason := ctx.FormValue("comment")
-	var expires time.Time
+
+	var parsed time.Time
 
 	if ctx.FormValue("permanent") == "on" {
-		expires, _ = time.Parse("2006-01-02", "9999-12-31")
+		parsed, _ = time.Parse("2006-01-02", "9999-12-31")
 	} else {
-		expires, _ = time.Parse("2006-01-02T15:04", ctx.FormValue("expires"))
+		parsed, _ = time.Parse("2006-01-02T15:04", ctx.FormValue("expires"))
 	}
 
-	query := `INSERT INTO "bannedips" (ip, reason, expires) VALUES ((SELECT ip from identify WHERE id=$1 AND ip !='172.16.0.1'), $2, $3);`
-	_, err := config.DB.Exec(query, id, reason, expires)
+	//expires := parsed.Format("2006-01-02T15:04:05.000Z")
+	expires := parsed
+
+	query := `INSERT INTO "bannedips" (ip, reason, date, expires) VALUES ((SELECT ip from identify WHERE id=$1 AND ip !='172.16.0.1'), $2, $3, $4);`
+	_, err := config.DB.Exec(query, id, reason, time.Now().UTC(), expires)
 	if err != nil {
 		return util.MakeError(err, "BanPost")
 	}

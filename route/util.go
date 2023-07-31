@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"io/ioutil"
 	"math/rand"
 	"regexp"
 	"strconv"
@@ -35,19 +34,6 @@ func GetThemeCookie(c *fiber.Ctx) string {
 	}
 
 	return "default"
-}
-
-func isTorExit(ip string) bool {
-	b, err := ioutil.ReadFile("/tmp/tor-exit-nodes.lst")
-	if err != nil {
-		panic(err)
-	}
-
-	isExit, err := regexp.Match(ip, b)
-	if err != nil {
-		panic(err)
-	}
-	return isExit
 }
 
 func WantToServeCatalog(actorName string) (activitypub.Collection, bool, error) {
@@ -188,7 +174,7 @@ func ParseOutboxRequest(ctx *fiber.Ctx, actor activitypub.Actor) error {
 
 			if actor.Name == "bint" {
 				//TODO: better way to pass IP to
-				if ctx.Get("PosterIP") == "172.16.0.1" || isTorExit(ctx.Get("PosterIP")) {
+				if ctx.Get("PosterIP") == "172.16.0.1" || util.IsTorExit(ctx.Get("PosterIP")) {
 					return ctx.Render("403", fiber.Map{
 						"message": "Proxies are not allowed on /" + actor.Name + "/",
 					})

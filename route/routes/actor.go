@@ -225,24 +225,10 @@ func MakeActorPost(ctx *fiber.Ctx) error {
 		})
 	}
 
-	//var isThread bool
-	//TODO: Fix once go packaging sorted
-	//if ctx.FormValue("inReplyTo") != "" && isThread = db.isValidThread(ctx.FormValue("inReplyTo")); !isThread {
-	if ctx.FormValue("inReplyTo") != "" {
-		var postID string
-		post := ctx.FormValue("inReplyTo")
-		query := `select id from activitystream where id = $1`
-		if err := config.DB.QueryRow(query, post).Scan(&postID); err != nil {
-			query = `select id from cacheactivitystream where id = $1`
-			if err := config.DB.QueryRow(query, post).Scan(&postID); err != nil {
-				query = `select id from replies where id = $1 AND inreplyto = ''`
-				if err := config.DB.QueryRow(query, post).Scan(&postID); err != nil {
-					return ctx.Render("403", fiber.Map{
-						"message": "\"" + ctx.FormValue("inReplyTo") + "\" is not a valid thread on this server",
-					})
-				}
-			}
-		}
+	if ctx.FormValue("inReplyTo") != "" && !db.IsValidThread(ctx.FormValue("inReplyTo")) {
+		return ctx.Render("403", fiber.Map{
+			"message": "\"" + ctx.FormValue("inReplyTo") + "\" is not a valid thread on this server",
+		})
 	}
 
 	var file multipart.File

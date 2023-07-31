@@ -27,7 +27,7 @@ func IsOnion(url string) bool {
 	return false
 }
 
-func isTorExit(ip string) bool {
+func IsTorExit(ip string) bool {
 	b, err := ioutil.ReadFile("/tmp/tor-exit-nodes.lst")
 	if err != nil {
 		panic(err)

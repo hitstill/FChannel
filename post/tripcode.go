@@ -5,6 +5,8 @@ import (
 	"regexp"
 	"strings"
 
+	"os/exec"
+
 	"github.com/FChannel0/FChannel-Server/config"
 	"github.com/FChannel0/FChannel-Server/util"
 	"github.com/gofiber/fiber/v2"
@@ -12,7 +14,6 @@ import (
 	"github.com/simia-tech/crypt"
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/transform"
-	"os/exec"
 )
 
 const SaltTable = "" +

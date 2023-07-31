@@ -33,7 +33,7 @@ import (
 // }
 
 func GetCC(ip string) string {
-	if isTorExit(ip) || ip == "172.16.0.1" {
+	if IsTorExit(ip) || ip == "172.16.0.1" {
 		return "xx"
 	}
 	db, err := maxminddb.Open("/usr/share/GeoIP/GeoLite2-Country.mmdb")

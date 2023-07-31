@@ -440,16 +440,19 @@ func GetPostIDFromNum(num string) (string, error) {
 	return postID, nil
 }
 
-func isValidThread(post string) bool {
+func IsValidThread(post string) bool {
 	var postID string
-	query := `select id from activitystream where id = $1`
+
+	query := `select id from replies where id = $1 AND inreplyto = ''`
+	if err := config.DB.QueryRow(query, post).Scan(&postID); err != nil {
+		return false
+	}
+
+	query = `select id from activitystream where id = $1`
 	if err := config.DB.QueryRow(query, post).Scan(&postID); err != nil {
 		query = `select id from cacheactivitystream where id = $1`
 		if err := config.DB.QueryRow(query, post).Scan(&postID); err != nil {
-			query = `select id from replies where id = $1 AND inreplyto = ''`
-			if err := config.DB.QueryRow(query, post).Scan(&postID); err != nil {
-				return false
-			}
+			return false
 		}
 	}
 
