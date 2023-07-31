@@ -1,7 +1,5 @@
 # Usagi fork
-This repo is intended as a convenient way to grab changes from [usagi.reisen](https://usagi.reisen).
-
-You are welcome to use this repo as is, but beware that I force-push to fix mistakes and squash features into single commits.
+This fork may break a number of features or introduce bugs which will rape your server, no support it provided.
 
 # About
 
