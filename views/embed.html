@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html data-ruffle-optout>
+<head>
+<title>swf-embed</title>
+<meta charset="utf-8">
+<style>
+    html, body { background-color: #000; margin: 0; padding: 0; }
+    .hidden { display: none; }
+    #state { position: absolute; top: 0; font-size: 12px; font-family: monospace; padding: 10px; }
+  </style>
+<script>
+    window.RufflePlayer = window.RufflePlayer || {};
+    
+    let settings = {
+      autoplay: "on",
+      allowScriptAccess: false,
+      warnOnUnsupportedContent: false,
+      letterbox: 'on',
+			splashScreen: false
+    };
+    
+    function streamedFetch(url) {
+      console.log('streamedFetch');
+      
+      showStatus();
+      
+      let loadedBytes = 0;
+      
+      return fetch(url)
+        .then(resp => {
+          let totalBytes = +resp.headers.get('Content-Length');
+          
+          const reader = resp.body.getReader();
+
+          return new ReadableStream({
+            start(controller) {
+              function read() {
+                reader.read().then(({done, value}) => {
+                  if (done) {
+                    setStatus('Loading 100%');
+                    controller.close();
+                    return;
+                  }
+                  controller.enqueue(value);
+                  loadedBytes += value.byteLength;
+                  setStatus('Loading ' + (~~(loadedBytes / totalBytes * 100)) + '%');
+                  read();
+                })
+              }
+
+              read();
+            }
+          });
+        })
+        .then(stream => {
+          setStatus('Buffering…');
+          return new Response(stream).arrayBuffer();
+        });
+    }
+
+    function setStatus(str) {
+      document.getElementById('state').textContent = str;
+    }
+    
+    function showStatus() {
+      document.getElementById('state').classList.remove('hidden');
+    }
+    
+    function hideStatus() {
+      document.getElementById('state').classList.add('hidden');
+    }
+    
+    function playSWF(player, settings) {
+      setStatus('Loading player…');
+      player.load(settings)
+        .then(() => { 
+						let w = player.metadata.width;
+						let h = player.metadata.height;
+						resizeTo(player.metadata.width, player.metadata.height);
+						hideStatus();
+						//container = document.querySelector("body > div:nth-child(2) > ruffle-player");
+						//container = document.getElementsByTagName("ruffle-player");
+						container.style.width = (+w) + 'px';
+						container.style.height = (+h) + 'px';
+						player.setAttribute('width', w);
+						player.setAttribute('height', h);
+						player.style.maxWidth = "100vw";
+						player.style.maxHeight = "100vh";
+					})
+
+        .catch(() => { setStatus("Couldn't load the player"); });
+    }
+
+    function run() {
+      //if (window.self === window.top) {
+      //  return;
+      //}
+      
+      if (location.hash.length < 2) {
+        return;
+      }
+      
+      let url = location.hash.replace('#', '');
+      
+      let el = document.createElement('div');
+			el.id = "container";
+      
+      document.body.appendChild(el);
+      
+      let ruffle = window.RufflePlayer.newest();
+      let player = ruffle.createPlayer();
+      let container = document.getElementById("container");
+      
+      //player.setAttribute('width', w);
+      //player.setAttribute('height', h);
+
+      el.appendChild(player);
+      
+      if (!!window.ReadableStream) {
+        streamedFetch(url).then(data => {
+          settings.data = new Uint8Array(data);
+          playSWF(player, settings);
+        })
+      }
+      else {
+        settings.url = url;
+        playSWF(player, settings);
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', run);
+  </script>
+<script src="/static/ruffle/ruffle.js"></script>
+</head>
+<body><div id="state" class="hidden"></div></body>
+</html>

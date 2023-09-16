@@ -102,12 +102,12 @@ h1, h2, h3, h4, h5, h6 {
   background-color: #f0e0d6;
 }
 
-:target > div > .post {
-  background-color: #d6bad0;
+:target > div > .post, .highlight {
+  background-color: #d6bad0!important;
 }
 
-.nsfw :target > div > .post {
-  background-color: #f0c0b0;
+.nsfw :target > div > .post, .highlight {
+  background-color: #f0c0b0!important;
 }
 
 .title {
@@ -334,3 +334,8 @@ a.reply {
 }
 
 .posteruid .id {padding: 0 5px; border-radius: 6px; font-size: 0.8em;}
+
+.posteruid .id:hover {
+  cursor: pointer;
+  color: red!important;
+}

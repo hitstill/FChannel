@@ -175,19 +175,23 @@ func ParseOutboxRequest(ctx *fiber.Ctx, actor activitypub.Actor) error {
 			if actor.Name == "bint" {
 				//TODO: better way to pass IP to
 				if ctx.Get("PosterIP") == "172.16.0.1" || util.IsTorExit(ctx.Get("PosterIP")) {
-					return ctx.Render("403", fiber.Map{
-						"message": "Proxies are not allowed on /" + actor.Name + "/",
-					})
+					nObj.Alias = nObj.Alias + "id:HiddenID"
+				} else {
+
+					//	return ctx.Render("403", fiber.Map{
+					//		"message": "Proxies are not allowed on /" + actor.Name + "/",
+					//	})
+					//}
+
+					input := []byte(ctx.Get("PosterIP"))
+					hasher := sha256.New()
+					hasher.Write(input)
+					sha := base64.URLEncoding.EncodeToString(hasher.Sum(nil))
+
+					uniqID := string(sha)
+
+					nObj.Alias = nObj.Alias + "id:" + uniqID
 				}
-
-				input := []byte(ctx.Get("PosterIP"))
-				hasher := sha256.New()
-				hasher.Write(input)
-				sha := base64.URLEncoding.EncodeToString(hasher.Sum(nil))
-
-				uniqID := string(sha)
-
-				nObj.Alias = nObj.Alias + "id:" + uniqID
 			}
 
 			nObj.Actor = config.Domain + "/" + actor.Name
@@ -497,22 +501,27 @@ func TemplateFunctions(engine *html.Engine) {
 
 		if id != "" {
 			var r, g, b int
-			var txtcol string
+			var txtcol, bgcol string
 			//var shadcol string
 			id = strings.TrimPrefix(id, "id:")
-			h := md5.New()
-			h.Write([]byte(id))
-			var seed uint64 = binary.BigEndian.Uint64(h.Sum(nil))
-			rand.Seed(int64(seed))
-			r = rand.Intn(256)
-			g = rand.Intn(256)
-			b = rand.Intn(256)
-			bgcol := "rgb(" + strconv.Itoa(r) + ", " + strconv.Itoa(g) + ", " + strconv.Itoa(b) + ")"
-			var l float64 = ((0.299*float64(r) + 0.587*float64(g) + 0.114*float64(b)) / 255)
-			if l > 0.5 {
+			if id == "HiddenID" {
+				bgcol = "rgb(255, 255, 255)"
 				txtcol = "#000"
 			} else {
-				txtcol = "#FFF"
+				h := md5.New()
+				h.Write([]byte(id))
+				var seed uint64 = binary.BigEndian.Uint64(h.Sum(nil))
+				rand.Seed(int64(seed))
+				r = rand.Intn(256)
+				g = rand.Intn(256)
+				b = rand.Intn(256)
+				bgcol = "rgb(" + strconv.Itoa(r) + ", " + strconv.Itoa(g) + ", " + strconv.Itoa(b) + ")"
+				var l float64 = ((0.299*float64(r) + 0.587*float64(g) + 0.114*float64(b)) / 255)
+				if l > 0.5 {
+					txtcol = "#000"
+				} else {
+					txtcol = "#FFF"
+				}
 			}
 			// if (float64(r)*0.299 + float64(g)*0.587 + float64(b)*0.114) > 186 {
 			// 	txtcol = "#000"

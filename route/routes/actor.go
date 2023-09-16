@@ -385,9 +385,15 @@ func MakeActorPost(ctx *fiber.Ctx) error {
 	body, _ := ioutil.ReadAll(resp.Body)
 
 	if resp.StatusCode == 200 {
+		var postid string
 		var obj activitypub.ObjectBase
 
 		obj = post.ParseOptions(ctx, obj)
+		re := regexp.MustCompile(`\S*\|`)
+		postid = re.ReplaceAllString(string(body), "${1}")
+		if len(postid) > 0 {
+			ctx.Set("postid", postid)
+		}
 		for _, e := range obj.Option {
 			if e == "noko" || e == "nokosage" {
 				return ctx.Redirect(ctx.BaseURL()+"/"+ctx.FormValue("boardName")+"/"+util.ShortURL(ctx.FormValue("sendTo"), string(body)), 301)

@@ -44,8 +44,8 @@ body {
   background-color: #1d2021;
 }
 
-:target > div > .post {
-  background-color: #504945;
+:target > div > .post, .highlight {
+  background-color: #504945!important;
 }
 
 .subject {
@@ -277,3 +277,8 @@ hr {
 }
 
 .posteruid .id {padding: 0 5px; border-radius: 6px; font-size: 0.8em;}
+
+.posteruid .id:hover {
+  cursor: pointer;
+  color: #fb4934!important;
+}

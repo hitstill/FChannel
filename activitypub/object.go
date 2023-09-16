@@ -1102,27 +1102,31 @@ func (obj ObjectBase) Write() (ObjectBase, error) {
 	// TODO: decide if ID's should be unique per instance
 	// TODO: evaluate collisions
 	if obj.Actor == config.Domain+"/bint" {
-		var threadid string
-		op := len(obj.InReplyTo) - 1
-		if op >= 0 {
-			if obj.InReplyTo[op].Id == "" {
-				threadid = obj.Id
-			} else {
-				threadid = obj.InReplyTo[0].Id
+		re := regexp.MustCompile(`id:HiddenID`)
+		if !re.MatchString(obj.Alias) {
+			var threadid string
+			op := len(obj.InReplyTo) - 1
+			if op >= 0 {
+				if obj.InReplyTo[op].Id == "" {
+					threadid = obj.Id
+				} else {
+					threadid = obj.InReplyTo[0].Id
+				}
 			}
+			input := []byte(obj.Alias + threadid)
+			hasher := sha256.New()
+			hasher.Write(input)
+			sha := base64.URLEncoding.EncodeToString(hasher.Sum(nil))
+
+			r := []rune(sha)
+			trunc := r[:8]
+			uniqID := string(trunc)
+
+			re = regexp.MustCompile(`id:\S*`)
+			obj.Alias = re.ReplaceAllString(obj.Alias, "id:"+uniqID)
 		}
-		input := []byte(obj.Alias + threadid)
-		hasher := sha256.New()
-		hasher.Write(input)
-		sha := base64.URLEncoding.EncodeToString(hasher.Sum(nil))
-
-		r := []rune(sha)
-		trunc := r[:8]
-		uniqID := string(trunc)
-
-		re := regexp.MustCompile(`id:\S*`)
-		obj.Alias = re.ReplaceAllString(obj.Alias, "id:"+uniqID)
 	}
+
 	if len(obj.Attachment) > 0 {
 		if obj.Preview.Href != "" {
 			id, err := util.CreateUniqueID(obj.Actor)

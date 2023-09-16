@@ -58,9 +58,9 @@ body {
 	color: #b294bb;
 }
 
-:target > div > .post {
-	background-color: #1d1d21;
-  border: 1px solid #111;
+:target > div > .post, .highlight {
+	background-color: #1d1d21!important;
+	border: 1px solid #111!important;
 }
 
 .title {
@@ -299,3 +299,8 @@ img {
 }
 
 .posteruid .id {padding: 0 5px; border-radius: 6px; font-size: 0.8em;}
+
+.posteruid .id:hover {
+	cursor: pointer;
+	color: #5f89ac!important;
+  }

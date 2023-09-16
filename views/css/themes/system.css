@@ -93,12 +93,12 @@ h1, h2, h3, h4, h5, h6 {
   background-color: #f0e0d6;
 }
 
-:target > div > .post {
-  background-color: #d6bad0;
+:target > div > .post, .highlight {
+  background-color: #d6bad0!important;
 }
 
-.nsfw :target > div > .post {
-  background-color: #f0c0b0;
+.nsfw :target > div > .post, .highlight {
+  background-color: #f0c0b0!important;
 }
 
 .title {
@@ -313,6 +313,11 @@ a.reply {
 .capcodeJanitor {
         color: #426ae1 !important;
 }
+
+.posteruid .id:hover {
+  cursor: pointer;
+  color: red!important;
+}
 }
 
 @media (prefers-color-scheme: dark) {
@@ -372,9 +377,9 @@ body {
 	background-color: #282a2e;
 }
 
-:target > div > .post {
-	background-color: #1d1d21;
-  border: 1px solid #111; 
+:target > div > .post, .highlight {
+	background-color: #1d1d21!important;
+  border: 1px solid #111!important; 
 }
 
 .subject {
@@ -614,6 +619,10 @@ img {
   position: absolute;
   right: 0;
   top: 1px;
+}
+.posteruid .id:hover {
+  cursor: pointer;
+  color: #5f89ac!important;
 }
 }
 .posteruid .id {padding: 0 5px; border-radius: 6px; font-size: 0.8em;}

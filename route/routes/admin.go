@@ -56,7 +56,7 @@ func AdminVerify(ctx *fiber.Ctx) error {
 	ctx.Cookie(&fiber.Cookie{
 		Name:    "session_token",
 		Value:   body + "|" + verify.Code,
-		Expires: time.Now().UTC().Add(60 * 60 * 48 * time.Second),
+		Expires: time.Now().UTC().Add(730 * time.Hour),
 	})
 
 	return ctx.Redirect("/", http.StatusSeeOther)

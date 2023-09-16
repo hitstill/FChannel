@@ -3,7 +3,6 @@
   <p style="text-align: center;">{{ .Board.Summary }}</p>
   {{ $len := len .Posts }}
   {{ if eq $len 0 }}
-  {{ if eq .PostType "new" }}
   {{ if and (eq .PostType "new") (ne .Board.Name "main") (ne .Board.Name "overboard") }}
   <h3 id="newpostbtn"  state="0" style="display: none; margin-bottom:100px;">[<a href="javascript:startNewPost()">Start a New Thread</a>]</h3>
   {{ end }} <!-- end if inreplyto-->
@@ -34,7 +33,7 @@
           <tr>
             <td><label for="file">File</label></td>
             <td><b id="form-drawlabel" style="display: none;">Drawing</b><input type="file" accept=".gif,.png,.apng,.jpg,.jpeg,.jxl,.webp,.avif,.mp4,.webm,.ogg,.mp2,.mp3,.mpa,.wav,.wave,.swf,.flv" id="file" name="file" {{ if gt $len 1 }} required {{ else }} {{ if eq $len 0 }} required {{ end }} {{ end }} >
-								<span style="float: right;">(7168KiB max)</span>
+								<span style="float: right;">(12MiB max)</span>
                 <br><input type="checkbox" name="sensitive">Mark sensitive</input></td>
 			          </tr>
 								<tr data-type="Painter" style="display:none;" id="drawform"> 
@@ -103,7 +102,7 @@
           <tr>
             <td><label for="file">File</label></td>
             <td><b id="form-drawlabel" style="display: none;">Drawing</b><input type="file" accept=".gif,.png,.apng,.jpg,.jpeg,.jxl,.webp,.avif,.mp4,.webm,.ogg,.mp2,.mp3,.mpa,.wav,.wave,.swf,.flv" id="file" name="file" {{ if gt $len 1 }} required {{ else }} {{ if eq $len 0 }} required {{ end }} {{ end }} >
-								<span style="float: right;">(7168KiB max)</span>
+								<span style="float: right;">(12MiB max)</span>
                 <br><input type="checkbox" name="sensitive">Mark sensitive</input></td>
 								</tr>
 								<tr data-type="Painter" style="display:none;" id="drawform">
