@@ -153,7 +153,7 @@ func TripCodeSecure(pass string) (string, error) {
 func TripPhrase(pass string) (string, error) {
 	pass = TripCodeConvert(pass)
 	//User input in os.exec :(
-	phrase, err := exec.Command("perl", "util/tripphrase/tripphrase.pl", pass, config.Salt).Output()
+	phrase, err := exec.Command("perl", "util/tripphrase/tripphrase.pl", config.Salt+pass).Output()
 	if err != nil {
 		return "", util.MakeError(err, "TripPhrase")
 	}

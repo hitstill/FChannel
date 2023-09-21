@@ -19,8 +19,7 @@ use Digest::MD5 qw(md5_hex);
 
 sub main {
     my $password = param('q') || $ARGV[0] || "";
-		my $salt = param('q') || $ARGV[1] || "rabbit";
-    my $digest = md5_hex("$salt$password");
+    my $digest = md5_hex("$password");
     my @indexes = map { hex } ($digest =~ /..../g);
     
     my $template = templateForIndex(shift(@indexes));
