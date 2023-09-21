@@ -3,6 +3,7 @@
 *~
 #*
 public/
+views/partials/extboards.html
 config$
 config/config-init
 clientkey

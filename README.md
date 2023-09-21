@@ -91,6 +91,10 @@ and to fix errors reported by `go vet` and make your code better with
 
   `emailnotify:email1@so.co, email2@bo.uo`     Comma seperated emails To.
 
+### Customization
+Extra links to external boards, websites, etc... can be appended to the board navigation header by modifying [views/partials/extboards.html](views/partials/extboards.html).  
+[Example with two external boards](views/partials/extboards.html.example) 
+
 ### Local testing
 
 When testing on a local env when setting the `instance` value in the config file you have to append the port number to the local address eg. `instance:localhost:3000` with `instanceport` also being set to the same port.
