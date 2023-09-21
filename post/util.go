@@ -436,7 +436,7 @@ func ParseAttachment(obj activitypub.ObjectBase, catalog bool) template.HTML {
 	if regexp.MustCompile(`audio\/`).MatchString(obj.Attachment[0].MediaType) {
 		media = "<audio "
 		media += "controls=\"controls\" "
-		media += "preload=\"metadta\" "
+		media += "preload=\"metadata\" "
 		if catalog {
 			media += "style=\"margin-right: 10px; margin-bottom: 10px; max-width: 180px; max-height: 180px;\" "
 		} else {
@@ -456,7 +456,7 @@ func ParseAttachment(obj activitypub.ObjectBase, catalog bool) template.HTML {
 	if regexp.MustCompile(`video\/`).MatchString(obj.Attachment[0].MediaType) {
 		media = "<video "
 		media += "controls=\"controls\" "
-		media += "preload=\"metadta\" "
+		media += "preload=\"metadata\" "
 		media += "muted=\"muted\" "
 		if catalog {
 			media += "style=\"margin-right: 10px; margin-bottom: 10px; max-width: 180px; max-height: 180px;\" "
