@@ -774,5 +774,10 @@ func BanPost(ctx *fiber.Ctx) error {
 		return util.MakeError(err, "BanPost")
 	}
 
-	return ctx.Redirect("/"+board, http.StatusSeeOther)
+	// Take a little shortcut :)
+	if ctx.FormValue("banmedia") == "on" {
+		return ctx.Redirect("/banmedia?id=" + id + "&board=" + board)
+	} else {
+		return ctx.Redirect("/"+board, http.StatusSeeOther)
+	}
 }

@@ -250,10 +250,12 @@ func ParseOutboxRequest(ctx *fiber.Ctx, actor activitypub.Actor) error {
 				}
 			}
 
-			query := `INSERT INTO "identify" (id, ip) VALUES ($1, $2)`
-			_, err = config.DB.Exec(query, nObj.Id, ctx.Get("PosterIP"))
-			if err != nil {
-				return util.MakeError(err, "ParseOutboxRequest")
+			if len(ctx.Get("PosterIP")) > 1 && ctx.Get("PosterIP") != "127.0.0.1" && ctx.Get("PosterIP") != "172.16.0.1" {
+				query := `INSERT INTO "identify" (id, ip) VALUES ($1, $2)`
+				_, err = config.DB.Exec(query, nObj.Id, ctx.Get("PosterIP"))
+				if err != nil {
+					return util.MakeError(err, "ParseOutboxRequest")
+				}
 			}
 
 			ctx.Response().Header.Set("Status", "200")
