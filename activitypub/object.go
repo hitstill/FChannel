@@ -1332,8 +1332,8 @@ func (obj ObjectBase) WriteReply() error {
 }
 
 func (obj ObjectBase) WriteCache() (ObjectBase, error) {
-	if isBlacklisted, err := util.IsPostBlacklist(obj.Content); err != nil || isBlacklisted {
-		config.Log.Println("Blacklist post blocked")
+	if isBlacklisted, err, regex := util.IsPostBlacklist(obj.Content); err != nil || isBlacklisted {
+		config.Log.Println("Blacklist post blocked \nRegex: " + regex + "\n" + obj.Content)
 		return obj, util.MakeError(err, "WriteObjectToCache")
 	}
 

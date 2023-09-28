@@ -39,22 +39,22 @@ func GetRegexBlacklist() ([]PostBlacklist, error) {
 	return list, nil
 }
 
-func IsPostBlacklist(comment string) (bool, error) {
+func IsPostBlacklist(comment string) (bool, error, string) {
 	postblacklist, err := GetRegexBlacklist()
 
 	if err != nil {
-		return false, MakeError(err, "IsPostBlacklist")
+		return false, MakeError(err, "IsPostBlacklist"), ""
 	}
 
 	for _, e := range postblacklist {
 		re := regexp.MustCompile(e.Regex)
 
 		if re.MatchString(comment) {
-			return true, nil
+			return true, nil, re.String()
 		}
 	}
 
-	return false, nil
+	return false, nil, ""
 }
 
 func WriteRegexBlacklist(regex string) error {

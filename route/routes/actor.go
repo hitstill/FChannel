@@ -243,8 +243,8 @@ func MakeActorPost(ctx *fiber.Ctx) error {
 		})
 	}
 
-	if is, _ := util.IsPostBlacklist(ctx.FormValue("comment")); is {
-		config.Log.Println("Blacklist post blocked")
+	if is, _, regex := util.IsPostBlacklist(ctx.FormValue("comment")); is {
+		config.Log.Println("Blacklist post blocked \nRegex: " + regex + "\n" + ctx.FormValue("comment"))
 		return ctx.Redirect(ctx.BaseURL()+"/", 301)
 	}
 
