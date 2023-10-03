@@ -697,6 +697,7 @@ func Lock(ctx *fiber.Ctx) error {
 
 func BanGet(ctx *fiber.Ctx) error {
 	actor, _ := activitypub.GetActor(ctx.Query("actor"))
+	post := ctx.Query("post")
 
 	_, auth := util.GetPasswordFromSession(ctx)
 
@@ -708,12 +709,16 @@ func BanGet(ctx *fiber.Ctx) error {
 		return util.MakeError(errors.New("no auth"), "Ban")
 	}
 
+	if !db.PostHasIP(post) {
+		return util.MakeError(errors.New("Post ID \""+ctx.Query("post")+"\" has no IP address"), "Ban")
+	}
+
 	var data route.PageData
 	data.Board.Actor = actor
 	data.Board.Name = actor.Name
 	data.Board.PrefName = actor.PreferredUsername
 	data.Board.Summary = actor.Summary
-	data.Board.InReplyTo = ctx.Query("post")
+	data.Board.InReplyTo = post
 	data.Board.To = actor.Outbox
 	data.Board.Restricted = actor.Restricted
 
@@ -753,6 +758,10 @@ func BanPost(ctx *fiber.Ctx) error {
 
 	if has, _ := util.HasAuth(auth, actor.Id); !has {
 		return util.MakeError(errors.New("no auth"), "Ban")
+	}
+
+	if !db.PostHasIP(id) {
+		return util.MakeError(errors.New("Post ID \""+ctx.Query("post")+"\" has no IP address"), "Ban")
 	}
 
 	reason := ctx.FormValue("comment")

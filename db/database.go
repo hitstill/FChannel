@@ -458,3 +458,20 @@ func IsValidThread(post string) bool {
 
 	return true
 }
+
+func PostHasIP(post string) bool {
+	// Exists is nicer but I don't want to consider tor/lokinet posts as having an IP
+	//var exists bool
+	//query := `select exists(select ip from identify where id = $1)`
+	//config.DB.QueryRow(query, post).Scan(&exists)
+	//return exists
+	var ip string
+	query := `select ip from identify where id = $1`
+	if err := config.DB.QueryRow(query, post).Scan(&ip); err != nil {
+		return false
+	}
+	if len(ip) > 1 && ip != "172.16.0.1" {
+		return true
+	}
+	return false
+}
