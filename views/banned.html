@@ -1,29 +1,35 @@
 <script>
-	var toLocal = function(el) {
-		console.log(el.textContent)
-		el.textContent = new Date(el.textContent)
-	}
+  var toLocal = function (el) {
+    console.log(el.textContent)
+    el.textContent = new Date(el.textContent)
+  }
 </script>
 
 <div class="newsbox" style="text-align: left; max-width: 800px; margin: 0 auto;margin-top: 50px;padding-top:0;">
   {{ if .banned.IP }}
   <div class="newsbox-news">
-                <h1>You are banned!</h1><br>
-                <p>You have been banned from posting on {{ .page.PreferredUsername }} for the following reason:</p>
-								<br>
-                <p><b>{{ .banned.Reason }}</p></b>
-								<br>
-								<p>Your ban was filed on <b id='bandate'>{{ .banned.Date }}</b><script>toLocal(document.getElementById("bandate"))</script> {{ if eq .banned.Expires "never" }}. This ban will not expire. {{ else }} and expires on <b id='banexpires'>{{ .banned.Expires }}</b>. <script>toLocal(document.getElementById("banexpires"));var diffMs = (new Date(document.getElementById("banexpires").textContent) - new Date(document.getElementById("bandate").textContent));
-var diffDays = Math.floor(diffMs / 86400000); // days
-var diffHrs = Math.floor((diffMs % 86400000) / 3600000); // hours
-var diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000); // minutes
-document.getElementById('banexpires').append(" This is " + diffDays + " days, " + diffHrs + " hours, " + diffMins + " minutes.");</script>{{ end }}</p>
-								<br>
-                <p> According to our server, your IP is: <b>{{ .banned.IP }}</b>.</p>
+    <h1>You are banned!</h1><br>
+    <p>You have been banned from posting on {{ .page.PreferredUsername }} for the following reason:</p>
+    <br>
+    <p><b>{{ .banned.Reason }}</p></b>
+    <br>
+    <p>Your ban was filed on <b id='bandate'>{{ .banned.Date }}</b>
+      <script>toLocal(document.getElementById("bandate"))</script> {{ if eq .banned.Expires "never" }}. This ban will
+      not expire. {{ else }} and expires on <b id='banexpires'>{{ .banned.Expires }}</b>.
+      <script>toLocal(document.getElementById("banexpires")); var diffMs = (new Date(document.getElementById("banexpires").textContent) - new Date(document.getElementById("bandate").textContent));
+        var diffDays = Math.floor(diffMs / 86400000); // days
+        var diffHrs = Math.floor((diffMs % 86400000) / 3600000); // hours
+        var diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000); // minutes
+        document.getElementById('banexpires').append(" This is " + diffDays + " days, " + diffHrs + " hours, " + diffMins + " minutes.");</script>
+      {{ end }}
+    </p>
+    <br>
+    <p> According to our server, your IP is: <b>{{ .banned.IP }}</b>.</p>
   </div>
-        {{else}}
-        <div class="newsbox-news">
-  <p><h1>You not banned</h1><br>You are not currently banned.</p>
+  {{else}}
+  <div class="newsbox-news">
+    <p>
+    <h1>You not banned</h1><br>You are not currently banned.</p>
   </div>
   {{ end }}
 </div>

@@ -1529,11 +1529,10 @@ func (obj ObjectBase) SendEmailNotify() error {
 	mime := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";"
 	body := fmt.Sprintf("<html><body>New post: <a href='%s'>%s</a><br><br>%s<br><br><b>%s %s</b><br>%s<br><pre>%s</pre></body></html>", posturl, posturl, attachment, obj.AttributedTo, obj.TripCode, obj.Name, obj.Content)
 
-	msg := "From: Udonge <" + from + ">\n" +
+	msg := "From: " + config.InstanceName + " <" + from + ">\n" +
 		"To: " + to + "\n" +
 		"Subject: IB Post\n" +
 		mime + "\n\n" + body
-	//util.GPGEncryptMessage(mime + "\n\n" +body)
 	err := smtp.SendMail(config.SiteEmailServer+":"+config.SiteEmailPort,
 		smtp.PlainAuth(from, user, pass, config.SiteEmailServer),
 		from, []string{to}, []byte(msg))
