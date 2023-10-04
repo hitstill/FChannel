@@ -15,20 +15,21 @@ import (
 	"github.com/FChannel0/FChannel-Server/util"
 )
 
-func (activity Activity) AcceptFollow(a Actor) Activity {
+func (activity Activity) AcceptFollow() Activity {
 	var accept Activity
 	accept.AtContext.Context = activity.AtContext.Context
 	accept.Type = "Accept"
-	accept.Actor = &a
+	var nActor Actor
+	accept.Actor = &nActor
+	accept.Actor.Id = activity.Object.Actor
 	var nObj ObjectBase
 	accept.Object = nObj
 	accept.Object.Actor = activity.Actor.Id
 	var nNested NestedObjectBase
 	accept.Object.Object = &nNested
-
 	accept.Object.Object.Actor = activity.Object.Actor
 	accept.Object.Object.Type = "Follow"
-	accept.To = append(accept.To, activity.Actor.Id)
+	accept.To = append(accept.To, activity.Object.Actor)
 
 	return accept
 }
