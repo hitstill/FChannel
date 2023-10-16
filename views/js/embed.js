@@ -63,5 +63,5 @@ ythost = getYTHost();
 
 document.querySelectorAll('.comment').forEach(function(element) {
 	const regExp = /((?:watch\?v=|youtu\.be|youtube.com\/(?:shorts|v|live)\/)([\w-]{11})(?!\")(?:\S*))/g
-	element.innerHTML = element.innerHTML.replace(regExp, '$1 <span>[<a href="' + ythost + '/watch?v=$2" data="$2" onclick="return ytembed(this)">Embed</a>]</span>');
+	element.innerHTML = element.innerHTML.replace(regExp, "$1 <span>[<a href='" + ythost + "/watch?v=$2' data='$2' onclick='return ytembed(this)'>Embed</a>]</span>");
 });
