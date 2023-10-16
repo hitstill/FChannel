@@ -40,9 +40,5 @@ func BannedGet(ctx *fiber.Ctx) error {
 	var banned route.Ban
 	banned.IP, banned.Reason, banned.Date, banned.Expires, _ = db.IsIPBanned(ctx.IP())
 
-	if banned.Expires == "9999-12-31T00:00:00Z" {
-		banned.Expires = "never"
-	}
-
 	return ctx.Render("banned", fiber.Map{"page": data, "banned": banned}, "layouts/main")
 }

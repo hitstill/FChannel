@@ -1,9 +1,4 @@
-<script>
-  var toLocal = function (el) {
-    console.log(el.textContent)
-    el.textContent = new Date(el.textContent)
-  }
-</script>
+
 
 <div class="newsbox" style="text-align: left; max-width: 800px; margin: 0 auto;margin-top: 50px;padding-top:0;">
   {{ if .banned.IP }}
@@ -13,15 +8,10 @@
     <br>
     <p><b>{{ .banned.Reason }}</p></b>
     <br>
-    <p>Your ban was filed on <b id='bandate'>{{ .banned.Date }}</b>
-      <script>toLocal(document.getElementById("bandate"))</script> {{ if eq .banned.Expires "never" }}. This ban will
-      not expire. {{ else }} and expires on <b id='banexpires'>{{ .banned.Expires }}</b>.
-      <script>toLocal(document.getElementById("banexpires")); var diffMs = (new Date(document.getElementById("banexpires").textContent) - new Date(document.getElementById("bandate").textContent));
-        var diffDays = Math.floor(diffMs / 86400000); // days
-        var diffHrs = Math.floor((diffMs % 86400000) / 3600000); // hours
-        var diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000); // minutes
-        document.getElementById('banexpires').append(" This is " + diffDays + " days, " + diffHrs + " hours, " + diffMins + " minutes.");</script>
-      {{ end }}
+    <p>Your ban was filed on <b id='bandate' data-utc="{{ timeToUnix .banned.Date }}">{{ timeToDateLong .banned.Date }}</b>
+    {{ if (eq .banned.Expires.String "9999-12-31 00:00:00 +0000 UTC") }}. This ban will not expire.
+    {{ else }} and expires on <b id='banexpires' data-utc="{{ timeToUnix .banned.Expires }}">{{ timeToDateTimeLong .banned.Expires }}</b>, which is {{ timeUntil .banned.Expires }} from now.
+    {{ end }}
     </p>
     <br>
     <p> According to our server, your IP is: <b>{{ .banned.IP }}</b>.</p>
@@ -33,3 +23,36 @@
   </div>
   {{ end }}
 </div>
+<script>
+  const bandate = document.getElementById('bandate');
+  const banexpires = document.getElementById('banexpires');
+
+  const bandateUTC = bandate.getAttribute('data-utc');
+  const bandateLocal = formatDate(parseInt(bandateUTC) * 1000);
+  bandate.textContent = bandateLocal;
+
+  if (banexpires !== null) {
+    const banexpiresUTC = banexpires.getAttribute('data-utc');
+    const banexpiresLocal = formatDate(parseInt(banexpiresUTC) * 1000);
+    banexpires.textContent = banexpiresLocal;
+  }
+
+  function formatDate(timestamp) {
+    const date = new Date(timestamp);
+    const day = date.getDate();
+    const suffix = getDaySuffix(day);
+    return date.toLocaleString('en-US', { month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', timeZoneName: 'short' }).replace(day, day + suffix);
+  }
+
+  function getDaySuffix(day) {
+    if (day >= 11 && day <= 13) {
+      return 'th';
+    }
+    switch (day % 10) {
+      case 1: return 'st';
+      case 2: return 'nd';
+      case 3: return 'rd';
+      default: return 'th';
+    }
+  }
+</script>

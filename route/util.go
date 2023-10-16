@@ -401,6 +401,34 @@ func TemplateFunctions(engine *html.Engine) {
 		return time.Unix(int64(u), 0).Format("Jan 02, 2006")
 	})
 
+	engine.AddFunc("timeToDateLong", func(t time.Time) string {
+		day := t.Day()
+		suffix := "th"
+		switch day {
+		case 1, 21, 31:
+			suffix = "st"
+		case 2, 22:
+			suffix = "nd"
+		case 3, 23:
+			suffix = "rd"
+		}
+		return t.Format("January 2" + suffix + ", 2006 MST")
+	})
+
+	engine.AddFunc("timeToDateTimeLong", func(t time.Time) string {
+		day := t.Day()
+		suffix := "th"
+		switch day {
+		case 1, 21, 31:
+			suffix = "st"
+		case 2, 22:
+			suffix = "nd"
+		case 3, 23:
+			suffix = "rd"
+		}
+		return t.Format("January 2" + suffix + ", 2006 at 15:04 UTC")
+	})
+
 	engine.AddFunc("timeToReadableLong", func(t time.Time) string {
 		return t.Format("01/02/06(Mon)15:04:05")
 	})
@@ -547,5 +575,61 @@ func TemplateFunctions(engine *html.Engine) {
 			html = html + " <span title=\"" + countryname + "\" class=\"flag flag-" + cc + "\"></span>"
 		}
 		return template.HTML(html)
+	})
+
+	engine.AddFunc("timeUntil", func(to time.Time) string {
+		duration := to.Sub(time.Now().UTC())
+		years := int(duration.Hours() / 24 / 365)
+		months := int(duration.Hours()/24/30) % 12
+		days := int(duration.Hours()/24) % 30
+		hours := int(duration.Hours()) % 24
+		minutes := int(duration.Minutes()) % 60
+		seconds := int(duration.Seconds()) % 60
+
+		var timeStrings []string
+		if years > 1 {
+			timeStrings = append(timeStrings, fmt.Sprintf("%d years", years))
+		} else if years == 1 {
+			timeStrings = append(timeStrings, fmt.Sprintf("%d year", years))
+		}
+		if months > 1 {
+			timeStrings = append(timeStrings, fmt.Sprintf("%d months", months))
+		} else if months == 1 {
+			timeStrings = append(timeStrings, fmt.Sprintf("%d month", months))
+		}
+		if days > 1 {
+			timeStrings = append(timeStrings, fmt.Sprintf("%d days", days))
+		} else if days == 1 {
+			timeStrings = append(timeStrings, fmt.Sprintf("%d day", days))
+		}
+		if hours > 1 {
+			timeStrings = append(timeStrings, fmt.Sprintf("%d hours", hours))
+		} else if hours == 1 {
+			timeStrings = append(timeStrings, fmt.Sprintf("%d hour", hours))
+		}
+		if minutes > 1 {
+			timeStrings = append(timeStrings, fmt.Sprintf("%d minutes", minutes))
+		} else if minutes == 1 {
+			timeStrings = append(timeStrings, fmt.Sprintf("%d minute", minutes))
+		}
+		if years == 0 && months == 0 && days == 0 && minutes == 0 {
+			if seconds == 1 {
+				timeStrings = append(timeStrings, fmt.Sprintf("%d second", seconds))
+			} else if seconds > 1 {
+				timeStrings = append(timeStrings, fmt.Sprintf("%d seconds", seconds))
+			}
+		}
+
+		if len(timeStrings) == 0 {
+			return "0 seconds"
+		}
+
+		if len(timeStrings) == 1 {
+			return timeStrings[0]
+		}
+
+		last := timeStrings[len(timeStrings)-1]
+		timeStrings = timeStrings[:len(timeStrings)-1]
+		return strings.Join(timeStrings, ", ") + " and " + last
 	})
 }

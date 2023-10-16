@@ -713,6 +713,13 @@ func BanGet(ctx *fiber.Ctx) error {
 		return util.MakeError(errors.New("Post ID \""+ctx.Query("post")+"\" has no IP address"), "Ban")
 	}
 
+	// TODO: Get previous ban count
+	// TODO: Check if IP is already permanently banned
+	// TODO: Add page to see previous bans
+	// TODO: Display post content (name, comment, image (make this blurred with click through))
+	// TODO: More information like other IP's banned in this range
+	// TODO: Range bans + IPv6 prefix support
+
 	var data route.PageData
 	data.Board.Actor = actor
 	data.Board.Name = actor.Name
@@ -765,20 +772,39 @@ func BanPost(ctx *fiber.Ctx) error {
 	}
 
 	reason := ctx.FormValue("comment")
+	var expires time.Time
+	var err error
 
-	var parsed time.Time
-
-	if ctx.FormValue("permanent") == "on" {
-		parsed, _ = time.Parse("2006-01-02", "9999-12-31")
+	expiresStr := ctx.FormValue("expires")
+	config.Log.Println(ctx.FormValue("custom-date"))
+	if len(ctx.FormValue("custom-date")) > 0 {
+		expires, err = time.Parse("2006-01-02T15:04:05.000Z", ctx.FormValue("custom-date"))
+		if err != nil {
+			return util.MakeError(err, "BanPost")
+		}
 	} else {
-		parsed, _ = time.Parse("2006-01-02T15:04", ctx.FormValue("expires"))
+		switch expiresStr {
+		case "1day":
+			expires = time.Now().AddDate(0, 0, 1)
+		case "3days":
+			expires = time.Now().AddDate(0, 0, 3)
+		case "1week":
+			expires = time.Now().AddDate(0, 0, 7)
+		case "2weeks":
+			expires = time.Now().AddDate(0, 0, 14)
+		case "1month":
+			expires = time.Now().AddDate(0, 1, 0)
+		case "permanent":
+			expires = time.Date(9999, 12, 31, 0, 0, 0, 0, time.UTC)
+		default:
+			return util.MakeError(errors.New("invalid ban length"), "BanPost")
+		}
 	}
 
-	//expires := parsed.Format("2006-01-02T15:04:05.000Z")
-	expires := parsed
+	expires = expires.UTC()
 
 	query := `INSERT INTO "bannedips" (ip, reason, date, expires) VALUES ((SELECT ip from identify WHERE id=$1 AND ip !='172.16.0.1'), $2, $3, $4);`
-	_, err := config.DB.Exec(query, id, reason, time.Now().UTC(), expires)
+	_, err = config.DB.Exec(query, id, reason, time.Now().UTC(), expires)
 	if err != nil {
 		return util.MakeError(err, "BanPost")
 	}

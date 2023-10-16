@@ -391,11 +391,11 @@ func IsHashBanned(hash string) (bool, error) {
 	return h == hash, nil
 }
 
-func IsIPBanned(i string) (string, string, string, string, error) {
+func IsIPBanned(i string) (string, string, time.Time, time.Time, error) {
 	var ip string
 	var reason string
-	var date string
-	var expires string
+	var date time.Time
+	var expires time.Time
 
 	// Worth also including NULL values just incase?
 	query := `select ip, reason, date, expires from bannedips where ip=$1 AND expires > now() ORDER BY "expires" DESC;`
