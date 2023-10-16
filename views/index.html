@@ -29,6 +29,8 @@
   {{ if .page.NewsItems }}
   <div class="newsbox" style="margin-top:50px;">
     <h2><a href="/news">{{ .page.PreferredUsername }} News</a></h2>
+    <br>
+    <a href="/news.rss">RSS</a> | <a href="/news.atom">Atom</a> | <a href="/news.json">JSON</a>
     {{ $page := .page }}
     {{ range $i, $e := .page.NewsItems }}
     <div class="newsbox-news">

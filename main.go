@@ -80,6 +80,7 @@ func main() {
 
 	// News routes
 	app.Get("/news/:ts", routes.NewsGet)
+	app.Get("/news.:feedtype", routes.GetNewsFeed)
 	app.Get("/news", routes.NewsGetAll)
 
 	// Board managment

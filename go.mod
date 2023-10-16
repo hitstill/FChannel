@@ -5,8 +5,8 @@ go 1.15
 require (
 	github.com/gofiber/fiber/v2 v2.41.0
 	github.com/gofiber/template v1.6.18
-	github.com/jackc/pgx/v5 v5.2.0
-	github.com/lib/pq v1.9.0
+	github.com/gorilla/feeds v1.1.1
+	github.com/jackc/pgx/v5 v5.4.3
 	github.com/mikekonan/go-countries v1.1.2
 	github.com/oschwald/maxminddb-golang v1.11.0
 	github.com/simia-tech/crypt v0.5.0

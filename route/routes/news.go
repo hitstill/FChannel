@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/FChannel0/FChannel-Server/activitypub"
 	"github.com/FChannel0/FChannel-Server/config"
@@ -12,6 +13,7 @@ import (
 	"github.com/FChannel0/FChannel-Server/util"
 	"github.com/FChannel0/FChannel-Server/webfinger"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gorilla/feeds"
 )
 
 func NewsGet(ctx *fiber.Ctx) error {
@@ -138,4 +140,55 @@ func NewsDelete(ctx *fiber.Ctx) error {
 	}
 
 	return ctx.Redirect("/news/", http.StatusSeeOther)
+}
+
+func GetNewsFeed(ctx *fiber.Ctx) error {
+	feedtype := ctx.Params("feedtype")
+	actor, err := activitypub.GetActorFromDB(config.Domain)
+	if err != nil {
+		return util.MakeError(err, "NewsGetAll")
+	}
+	now := time.Now()
+	feed := &feeds.Feed{
+		Title:   actor.PreferredUsername + " News",
+		Link:    &feeds.Link{Href: config.Domain + "/news"},
+		Created: now,
+	}
+
+	news, err := db.GetNews(0)
+	if err != nil {
+		return util.MakeError(err, "NewsFeed")
+	}
+
+	for _, item := range news {
+		feedItem := &feeds.Item{
+			Id:          config.Domain + "/news/" + strconv.Itoa(item.Time),
+			Title:       item.Title,
+			Link:        &feeds.Link{Href: config.Domain + "/news/" + strconv.Itoa(item.Time)},
+			Description: string(item.Content),
+			Created:     time.Unix(int64(item.Time), 0),
+		}
+		feed.Add(feedItem)
+	}
+
+	var feedContent string
+	switch feedtype {
+	case "atom":
+		feedContent, err = feed.ToAtom()
+		ctx.Set("Content-Type", "application/atom+xml")
+	case "rss":
+		feedContent, err = feed.ToRss()
+		ctx.Set("Content-Type", "application/rss+xml")
+	case "json":
+		feedContent, err = feed.ToJSON()
+		ctx.Set("Content-Type", "application/json")
+	default:
+		return ctx.Status(400).SendString("Invalid feed type")
+	}
+
+	if err != nil {
+		return util.MakeError(err, "NewsFeed")
+	}
+
+	return ctx.SendString(feedContent)
 }
