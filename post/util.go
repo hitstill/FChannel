@@ -503,6 +503,9 @@ func ParseContent(board activitypub.Actor, op string, content string, thread act
 	}
 
 	nContent = ParseCommentQuotes(nContent)
+	nContent = ParseCommentSpoilers(nContent)
+	nContent = ParseCommentCode(nContent)
+	nContent = CloseUnclosedTags(nContent)
 	nContent = strings.ReplaceAll(nContent, `/\&lt;`, ">")
 
 	return template.HTML(nContent), nil
@@ -518,7 +521,7 @@ func ParseTruncate(content string, board activitypub.Actor, op string, id string
 			content += lines[i]
 		}
 
-		content += fmt.Sprintf("<a href=\"%s\">(view full post...)</a>", board.Id+"/"+util.ShortURL(board.Outbox, op)+"#"+util.ShortURL(board.Outbox, id))
+		content += fmt.Sprintf("</pre><br><a href=\"%s\">(view full post...)</a>", board.Id+"/"+util.ShortURL(board.Outbox, op)+"#"+util.ShortURL(board.Outbox, id))
 	}
 
 	return content
@@ -612,4 +615,49 @@ func ParseCommentQuotes(content string) string {
 	re = regexp.MustCompile(`(\r\n|\n|\r)>`)
 
 	return re.ReplaceAllString(content, "\r\n<span class=\"quote\">&gt;</span>")
+}
+
+func ParseCommentSpoilers(content string) string {
+	re := regexp.MustCompile(`\[(\/)?spoiler]`)
+	content = re.ReplaceAllString(content, "<${1}s>")
+	return content
+}
+
+// TODO: Pretty printing with syntax highlighting
+// Something like https://github.com/alecthomas/chroma
+func ParseCommentCode(content string) string {
+	content = strings.ReplaceAll(content, "[code]", "<pre class='code'>")
+	content = strings.ReplaceAll(content, "[/code]", "</pre>")
+	return content
+}
+
+// TODO: Overkill?
+func CloseUnclosedTags(content string) string {
+	// find all opening and closing tags
+	re := regexp.MustCompile(`<\/?[a-zA-Z]+[^>]*>`)
+	matches := re.FindAllStringIndex(content, -1)
+
+	// create a stack to keep track of open tags
+	stack := []string{}
+	for _, match := range matches {
+		tag := content[match[0]:match[1]]
+		if strings.HasPrefix(tag, "</") {
+			// closing tag, pop from stack
+			if len(stack) > 0 {
+				stack = stack[:len(stack)-1]
+			}
+		} else if !strings.HasPrefix(tag, "<br") {
+			// opening tag (not <br>), push to stack
+			stack = append(stack, tag)
+		}
+	}
+
+	// close all remaining open tags in reverse order
+	var builder strings.Builder
+	builder.WriteString(content)
+	for i := len(stack) - 1; i >= 0; i-- {
+		builder.WriteString("</" + stack[i][1:])
+	}
+
+	return builder.String()
 }
