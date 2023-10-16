@@ -10,7 +10,7 @@ import (
 	"github.com/FChannel0/FChannel-Server/config"
 	"github.com/FChannel0/FChannel-Server/util"
 	"github.com/gofiber/fiber/v2"
-	_ "github.com/lib/pq"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/simia-tech/crypt"
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/transform"
