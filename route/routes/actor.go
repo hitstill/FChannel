@@ -204,7 +204,7 @@ func ActorFollowers(ctx *fiber.Ctx) error {
 }
 
 func MakeActorPost(ctx *fiber.Ctx) error {
-	var ban route.Ban
+	var ban db.Ban
 	ban.IP, ban.Reason, ban.Date, ban.Expires, _ = db.IsIPBanned(ctx.IP())
 	if len(ban.IP) > 1 {
 		return ctx.Redirect(ctx.BaseURL()+"/banned", 301)

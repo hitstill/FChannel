@@ -9,7 +9,7 @@
     <br>
     <form id="report-post" action="/ban" method="post">
       <label for="comment">Reason:</label><br>
-      <textarea id="report-comment" name="comment" rows="12" cols="54" style="width: 396px;" maxlength="100" oninput="sessionStorage.setItem('element-report-comment', document.getElementById('report-comment').value)"></textarea>
+      <textarea id="report-comment" name="comment" rows="12" cols="54" style="width: 396px;" maxlength="512" oninput="sessionStorage.setItem('element-report-comment', document.getElementById('report-comment').value)"></textarea>
       <br>
       <label style="float:left;" for="banmedia">Ban media?</label>
       <input id="banmedia" name="banmedia" type="checkbox" style="float:left;">
@@ -70,6 +70,75 @@
       <input type="hidden" id="referer" name="referer" value="{{ .page.Referer }}">
       <input type="hidden" id="custom-date" name="custom-date" value="">
   </div>
+  
 </div>
+<br>
+{{ if .baninfo.Bans }}
+<style type="text/css">
+  td {
+    padding: 0 15px;
+    max-width: 420px;
+  }
+</style>
+<table align="center">
+  <h2 style="text-align: center;">Previous bans ({{ len .baninfo.Bans }})</h2>
+  <tr>
+    <th>Date</th>
+    <th>Reason</th>
+    <th>Expires</th>
+    <th>Length</th>
+    <th>Remaining</th>
+  </tr>
+  {{ range $i, $e := .baninfo.Bans }}
+  {{ if mod $i 2 }}
+  <tr class="box-alt">
+    <td data-utc="{{ timeToUnix $e.Date }}">{{ timeToDateTimeLong $e.Date }}</td>
+    <td>{{ $e.Reason }}</td>
+    <td {{ if (eq $e.Expires.String "9999-12-31 00:00:00 +0000 UTC") }}>Permanent{{ else }} data-utc="{{ timeToUnix $e.Expires }}">{{ timeToDateTimeLong $e.Expires }}{{ end }}</td>
+    <td>{{ if ( ne $e.Expires.String "9999-12-31 00:00:00 +0000 UTC") }}{{ timeUntil $e.Expires $e.Date }}{{ end }}</td>
+    <td>{{ if ( ne $e.Expires.String "9999-12-31 00:00:00 +0000 UTC") }}{{ timeUntil $e.Expires }}{{ end }}</td>
+  </tr>
+  {{ else }}
+  <tr class="box">
+      <td data-utc="{{ timeToUnix $e.Date }}">{{ timeToDateTimeLong $e.Date }}</td>
+      <td>{{ $e.Reason }}</td>
+      <td {{ if (eq $e.Expires.String "9999-12-31 00:00:00 +0000 UTC") }}>Permanent{{ else }} data-utc="{{ timeToUnix $e.Expires }}">{{ timeToDateTimeLong $e.Expires }}{{ end }}</td>
+      <td>{{ if ( ne $e.Expires.String "9999-12-31 00:00:00 +0000 UTC") }}{{ timeUntil $e.Expires $e.Date }}{{ end }}</td>
+      <td>{{ if ( ne $e.Expires.String "9999-12-31 00:00:00 +0000 UTC") }}{{ timeUntil $e.Expires }}{{ end }}</td>
+    </tr>
+  {{ end }}
+  {{ end }}
+</table>
+<script>
+const elementsWithUtc = document.querySelectorAll('[data-utc]');
+
+elementsWithUtc.forEach(element => {
+  const utc = element.getAttribute('data-utc');
+  const local = formatDate(parseInt(utc) * 1000);
+  element.textContent = local;
+});
+
+function formatDate(timestamp) {
+  const date = new Date(timestamp);
+  const day = date.getDate();
+  const suffix = getDaySuffix(day);
+  return date.toLocaleString('default', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', timeZoneName: 'short' }).replace(day, day + suffix);
+}
+
+function getDaySuffix(day) {
+  if (day >= 11 && day <= 13) {
+    return 'th';
+  }
+  switch (day % 10) {
+    case 1: return 'st';
+    case 2: return 'nd';
+    case 3: return 'rd';
+    default: return 'th';
+  }
+}
+</script>
+{{ end }}
+<div>
 {{ template "partials/footer" .page }}
 {{ template "partials/general_scripts" .page }}
+</div>

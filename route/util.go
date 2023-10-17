@@ -577,8 +577,13 @@ func TemplateFunctions(engine *html.Engine) {
 		return template.HTML(html)
 	})
 
-	engine.AddFunc("timeUntil", func(to time.Time) string {
-		duration := to.Sub(time.Now().UTC())
+	engine.AddFunc("timeUntil", func(to time.Time, from ...time.Time) string {
+		var duration time.Duration
+		if len(from) > 0 {
+			duration = to.Sub(from[0].UTC())
+		} else {
+			duration = to.Sub(time.Now().UTC())
+		}
 		years := int(duration.Hours() / 24 / 365)
 		months := int(duration.Hours()/24/30) % 12
 		days := int(duration.Hours()/24) % 30

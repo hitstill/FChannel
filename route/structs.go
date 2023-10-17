@@ -1,8 +1,6 @@
 package route
 
 import (
-	"time"
-
 	"github.com/FChannel0/FChannel-Server/activitypub"
 	"github.com/FChannel0/FChannel-Server/db"
 	"github.com/FChannel0/FChannel-Server/util"
@@ -60,9 +58,7 @@ type Meta struct {
 	Preview     string
 }
 
-type Ban struct {
-	IP      string
-	Reason  string
-	Date    time.Time
-	Expires time.Time
+type BanInfo struct {
+	Bans []db.Ban
+	//Post         activitypub.ObjectBase
 }

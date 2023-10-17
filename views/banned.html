@@ -1,5 +1,3 @@
-
-
 <div class="newsbox" style="text-align: left; max-width: 800px; margin: 0 auto;margin-top: 50px;padding-top:0;">
   {{ if .banned.IP }}
   <div class="newsbox-news">
@@ -24,27 +22,7 @@
   {{ end }}
 </div>
 <script>
-  const bandate = document.getElementById('bandate');
-  const banexpires = document.getElementById('banexpires');
-
-  const bandateUTC = bandate.getAttribute('data-utc');
-  const bandateLocal = formatDate(parseInt(bandateUTC) * 1000);
-  bandate.textContent = bandateLocal;
-
-  if (banexpires !== null) {
-    const banexpiresUTC = banexpires.getAttribute('data-utc');
-    const banexpiresLocal = formatDate(parseInt(banexpiresUTC) * 1000);
-    banexpires.textContent = banexpiresLocal;
-  }
-
-  function formatDate(timestamp) {
-    const date = new Date(timestamp);
-    const day = date.getDate();
-    const suffix = getDaySuffix(day);
-    return date.toLocaleString('en-US', { month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', timeZoneName: 'short' }).replace(day, day + suffix);
-  }
-
-  function getDaySuffix(day) {
+    function getDaySuffix(day) {
     if (day >= 11 && day <= 13) {
       return 'th';
     }
@@ -55,4 +33,19 @@
       default: return 'th';
     }
   }
+  
+  const bandate = document.getElementById('bandate');
+  const banexpires = document.getElementById('banexpires');
+
+    utc = parseInt(banexpires.getAttribute('data-utc')) * 1000;
+    date = new Date(utc);
+    day = date.getDate();
+    suffix = getDaySuffix(day);
+    banexpires.textContent = date.toLocaleString('default', { month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', timeZoneName: 'short' }).replace(day, day + suffix);
+
+    utc = parseInt(bandate.getAttribute('data-utc')) * 1000;
+    date = new Date(utc);
+    day = date.getDate();
+    suffix = getDaySuffix(day);
+    bandate.textContent = date.toLocaleString('default', { month: 'long', day: 'numeric', year: 'numeric' }).replace(day, day + suffix);
 </script>

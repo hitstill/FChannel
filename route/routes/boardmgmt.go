@@ -709,13 +709,12 @@ func BanGet(ctx *fiber.Ctx) error {
 		return util.MakeError(errors.New("no auth"), "Ban")
 	}
 
-	if !db.PostHasIP(post) {
+	ip := db.GetPostIP(post)
+	if len(ip) == 0 {
 		return util.MakeError(errors.New("Post ID \""+ctx.Query("post")+"\" has no IP address"), "Ban")
 	}
 
-	// TODO: Get previous ban count
 	// TODO: Check if IP is already permanently banned
-	// TODO: Add page to see previous bans
 	// TODO: Display post content (name, comment, image (make this blurred with click through))
 	// TODO: More information like other IP's banned in this range
 	// TODO: Range bans + IPv6 prefix support
@@ -743,12 +742,15 @@ func BanGet(ctx *fiber.Ctx) error {
 	data.Board.Domain = config.Domain
 	data.Boards = webfinger.Boards
 
+	var baninfo route.BanInfo
+	baninfo.Bans, _ = db.GetAllBansForIP(ip)
+
 	data.Referer = config.Domain + "/" + actor.Name
 	if strings.Contains(ctx.Get("referer"), config.Domain+"/"+actor.Name) && !strings.Contains(ctx.Get("referer"), "ban") {
 		data.Referer = ctx.Get("referer")
 	}
 
-	return ctx.Render("ban", fiber.Map{"page": data}, "layouts/main")
+	return ctx.Render("ban", fiber.Map{"page": data, "baninfo": baninfo}, "layouts/main")
 }
 
 func BanPost(ctx *fiber.Ctx) error {
@@ -767,7 +769,7 @@ func BanPost(ctx *fiber.Ctx) error {
 		return util.MakeError(errors.New("no auth"), "Ban")
 	}
 
-	if !db.PostHasIP(id) {
+	if len(db.GetPostIP(id)) == 0 {
 		return util.MakeError(errors.New("Post ID \""+ctx.Query("post")+"\" has no IP address"), "Ban")
 	}
 
@@ -793,7 +795,8 @@ func BanPost(ctx *fiber.Ctx) error {
 		case "2weeks":
 			expires = time.Now().AddDate(0, 0, 14)
 		case "1month":
-			expires = time.Now().AddDate(0, 1, 0)
+			//expires = time.Now().AddDate(0, 1, 0)
+			expires = time.Now().AddDate(0, 0, 30)
 		case "permanent":
 			expires = time.Date(9999, 12, 31, 0, 0, 0, 0, time.UTC)
 		default:

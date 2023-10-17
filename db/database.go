@@ -22,6 +22,13 @@ type NewsItem struct {
 	Time    int
 }
 
+type Ban struct {
+	IP      string
+	Reason  string
+	Date    time.Time
+	Expires time.Time
+}
+
 func Connect() error {
 	host := config.DBHost
 	port := config.DBPort
@@ -404,6 +411,34 @@ func IsIPBanned(i string) (string, string, time.Time, time.Time, error) {
 	return ip, reason, date, expires, nil
 }
 
+func GetAllBansForIP(ip string) ([]Ban, error) {
+	var bans []Ban
+
+	// Display permanent bans at top, else sort by date
+	query := `SELECT ip, reason, date, expires FROM bannedips WHERE ip=$1 ORDER BY (CASE WHEN expires ='9999-12-31 00:00:00' then '1' else '2' END) ASC, date DESC;`
+	rows, err := config.DB.Query(query, ip)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var ban Ban
+		err := rows.Scan(&ban.IP, &ban.Reason, &ban.Date, &ban.Expires)
+		if err != nil {
+			return nil, err
+		}
+		bans = append(bans, ban)
+	}
+
+	err = rows.Err()
+	if err != nil {
+		return nil, err
+	}
+
+	return bans, nil
+}
+
 func PrintAdminAuth() error {
 	code, identifier, err := GetAdminAuth()
 
@@ -459,19 +494,14 @@ func IsValidThread(post string) bool {
 	return true
 }
 
-func PostHasIP(post string) bool {
-	// Exists is nicer but I don't want to consider tor/lokinet posts as having an IP
-	//var exists bool
-	//query := `select exists(select ip from identify where id = $1)`
-	//config.DB.QueryRow(query, post).Scan(&exists)
-	//return exists
+func GetPostIP(post string) string {
 	var ip string
 	query := `select ip from identify where id = $1`
 	if err := config.DB.QueryRow(query, post).Scan(&ip); err != nil {
-		return false
+		return ""
 	}
-	if len(ip) > 1 && ip != "172.16.0.1" {
-		return true
+	if ip == "172.16.0.1" {
+		return ""
 	}
-	return false
+	return ip
 }
