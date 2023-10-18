@@ -16,6 +16,8 @@ import (
 	"github.com/FChannel0/FChannel-Server/db"
 	"github.com/FChannel0/FChannel-Server/util"
 	"github.com/gofiber/fiber/v2"
+
+	"github.com/sourcegraph/syntaxhighlight"
 )
 
 func ConvertHashLink(domain string, link string) string {
@@ -504,10 +506,10 @@ func ParseContent(board activitypub.Actor, op string, content string, thread act
 
 	nContent = ParseCommentQuotes(nContent)
 	nContent = ParseCommentSpoilers(nContent)
+	//TODO: Don't tuncate code blocks
 	nContent = ParseCommentCode(nContent)
 	nContent = CloseUnclosedTags(nContent)
 	nContent = strings.ReplaceAll(nContent, `/\&lt;`, ">")
-
 	return template.HTML(nContent), nil
 }
 
@@ -623,11 +625,31 @@ func ParseCommentSpoilers(content string) string {
 	return content
 }
 
-// TODO: Pretty printing with syntax highlighting
-// Something like https://github.com/alecthomas/chroma
 func ParseCommentCode(content string) string {
-	content = strings.ReplaceAll(content, "[code]", "<pre class='code'>")
-	content = strings.ReplaceAll(content, "[/code]", "</pre>")
+	re := regexp.MustCompile(`\[code\](?s)(.+?)\[/code\]`)
+	matches := re.FindAllStringSubmatch(content, -1)
+	for _, match := range matches {
+		content = strings.Replace(content, match[0], "<pre class='prettyprint'>"+match[1]+"</pre>", 1)
+	}
+	return content
+}
+
+// TODO: copy in package and change to work with HTML entities
+func ParseCommentCodeTest(content string) string {
+	re := regexp.MustCompile(`\[code1\](?s)(.+?)\[/code1\]`)
+	matches := re.FindAllStringSubmatch(content, -1)
+
+	for _, match := range matches {
+		code := match[1]
+		highlighted, err := syntaxhighlight.AsHTML([]byte(code))
+		if err != nil {
+			// If Syntax highlighting fails fall back, maybe move this to end and use ReplaceAll?
+			content = strings.Replace(content, match[0], "<pre class='prettyprint'>"+match[1]+"</pre>", 1)
+		} else {
+			// replace the code block with the highlighted HTML
+			content = strings.Replace(content, match[0], "<pre class='prettyprint prettyprinted'>"+string(highlighted)+"</pre>", 1)
+		}
+	}
 	return content
 }
 

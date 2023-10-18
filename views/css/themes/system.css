@@ -251,7 +251,7 @@
       cursor: pointer;
       color: red !important;
  }
-  .code {
+  .prettyprint {
       border: none !important;
       background-color: #fff;
       padding: 5px !important;
@@ -268,6 +268,53 @@
       text-wrap: nowrap;
       margin: 1em 0px;
  }
+ span.pln {
+    color: #000
+  }
+  
+  span.str {
+    color: #080
+  }
+  
+  span.kwd {
+    color: #008
+  }
+  
+  span.com {
+    color: #800
+  }
+  
+  span.typ {
+    color: #606
+  }
+  
+  span.lit {
+    color: #066
+  }
+  
+  span.pun,.opn,.clo {
+    color: #660
+  }
+  
+  span.tag {
+    color: #008
+  }
+  
+  span.atn {
+    color: #606
+  }
+  
+  span.atv {
+    color: #080
+  }
+  
+  span.dec,span.var {
+    color: #606
+  }
+  
+  span.fun {
+    color: red
+  }
 }
 @media (prefers-color-scheme: dark) {
   a, a:link, a:visited, a:hover, a:active {
@@ -514,7 +561,7 @@
       cursor: pointer;
       color: #5f89ac !important;
  }
-  .code {
+  .prettyprint {
       border: none !important;
       background-color: rgba(255, 255, 255, .1);
       padding: 5px !important;
@@ -531,6 +578,37 @@
       text-wrap: nowrap;
       margin: 1em 0px;
  }
+ span.tag {
+    color: #5f89ac
+}
+
+span.pun {
+    color: #72814d
+}
+
+span.com {
+    color: #bb6793
+}
+
+span.str {
+    color: #8ea062
+}
+
+span.kwd {
+    color: #81a2be
+}
+
+span.typ {
+    color: #b294bb
+}
+
+span.lit {
+    color: #6e9b89
+}
+
+span.pln {
+    color: #c5c8c6
+}
 }
 .posteruid .id {
   padding: 0 5px;

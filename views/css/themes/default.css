@@ -562,7 +562,7 @@ s, s a:not(:hover) {
   background: #000 !important;
   text-decoration: none;
 }
-.code {
+.prettyprint {
   border: none!important;
   background-color: #fff;
   padding: 5px!important;
@@ -578,4 +578,52 @@ pre {
   white-space-collapse: preserve;
   text-wrap: nowrap;
   margin: 1em 0px;
+}
+
+span.pln {
+  color: #000
+}
+
+span.str {
+  color: #080
+}
+
+span.kwd {
+  color: #008
+}
+
+span.com {
+  color: #800
+}
+
+span.typ {
+  color: #606
+}
+
+span.lit {
+  color: #066
+}
+
+span.pun,span.opn,span.clo {
+  color: #660
+}
+
+span.tag {
+  color: #008
+}
+
+span.atn {
+  color: #606
+}
+
+span.atv {
+  color: #080
+}
+
+span.dec,span.var {
+  color: #606
+}
+
+span.fun {
+  color: red
 }
