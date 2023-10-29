@@ -340,7 +340,7 @@ func MakeActorPost(ctx *fiber.Ctx) error {
 		re := regexp.MustCompile(`.+\/`)
 		actorid := strings.TrimSuffix(re.FindString(ctx.FormValue("inReplyTo")), "/")
 		actor, err := activitypub.GetActor(actorid)
-		if err == nil {
+		if err != nil {
 			local, _ := actor.IsLocal()
 			if local {
 				sendTo = actor.Outbox
