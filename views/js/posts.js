@@ -228,25 +228,53 @@ function closeDragElement(e) {
 function elementDrag(e) {
     e = e || window.event;
     e.preventDefault();
+
     // calculate the new cursor position:
     pos1 = pos3 - e.clientX;
     pos2 = pos4 - e.clientY;
     pos3 = e.clientX;
     pos4 = e.clientY;
+
     sessionStorage.setItem("pos1", pos1);
     sessionStorage.setItem("pos2", pos2);
     sessionStorage.setItem("pos3", pos3);
     sessionStorage.setItem("pos4", pos4);
 
     // set the element's new position:
-    elmnt.parentElement.style.top = (elmnt.parentElement.offsetTop - pos2) + "px";
-    elmnt.parentElement.style.left = (elmnt.parentElement.offsetLeft - pos1) + "px";
-    if(elmnt.id.startsWith("report")){
-        sessionStorage.setItem("report-top", elmnt.parentElement.style.top);
-        sessionStorage.setItem("report-left", elmnt.parentElement.style.left);
-    }else if(elmnt.id.startsWith("reply")){
-        sessionStorage.setItem("reply-top", elmnt.parentElement.style.top);
-        sessionStorage.setItem("reply-left", elmnt.parentElement.style.left);
+    var parent = elmnt.parentElement;
+    var parentRect = parent.getBoundingClientRect();
+    var parentTop = parentRect.top;
+    var parentLeft = parentRect.left;
+    var parentWidth = parentRect.width;
+    var parentHeight = parentRect.height;
+    var windowWidth = window.innerWidth;
+    var windowHeight = window.innerHeight;
+    var newTop = parentTop - pos2;
+    var newLeft = parentLeft - pos1;
+
+    // check if the element is going off the top or bottom of the screen
+    if (newTop < 0) {
+        newTop = 0;
+    } else if (newTop + parentHeight > windowHeight) {
+        newTop = windowHeight - parentHeight;
+    }
+
+    // check if the element is going off the left or right of the screen
+    if (newLeft < 0) {
+        newLeft = 0;
+    } else if (newLeft + parentWidth > windowWidth) {
+        newLeft = windowWidth - parentWidth;
+    }
+
+    parent.style.top = newTop + "px";
+    parent.style.left = newLeft + "px";
+
+    if (elmnt.id.startsWith("report")) {
+        sessionStorage.setItem("report-top", parent.style.top);
+        sessionStorage.setItem("report-left", parent.style.left);
+    } else if (elmnt.id.startsWith("reply")) {
+        sessionStorage.setItem("reply-top", parent.style.top);
+        sessionStorage.setItem("reply-left", parent.style.left);
     }
 }
 
