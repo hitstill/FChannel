@@ -2,6 +2,7 @@ package routes
 
 import (
 	"encoding/json"
+	"strings"
 
 	"github.com/FChannel0/FChannel-Server/config"
 	"github.com/FChannel0/FChannel-Server/util"
@@ -10,25 +11,45 @@ import (
 
 func NodeInfoDiscover(ctx *fiber.Ctx) error {
 	jsonData := map[string]interface{}{
-		"links": map[string]interface{}{
-			"href": config.Domain + "/nodeinfo/2.1",
-			"rel":  "http://nodeinfo.diaspora.software/ns/schema/2.1",
+		"links": []map[string]string{
+			{
+				"href": config.Domain + "/nodeinfo/2.0.json",
+				"rel":  "http://nodeinfo.diaspora.software/ns/schema/2.0",
+			},
+			{
+				"href": config.Domain + "/nodeinfo/2.1.json",
+				"rel":  "http://nodeinfo.diaspora.software/ns/schema/2.1",
+			},
 		},
 	}
+
 	ctx.Set("Content-Type", "application/json")
 	links, _ := json.Marshal(jsonData)
 	return ctx.Send(links)
 }
 
 func NodeInfo(ctx *fiber.Ctx) error {
-	var localthreads int
+	var localPosts int
+	var remotePosts int
+	var archivedPosts int
+	schemaVersion := strings.TrimSuffix(ctx.Params("version"), ".json")
 
-	query := `SELECT COUNT(*) FROM activitystream WHERE "type" = 'Note'`
-	if err := config.DB.QueryRow(query).Scan(&localthreads); err != nil {
+	if schemaVersion != "2.0" && schemaVersion != "2.1" {
+		errorData := map[string]string{
+			"error": "Nodeinfo schema version not handled",
+		}
+		errorJSON, _ := json.Marshal(errorData)
+		ctx.Set("Content-Type", "application/json")
+		return ctx.Send(errorJSON)
+	}
+
+	query := `SELECT  (SELECT COUNT(*) FROM activitystream WHERE type = 'Note' ) AS local, (SELECT COUNT(*) FROM cacheactivitystream WHERE type = 'Note') AS remote, (SELECT count(*) FROM activitystream where type = 'Archive') + (SELECT count(*) FROM cacheactivitystream where type = 'Archive') AS archived`
+	if err := config.DB.QueryRow(query).Scan(&localPosts, &remotePosts, &archivedPosts); err != nil {
 		return util.MakeError(err, "NodeInfo")
 	}
+
 	jsonData := map[string]interface{}{
-		"version": "2.1",
+		"version": schemaVersion,
 		"software": map[string]interface{}{
 			"name":       "FChannel",
 			"version":    "0.1.1", // Should be dynamic
@@ -37,12 +58,18 @@ func NodeInfo(ctx *fiber.Ctx) error {
 		},
 		"protocols": []string{"activitypub"},
 		"usage": map[string]interface{}{
-			"localPosts": localthreads, // local posts
+			"localPosts": localPosts,
 		},
 		"openRegistrations": false,
 		"services": map[string]interface{}{
 			"inbound":  []string{},
 			"outbound": []string{},
+		},
+		"nodeName":        config.InstanceName,
+		"nodeDescription": config.InstanceSummary,
+		"metadata": map[string]interface{}{
+			"remotePosts":   remotePosts,
+			"archivedPosts": archivedPosts,
 		},
 	}
 
