@@ -647,7 +647,7 @@ func ParseCommentCodeTest(content string) string {
 			content = strings.Replace(content, match[0], "<pre class='prettyprint'>"+match[1]+"</pre>", 1)
 		} else {
 			// replace the code block with the highlighted HTML
-			content = strings.Replace(content, match[0], "<pre class='prettyprint prettyprinted'>"+string(highlighted)+"</pre>", 1)
+			content = strings.Replace(content, match[0], "<pre class='prettyprint'>"+string(highlighted)+"</pre>", 1)
 		}
 	}
 	return content

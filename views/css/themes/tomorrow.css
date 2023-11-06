@@ -274,34 +274,34 @@ pre {
 	margin: 1em 0px;
 }
 
-span.tag {
+.tag {
     color: #5f89ac
 }
 
-span.pun {
+.pun {
     color: #72814d
 }
 
-span.com {
+.com {
     color: #bb6793
 }
 
-span.str {
+.str {
     color: #8ea062
 }
 
-span.kwd {
+.kwd {
     color: #81a2be
 }
 
-span.typ {
+.typ {
     color: #b294bb
 }
 
-span.lit {
+.lit {
     color: #6e9b89
 }
 
-span.pln {
+.pln {
     color: #c5c8c6
 }

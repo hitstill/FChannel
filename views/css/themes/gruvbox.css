@@ -236,7 +236,7 @@ s, s a:not(:hover) {
 }
 .prettyprint {
   border: none !important;
-  background-color: #282828;
+  background-color: #252525;
   padding: 5px !important;
   display: inline-block;
   max-height: 400px;
@@ -252,34 +252,34 @@ pre {
   margin: 1em 0px;
 }
 
-span.tag {
+.tag {
   color: #b8bb26;
 }
 
-span.pun {
+.pun {
   color: #d79921;
 }
 
-span.com {
+.com {
   color: #d3869b;
 }
 
-span.str {
+.str {
   color: #b8bb26;
 }
 
-span.kwd {
+.kwd {
   color: #83a598;
 }
 
-span.typ {
+.typ {
   color: #d3869b;
 }
 
-span.lit {
+.lit {
   color: #b8bb26;
 }
 
-span.pln {
+.pln {
   color: #d5c4a1;
 }

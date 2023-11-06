@@ -580,50 +580,50 @@ pre {
   margin: 1em 0px;
 }
 
-span.pln {
+.pln {
   color: #000
 }
 
-span.str {
+.str {
   color: #080
 }
 
-span.kwd {
+.kwd {
   color: #008
 }
 
-span.com {
+.com {
   color: #800
 }
 
-span.typ {
+.typ {
   color: #606
 }
 
-span.lit {
+.lit {
   color: #066
 }
 
-span.pun,span.opn,span.clo {
+.pun,.opn,.clo {
   color: #660
 }
 
-span.tag {
+.tag {
   color: #008
 }
 
-span.atn {
+.atn {
   color: #606
 }
 
-span.atv {
+.atv {
   color: #080
 }
 
-span.dec,span.var {
+.dec,.var {
   color: #606
 }
 
-span.fun {
+.fun {
   color: red
 }
