@@ -1,4 +1,20 @@
+/*TODO: Settings menu (save config)
+*/
 const defythost = "https://www.youtube-nocookie.com"
+var Config = {
+	embedYT: true,
+//	ytHost: "https://www.youtube-nocookie.com",
+	embedSC: true
+};
+
+Config.load = function() {
+	var storage;
+	
+	if (storage = localStorage.getItem('fchan')) {
+	  storage = JSON.parse(storage);
+	  $.extend(Config, storage);
+	}
+  };
 
 var getYTHost = function() {
 	if (localStorage.getItem("ythost") === null) {
@@ -40,6 +56,8 @@ var setYTHost = function() {
 
 }
 
+if (Config.embedYT) {
+ythost = getYTHost();
 var ytembed = function(element) {
 	id = element.getAttribute('data');
 	if (element.textContent == 'Remove') {
@@ -58,10 +76,49 @@ var ytembed = function(element) {
 	}
 	return false
 };
+}
 
-ythost = getYTHost();
+if (Config.embedSC) {
+var scembed = function(element) {
+	var xhr, url;
+
+	url = element.getAttribute('data');
+	if (element.textContent == 'Remove') {
+		element.parentNode.removeChild(element.nextElementSibling);
+		element.textContent = 'Embed';
+	} else if (element.textContent == 'Embed')  {
+		xhr = new XMLHttpRequest();
+		xhr.open('GET', 'https://soundcloud.com/oembed?show_artwork=false&'
+		  + 'maxwidth=500px&show_comments=false&format=json&url='
+		  + 'https://' + url);
+		xhr.onload = function() {
+			if (this.status == 200 || this.status == 304) {
+				el = document.createElement('div');
+				el.className = 'media-embed';
+				el.innerHTML = JSON.parse(this.responseText).html;
+				element.parentNode.insertBefore(el, element.nextElementSibling);
+				element.textContent = 'Remove';
+			} else {
+				element.textContent = 'Error';
+				console.log('SoundCloud Error (HTTP ' + this.status + ')');
+			}
+		};
+			element.textContent = 'Loading...';
+			xhr.send(null);
+		};
+	return false
+};
+}
+
+
 
 document.querySelectorAll('.comment').forEach(function(element) {
-	const regExp = /((?:watch\?v=|youtu\.be|youtube.com\/(?:shorts|v|live)\/)([\w-]{11})(?!\")(?:\S*))/g
-	element.innerHTML = element.innerHTML.replace(regExp, "$1 <span>[<a href='" + ythost + "/watch?v=$2' data='$2' onclick='return ytembed(this)'>Embed</a>]</span>");
+	if (Config.embedYT) {
+		const ytregExp = /((?:watch\?v=|youtu\.be|youtube.com\/(?:shorts|v|live)\/)([\w-]{11})(?!\")(?:\S*))/g;
+		element.innerHTML = element.innerHTML.replace(ytregExp, "$1 <span>[<a href='" + ythost + "/watch?v=$2' data='$2' onclick='return ytembed(this)'>Embed</a>]</span>");
+	}
+	if (Config.embedSC) {
+		const scregExp = /((?:(?:on.)?soundcloud\.com|snd\.sc)\/[^\s<]+(?:<wbr>)?[^\s<]*)/g;
+		element.innerHTML = element.innerHTML.replace(scregExp, "$1 <span>[<a href='https://$1' data='$1' onclick='return scembed(this)'>Embed</a>]</span>");
+	}
 });
