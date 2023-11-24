@@ -29,9 +29,16 @@ func Index(ctx *fiber.Ctx) error {
 		return util.MakeError(err, "Index")
 	}
 
+	collection, err := actor.GetRecentThreads()
+
+	if err != nil {
+		return util.MakeError(err, "Index")
+	}
+
 	data.Title = "Welcome to " + actor.PreferredUsername
 	data.PreferredUsername = actor.PreferredUsername
 	data.Boards = webfinger.Boards
+	data.Posts = collection.OrderedItems
 	data.Board.Name = ""
 	data.Key = config.Key
 	data.Board.Domain = config.Domain

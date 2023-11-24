@@ -1308,3 +1308,71 @@ select count
 
 	return nColl, nil
 }
+
+func (actor Actor) GetRecentThreads() (Collection, error) {
+	//TODO: Convert ID and Board to local
+	var nColl Collection
+	var result []ObjectBase
+
+	var err error
+	var rows *sql.Rows
+
+	// Selects 6 most recently created local/remote threads
+	// Will exclude "hidden" boards when main actor used (only display local boards followed by main actor, and remote boards where the local actor is followed by the main actor)
+	query := `select x.id, x.name, x.content, x.type, x.published, x.updated, x.attributedto, x.attachment, x.preview, x.actor, x.tripcode, x.sensitive from (select id, name, content, type, published, updated, attributedto, attachment, preview, actor, tripcode, sensitive from activitystream where actor in (select following from following where id='https://usagi.reisen') and id in (select id from replies where inreplyto='') and type='Note' and id not in (select activity_id from sticky where actor_id=$1) union select id, name, content, type, published, updated, attributedto, attachment, preview, actor, tripcode, sensitive from cacheactivitystream where actor in (select following from following where id in (select following from following where id=$1)) and id in (select id from replies where inreplyto='') and type='Note' and id not in (select activity_id from sticky where actor_id=$1)) as x order by x.published desc limit 6`
+
+	if rows, err = config.DB.Query(query, actor.Id); err != nil {
+		return nColl, util.MakeError(err, "GetRecentThreads")
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		var post ObjectBase
+		var actor Actor
+
+		var attch ObjectBase
+		post.Attachment = append(post.Attachment, attch)
+
+		var prev NestedObjectBase
+		post.Preview = &prev
+
+		err = rows.Scan(&post.Id, &post.Name, &post.Content, &post.Type, &post.Published, &post.Updated, &post.AttributedTo, &post.Attachment[0].Id, &post.Preview.Id, &actor.Id, &post.TripCode, &post.Sensitive)
+
+		if err != nil {
+			return nColl, util.MakeError(err, "GetRecentThreads")
+		}
+
+		post.Locked, _ = post.IsLocked()
+		post.Actor = actor.Id
+
+		var replies CollectionBase
+
+		post.Replies = replies
+
+		post.Replies.TotalItems, post.Replies.TotalImgs, err = post.GetRepliesCount()
+
+		if err != nil {
+			return nColl, util.MakeError(err, "GetRecentThreads")
+		}
+
+		post.Attachment, err = post.Attachment[0].GetAttachment()
+
+		if err != nil {
+			return nColl, util.MakeError(err, "GetRecentThreads")
+		}
+
+		post.Preview, err = post.Preview.GetPreview()
+
+		if err != nil {
+			return nColl, util.MakeError(err, "GetRecentThreads")
+		}
+
+		result = append(result, post)
+	}
+
+	nColl.AtContext.Context = "https://www.w3.org/ns/activitystreams"
+
+	nColl.OrderedItems = result
+
+	return nColl, nil
+}

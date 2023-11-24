@@ -186,6 +186,36 @@
   .newsbox-news p, .newsbox-news h3 {
       margin: 0;
  }
+ .newthreadsbox {
+    padding: 25px;
+    border: 4px solid #f0e2d9;
+    background-color: #f9f9e0;
+  }
+  .newthreadsbox h2 {
+    margin: 0;
+    padding: 0;
+  }
+  .newthreadsbox-board {
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    white-space: nowrap;
+    margin-bottom: 5px;
+  }
+  .newthreadsbox-thread {
+    overflow: hidden;
+    vertical-align: top;
+    padding-right: 24px;
+    padding-bottom: 24px;
+    display: inline-block;
+    width: 180px;
+    max-height: 320px;
+    margin-bottom: 10px;
+  }
+  .newthreadsbox-thread video:nth-child(2), .newthreadsbox-thread  audio:nth-child(2) {
+    margin-bottom: initial!important;
+  }
   #stopTablePost {
       float: right;
       display: none;
@@ -488,6 +518,36 @@
   .newsbox-news p, .newsbox-news h3 {
       margin: 0;
  }
+ .newthreadsbox {
+    padding: 25px;
+    border: 4px solid #c5c8c6;
+    background-color: #282A2E;
+  }
+  .newthreadsbox h2 {
+    margin: 0;
+    padding: 0;
+  }
+  .newthreadsbox-board {
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    white-space: nowrap;
+    margin-bottom: 5px;
+  }
+  .newthreadsbox-thread {
+    overflow: hidden;
+    vertical-align: top;
+    padding-right: 24px;
+    padding-bottom: 24px;
+    display: inline-block;
+    width: 180px;
+    max-height: 320px;
+    margin-bottom: 10px;
+  }
+  .newthreadsbox-thread video:nth-child(2), .newthreadsbox-thread  audio:nth-child(2) {
+    margin-bottom: initial!important;
+  }
   #stopTablePost {
       float: right;
       display: none;

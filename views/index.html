@@ -34,12 +34,47 @@
     {{ $page := .page }}
     {{ range $i, $e := .page.NewsItems }}
     <div class="newsbox-news">
-      <h3><a href="/news/{{.Time}}">{{unixtoreadable $e.Time}} - {{$e.Title}}</a>{{ if $page.Board.ModCred }} <a href="/{{ $page.Key }}/newsdelete/{{ $e.Time }}">[Delete] </a>{{end}}</h3>
+      <h3><a href="/news/{{.Time}}">{{unixtoreadable $e.Time}} - {{$e.Title}}</a>{{ if $page.Board.ModCred }} [<a href="/{{ $page.Key }}/newsdelete/{{ $e.Time }}">Delete</a>]{{end}}</h3>
       <br>
 
       <p>{{$e.Content}}</p>
     </div>
     {{ end }}
+  </div>
+  {{ end }}
+
+  <br>
+  {{ if .page.Posts }}
+  <div class="newthreadsbox" style="padding: 10px; text-align: center;">
+    <h2>Latest Threads</h2>
+    <br>
+    <div style="padding: 10px; text-align: center;">
+      {{ range .page.Posts }}
+      <div class="newthreadsbox-thread">
+        <div class="newthreadsbox-board">{{ .Actor }}</div>
+        {{ if .Attachment }}
+        <div id="sensitive-{{ .Id }}" style="display: none;">
+          <div style="position: relative; text-align: center;">
+            <img id="sensitive-img-{{ .Id }}" style="float: left; margin-right: 10px; margin-bottom: 10px; max-width: 180px; max-height: 180px;" src="/static/sensitive.png">
+            <div id="sensitive-text-{{ .Id }}" style="width: 170px; position: absolute; margin-top: 75px; padding: 5px; background-color: black; color: white; cursor: default; ">NSFW Content</div>
+          </div>
+        </div>
+        <a id="{{ .Id }}-anchor" href="{{ .Id }}">
+          <div id="media-{{ .Id }}" style="width:180px;"><div id="status" style="position: absolute;">{{ if .Sticky }}<span id="sticky"><img src="/static/pin.png"></span>{{ end }}{{ if .Locked }}<span id="lock"><img src="/static/locked.png"></span>{{ end }}</div>{{ parseAttachment . true }}</div>
+        </a>
+        {{ end }}
+        <a style="color: unset;" id="{{ .Id }}-link" href="{{ .Id }}">
+          <div style="display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;">
+            {{ if .Name }}<b>{{ .Name }}{{ if .Content }}:{{ end }}</b>{{ end }}{{ if .Content }} {{.Content}}{{ end }}
+          </div>
+        </a>
+      </div>
+      {{ end }}
+    </div>
+    
   </div>
   {{ end }}
 </div>
