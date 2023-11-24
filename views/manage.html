@@ -80,7 +80,7 @@
   </form>
   <ul style="display: inline-block; padding: 0; margin: 0; list-style-type: none;">
     {{ range .jannies }}
-    <li>{{ .Label }} - <b>Login:</b> {{ .Identifier }} <b>Code:</b> {{ .Code }} <a href="/{{ $key }}/{{ $board.Name }}/deletejanny?code={{ .Code }}">[Revoke]</a></li>
+    <li>{{ .Label }} - <b>Login:</b> {{ .Identifier }} <b>Code:</b> {{ .Code }} [<a href="/{{ $key }}/{{ $board.Name }}/deletejanny?code={{ .Code }}">Revoke</a>]</li>
     {{ end }}
   </ul>
 </div>

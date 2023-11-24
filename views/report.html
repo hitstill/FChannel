@@ -4,7 +4,7 @@
 </div>
 
 <div style="height: 500px; width: 420px; margin: 0 auto; margin-top:75px;">
-  <a href="{{ .page.Referer }}" onclick="history.back()">[Back]</a>
+  [<a href="{{ .page.Referer }}" onclick="history.back()">Back</a>]
   <div id="report-box">
     <div id="report-header" style="text-align: center; display: inline-block; z-index: 0;">Report Post No. {{ shortURL .page.Board.Actor.Outbox .page.Board.InReplyTo }}</div>
     <form id="report-post" action="/report" method="post">

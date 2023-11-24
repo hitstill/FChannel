@@ -553,14 +553,6 @@ func TemplateFunctions(engine *html.Engine) {
 					txtcol = "#FFF"
 				}
 			}
-			// if (float64(r)*0.299 + float64(g)*0.587 + float64(b)*0.114) > 186 {
-			// 	txtcol = "#000"
-			// 	shadcol = "#FFF"
-			// } else {
-			// 	txtcol = "#FFF"
-			// 	shadcol = "#000"
-			// }
-			//html = " <span class=\"posteruid id_" + id + "\">(ID: <span class=\"id\" style=\"background-color: " + bgcol + "; color: " + txtcol + "; text-shadow: 0px 0px 2px " + shadcol + ";\">" + id + "</span>)</span>"
 			html = " <span class=\"posteruid id_" + id + "\">(ID: <span class=\"id\" style=\"background-color: " + bgcol + "; color: " + txtcol + ";\">" + id + "</span>)</span>"
 		}
 		if cc != "" {
