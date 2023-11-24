@@ -32,6 +32,8 @@ func NodeInfo(ctx *fiber.Ctx) error {
 	var localPosts int
 	var remotePosts int
 	var archivedPosts int
+	var avgPPD float64
+
 	schemaVersion := strings.TrimSuffix(ctx.Params("version"), ".json")
 
 	if schemaVersion != "2.0" && schemaVersion != "2.1" {
@@ -43,8 +45,12 @@ func NodeInfo(ctx *fiber.Ctx) error {
 		return ctx.Send(errorJSON)
 	}
 
-	query := `SELECT  (SELECT COUNT(*) FROM activitystream WHERE type = 'Note' ) AS local, (SELECT COUNT(*) FROM cacheactivitystream WHERE type = 'Note') AS remote, (SELECT count(*) FROM activitystream where type = 'Archive') + (SELECT count(*) FROM cacheactivitystream where type = 'Archive') AS archived`
-	if err := config.DB.QueryRow(query).Scan(&localPosts, &remotePosts, &archivedPosts); err != nil {
+	query := `SELECT  (SELECT COUNT(*) FROM activitystream WHERE type = 'Note' ) AS local, (SELECT COUNT(*) FROM cacheactivitystream WHERE type = 'Note') AS remote, (SELECT count(*) FROM activitystream where type = 'Archive') + (SELECT count(*) FROM cacheactivitystream where type = 'Archive') AS archived, (SELECT AVG(last_4_week) AS avg_ppd FROM
+	(SELECT COUNT(*) AS last_4_week
+	FROM activitystream
+	WHERE published::date  > CURRENT_DATE -28 AND type in ('Note', 'Tombstone') AND mediatype = ''
+	GROUP BY published :: date) A)`
+	if err := config.DB.QueryRow(query).Scan(&localPosts, &remotePosts, &archivedPosts, &avgPPD); err != nil {
 		return util.MakeError(err, "NodeInfo")
 	}
 
@@ -68,8 +74,9 @@ func NodeInfo(ctx *fiber.Ctx) error {
 		"nodeName":        config.InstanceName,
 		"nodeDescription": config.InstanceSummary,
 		"metadata": map[string]interface{}{
-			"remotePosts":   remotePosts,
-			"archivedPosts": archivedPosts,
+			"remotePosts":    remotePosts,
+			"archivedPosts":  archivedPosts,
+			"avgPostsPerDay": avgPPD,
 		},
 	}
 
