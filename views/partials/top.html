@@ -7,7 +7,7 @@
   <h3 id="newpostbtn"  state="0" style="display: none; margin-bottom:100px;">[<a href="javascript:startNewPost()">Start a New Thread</a>]</h3>
   {{ end }} <!-- end if inreplyto-->
   <div id="newpost">
-    <form onsubmit="sessionStorage.setItem('element-closed-reply', true)" id="new-post" action="/post" method="post" enctype="multipart/form-data">
+    <form onsubmit="setdeletionPassword(this);sessionStorage.setItem('element-closed-reply', true)" id="new-post" action="/post" method="post" enctype="multipart/form-data">
       <table id="postForm">
         <tr>
           <tr>
@@ -31,13 +31,20 @@
             <td><textarea rows="10" cols="50" id="comment" name="comment" maxlength="4500"></textarea></td>
           </tr>
           <tr>
-            <td><label for="file">File</label></td>
+            <td><label for="pwd">Password:</label></td>
+            <td>
+              <input type="password" name="pwd"><br>
+              <small>(for post deletion)</small>
+            </td>
+          </tr>
+          <tr>
+            <td><label for="file">File:</label></td>
             <td><b id="form-drawlabel" style="display: none;">Drawing</b><input type="file" accept=".gif,.png,.apng,.jpg,.jpeg,.jxl,.webp,.avif,.mp4,.webm,.ogg,.mp2,.mp3,.mpa,.wav,.wave,.swf,.flv" id="file" name="file" {{ if gt $len 1 }} required {{ else }} {{ if eq $len 0 }} required {{ end }} {{ end }} >
 								<span style="float: right;">(12MiB max)</span>
                 <br><input type="checkbox" name="sensitive">Mark sensitive</input></td>
 			          </tr>
 								<tr data-type="Painter" style="display:none;" id="drawform"> 
-									<td>Draw</td>
+									<td>Draw:</td>
 									<td class="painter-ctrl">Size <input type="text" value="400" maxlength="4"> × <input type="text" value="400" maxlength="4">&nbsp;
 									<button data-dims="400" type="button">Draw</button>
 									<button disabled="" type="button">Clear</button>
@@ -76,7 +83,7 @@
   {{ end }} <!-- end if inreplyto-->
   {{ $len := len .Posts }}
   <div id="newpost">
-    <form onsubmit="sessionStorage.setItem('element-closed-reply', true)" id="new-post" action="/post" method="post" enctype="multipart/form-data">
+    <form onsubmit="setdeletionPassword(this);sessionStorage.setItem('element-closed-reply', true)" id="new-post" action="/post" method="post" enctype="multipart/form-data">
       <table id="postForm">
         <tr>
           <tr>
@@ -97,6 +104,13 @@
           <tr>
             <td><label for="comment">Comment:</label></td>
             <td><textarea rows="10" cols="50" id="comment" name="comment" maxlength="4500"></textarea></td>
+          </tr>
+          <tr>
+            <td><label for="pwd">Password:</label></td>
+            <td>
+              <input type="password" name="pwd"><br>
+              <small>(for post deletion)</small>
+            </td>
           </tr>
           <tr>
             <td><label for="file">File</label></td>

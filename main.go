@@ -99,6 +99,8 @@ func main() {
 	app.Get("/sticky", routes.Sticky)
 	app.Get("/lock", routes.Lock)
 
+	app.Post("/multidelete", routes.MultiDelete)
+
 	// Webfinger routes
 	app.Get("/.well-known/webfinger", routes.Webfinger)
 

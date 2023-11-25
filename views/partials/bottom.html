@@ -3,7 +3,7 @@
     <span id="reply-header-text">...</span>
     <div id="reply-close" style="display: inline-block; float: right;"><a href="javascript:closeReply()">[X]</a></div>
   </div>
-  <form onsubmit="sessionStorage.setItem('element-closed-reply', true)"  id="reply-post" action="/post" method="post" enctype="multipart/form-data">
+  <form onsubmit="setdeletionPassword(this);sessionStorage.setItem('element-closed-reply', true)"  id="reply-post" action="/post" method="post" enctype="multipart/form-data">
     <input id="reply-name" name="name" type="text" placeholder="Name" maxlength="100">
     <input id="reply-options" name="options" type="text" placeholder="Options" maxlength="100">
     <textarea id="reply-comment" name="comment" maxlength="4500" oninput="sessionStorage.setItem('element-reply-comment', document.getElementById('reply-comment').value)"></textarea>
@@ -16,7 +16,10 @@
     <input type="hidden" id="boardName" name="boardName" value="{{ .Board.Name }}">
     <input type="hidden" id="captchaCode" name="captchaCode" value="{{ .Board.CaptchaCode }}">
     <input type="hidden" id="returnTo" name="returnTo" value="{{ .ReturnTo }}"><br>
-    <input type="checkbox" name="sensitive"><span>Mark attachment as sensitive</span><br>
+    <input type="checkbox" name="sensitive"><span>Mark sensitive</span>
+    <br>
+    <br>
+    Password: <input type="password" name="pwd">
 		<br>
 		<br>
 		<span class="painter-ctrl">Size <input type="text" value="400" maxlength="4"> × <input type="text" value="400" maxlength="4">&nbsp;
@@ -53,4 +56,8 @@
       <img src="{{ .Board.Captcha }}">
     </div>
   </form>
+</div>
+
+<div class="bottomCtrl desktop"><span class="deleteform"> Delete Post: [<input type="checkbox" name="onlyimg"
+      value="true" form="delform">File Only]<input type="password" id="delPassword" name="pwd" form="delform"> <input type="submit" value="Delete" form="delform"></span>
 </div>

@@ -265,7 +265,9 @@ expires timestamp DEFAULT '9999-12-31 00:00:00' NOT NULL
 
 CREATE TABLE IF NOT EXISTS identify (
 id varchar(256) NOT NULL,
-ip inet
+ip inet NOT NULL,
+password character varying,
+posted timestamp DEFAULT timezone('utc', now())
 );
 
 --ALTER TABLE ONLY identify ADD CONSTRAINT IF NOT EXISTS identify_id_fkey FOREIGN KEY (id) REFERENCES activitystream(id) ON UPDATE CASCADE ON DELETE CASCADE NOT DEFERRABLE;

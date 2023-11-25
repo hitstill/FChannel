@@ -1,30 +1,28 @@
-function startNewPost(){
+function startNewPost() {
     var el = document.getElementById("newpostbtn");
-    el.style="display:none;";
+    el.style = "display:none;";
     el.setAttribute("state", "1");
-    document.getElementById("drawform").style="";
+    document.getElementById("drawform").style = "";
     document.getElementById("newpost").style = "";
     document.getElementById("stopTablePost").style = "cursor: pointer; display:unset;";
     sessionStorage.setItem("newpostState", true);
 }
 
-function stopNewPost(){
+function stopNewPost() {
     var el = document.getElementById("newpostbtn");
-    el.style="display:block;margin-bottom:100px;";
+    el.style = "display:block;margin-bottom:100px;";
     el.setAttribute("state", "0");
     document.getElementById("newpost").style = "display: none;";
     sessionStorage.setItem("newpostState", false);
 }
 
-function shortURL(actorName, url)
-{
+function shortURL(actorName, url) {
     re = /.+\//g;
     temp = re.exec(url);
 
     var output;
 
-    if(stripTransferProtocol(temp[0]) == stripTransferProtocol(actorName) + "/")
-    {
+    if (stripTransferProtocol(temp[0]) == stripTransferProtocol(actorName) + "/") {
         var short = url.replace("https://", "");
         short = short.replace("http://", "");
         short = short.replace("www.", "");
@@ -35,8 +33,8 @@ function shortURL(actorName, url)
 
         re = /\w+$/g;
 
-        output =  re.exec(short);
-    }else{
+        output = re.exec(short);
+    } else {
         var short = url.replace("https://", "");
         short = short.replace("http://", "");
         short = short.replace("www.", "");
@@ -47,7 +45,7 @@ function shortURL(actorName, url)
 
         re = /\w+$/g;
 
-        u =  re.exec(short);
+        u = re.exec(short);
 
         str = short.replace(/\/+/g, " ");
 
@@ -63,47 +61,42 @@ function shortURL(actorName, url)
     return output;
 }
 
-function getBoardId(url)
-{
+function getBoardId(url) {
     var re = /\/([^/\n]+)(.+)?/gm;
     var matches = re.exec(url);
     return matches[1];
 }
 
-function convertContent(actorName, content, opid)
-{
+function convertContent(actorName, content, opid) {
     var re = /(>>)(https?:\/\/)?(www\.)?.+\/\w+/gm;
     var match = content.match(re);
     var newContent = content;
-    if(match)
-    {
-        match.forEach(function(quote, i){
+    if (match) {
+        match.forEach(function (quote, i) {
             var link = quote.replace('>>', '');
             var isOP = "";
-            if(link == opid)
-            {
+            if (link == opid) {
                 isOP = " (OP)";
             }
 
             var q = link;
 
-            if(document.getElementById(link + "-content") != null) {
+            if (document.getElementById(link + "-content") != null) {
                 q = document.getElementById(link + "-content").innerText;
                 q = q.replaceAll('>', '/\>');
                 q = q.replaceAll('"', '');
                 q = q.replaceAll("'", "");
             }
-            newContent = newContent.replace(quote, '<a class="reply" title="' + q +  '" href="'+ (actorName) + "/" + shortURL(actorName, opid)  +  '#' + shortURL(actorName, link) + '";">>>' + shortURL(actorName, link)  + isOP + '</a>');
+            newContent = newContent.replace(quote, '<a class="reply" title="' + q + '" href="' + (actorName) + "/" + shortURL(actorName, opid) + '#' + shortURL(actorName, link) + '";">>>' + shortURL(actorName, link) + isOP + '</a>');
 
         });
     }
 
-    re =  /^(\s+)?>.+/gm;
+    re = /^(\s+)?>.+/gm;
 
     match = newContent.match(re);
-    if(match)
-    {
-        match.forEach(function(quote, i) {
+    if (match) {
+        match.forEach(function (quote, i) {
 
             newContent = newContent.replace(quote, '<span class="quote">' + quote + '</span>');
         });
@@ -112,52 +105,57 @@ function convertContent(actorName, content, opid)
     return newContent.replaceAll('/\>', '>');
 }
 
-function convertContentNoLink(actorName, content, opid)
-{
+function convertContentNoLink(actorName, content, opid) {
     var re = /(>>)(https?:\/\/)?(www\.)?.+\/\w+/gm;
     var match = content.match(re);
     var newContent = content;
-    if(match)
-    {
-        match.forEach(function(quote, i){
+    if (match) {
+        match.forEach(function (quote, i) {
             var link = quote.replace('>>', '');
             var isOP = "";
-            if(link == opid)
-            {
+            if (link == opid) {
                 isOP = " (OP)";
             }
 
             var q = link;
 
-            if(document.getElementById(link + "-content") != null) {
+            if (document.getElementById(link + "-content") != null) {
                 q = document.getElementById(link + "-content").innerText;
             }
 
-            newContent = newContent.replace(quote, '>>' + shortURL(actorName, link)  + isOP);
+            newContent = newContent.replace(quote, '>>' + shortURL(actorName, link) + isOP);
         });
     }
     newContent = newContent.replaceAll("'", "");
     return newContent.replaceAll('"', '');
 }
 
-function closeReply()
-{
+function setdeletionPassword(form) {
+    localStorage.setItem("deletionPassword", form.pwd.value);
+}
+
+function getdeletionPassword() {
+    passwordFields = document.getElementsByName("pwd");
+    for (let i = 0; i < passwordFields.length; i++) {
+        passwordFields[i].value = localStorage.getItem("deletionPassword");
+    }
+}
+
+function closeReply() {
     document.getElementById("reply-box").style.display = "none";
     document.getElementById("reply-comment").value = "";
 
     sessionStorage.setItem("element-closed-reply", true);
 }
 
-function closeReport()
-{
+function closeReport() {
     document.getElementById("report-box").style.display = "none";
     document.getElementById("report-comment").value = "";
 
     sessionStorage.setItem("element-closed-report", true);
 }
 
-function quote(actorName, opid, id)
-{
+function quote(actorName, opid, id) {
     sessionStorage.setItem("element-closed-reply", false);
     var box = document.getElementById("reply-box");
     var header = document.getElementById("reply-header");
@@ -183,15 +181,14 @@ function quote(actorName, opid, id)
     sessionStorage.setItem("element-reply-actor", actorName);
     sessionStorage.setItem("element-reply-id", inReplyTo.value);
 
-    if(id != "reply")
+    if (id != "reply")
         comment.value += ">>" + id + "\n";
     sessionStorage.setItem("element-reply-comment", comment.value);
 
     dragElement(header);
 }
 
-function report(actorName, id)
-{
+function report(actorName, id) {
     sessionStorage.setItem("element-closed-report", false);
     var box = document.getElementById("report-box");
     var header = document.getElementById("report-header");
@@ -301,13 +298,13 @@ function dragElement(elmnt) {
     elmnt.onmousedown = dragMouseDown;
 }
 
-const stateLoadHandler = function(event){
+const stateLoadHandler = function (event) {
     pos1 = parseInt(sessionStorage.getItem("pos1"));
     pos2 = parseInt(sessionStorage.getItem("pos2"));
     pos3 = parseInt(sessionStorage.getItem("pos3"));
     pos4 = parseInt(sessionStorage.getItem("pos4"));
 
-    if(sessionStorage.getItem("element-closed-report") === "false"){
+    if (sessionStorage.getItem("element-closed-report") === "false") {
         var box = document.getElementById("report-box");
         var header = document.getElementById("report-header");
         var comment = document.getElementById("report-comment");
@@ -323,16 +320,16 @@ const stateLoadHandler = function(event){
         box.style.top = sessionStorage.getItem("report-top");
         box.style.left = sessionStorage.getItem("report-left");
 
-        if(sessionStorage.getItem("eventhandler") === "true"){
+        if (sessionStorage.getItem("eventhandler") === "true") {
             elmnt = header;
             document.onmouseup = closeDragElement;
             document.onmousemove = elementDrag;
-        }else{
+        } else {
             document.onmouseup = null;
             document.onmousemove = null;
         }
     }
-    if(sessionStorage.getItem("element-closed-reply") === "false"){
+    if (sessionStorage.getItem("element-closed-reply") === "false") {
         var box = document.getElementById("reply-box");
         var header = document.getElementById("reply-header");
         var header_text = document.getElementById("reply-header-text");
@@ -354,11 +351,11 @@ const stateLoadHandler = function(event){
         box.style.top = sessionStorage.getItem("reply-top");
         box.style.left = sessionStorage.getItem("reply-left");
 
-        if(sessionStorage.getItem("eventhandler") === "true"){
+        if (sessionStorage.getItem("eventhandler") === "true") {
             elmnt = header;
             document.onmouseup = closeDragElement;
             document.onmousemove = elementDrag;
-        }else{
+        } else {
             document.onmouseup = null;
             document.onmousemove = null;
         }
@@ -367,7 +364,15 @@ const stateLoadHandler = function(event){
 
 document.addEventListener("DOMContentLoaded", stateLoadHandler, false);
 
-function stripTransferProtocol(value){
+function stripTransferProtocol(value) {
     var re = /(https:\/\/|http:\/\/)?(www.)?/;
     return value.replace(re, "");
+}
+
+if (localStorage.getItem("deletionPassword") !== null) {
+    getdeletionPassword();
+}
+else {
+    localStorage.setItem("deletionPassword", Math.random().toString(36).slice(-14));
+    getdeletionPassword();
 }
