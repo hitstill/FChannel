@@ -10,3 +10,5 @@ clientkey
 pem/
 *.patch
 __debug_bin*
+fchan
+FChannel-Server

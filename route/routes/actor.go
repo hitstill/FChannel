@@ -336,28 +336,31 @@ func MakeActorPost(ctx *fiber.Ctx) error {
 
 	sendTo := ctx.FormValue("sendTo")
 
-	if sendTo == config.Domain+"/overboard/outbox" {
-		re := regexp.MustCompile(`.+\/`)
-		actorid := strings.TrimSuffix(re.FindString(ctx.FormValue("inReplyTo")), "/")
-		actor, err := activitypub.GetActor(actorid)
-		if err != nil {
-			local, _ := actor.IsLocal()
-			if local {
-				sendTo = actor.Outbox
-			} else {
-				query := `select id from following where following = $1 AND following != $2 LIMIT 1;`
-				if err := config.DB.QueryRow(query, actorid, config.Domain+"/overboard").Scan(&actorid); err == nil {
-					if actor, err := activitypub.GetActor(actorid); err == nil {
-						sendTo = actor.Outbox
-					}
+	//if sendTo == config.Domain+"/overboard/outbox" {
+	//return ctx.Render("403", fiber.Map{
+	//	"message": "Replying from /overboard/ is currently disabled, shift + middle click the post No. to enter the the thread",
+	//})
+	re := regexp.MustCompile(`.+\/`)
+	actorid := strings.TrimSuffix(re.FindString(ctx.FormValue("inReplyTo")), "/")
+	actor, err := activitypub.GetActor(actorid)
+	if err == nil {
+		local, _ := actor.IsLocal()
+		if local {
+			sendTo = actor.Outbox
+		} else {
+			query := `select id from following where following = $1 AND following != $2 LIMIT 1;`
+			if err := config.DB.QueryRow(query, actorid, config.Domain+"/overboard").Scan(&actorid); err == nil {
+				if actor, err := activitypub.GetActor(actorid); err == nil {
+					sendTo = actor.Outbox
 				}
 			}
-			//actorid := strings.TrimSuffix(re.FindString(ctx.FormValue("inReplyTo")), "/")
-			//sendTo = actorid + "/outbox"
-			//actor, _ := webfinger.GetActorFromPath(actorid, "/")
-			//sendTo = actor.Outbox
 		}
+		//actorid := strings.TrimSuffix(re.FindString(ctx.FormValue("inReplyTo")), "/")
+		//sendTo = actorid + "/outbox"
+		//actor, _ := webfinger.GetActorFromPath(actorid, "/")
+		//sendTo = actor.Outbox
 	}
+	//}
 
 	req, err := http.NewRequest("POST", sendTo, &b)
 
