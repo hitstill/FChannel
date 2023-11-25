@@ -169,7 +169,7 @@ func ParseOutboxRequest(ctx *fiber.Ctx, actor activitypub.Actor) error {
 			//}
 
 			if actor.Name == "int" || actor.Name == "bint" {
-				nObj.Alias = nObj.Alias + "cc:" + util.GetCC(ctx.Get("PosterIP"))
+				nObj.Alias = "cc:" + util.GetCC(ctx.Get("PosterIP"))
 			}
 
 			if actor.Name == "bint" {
@@ -565,6 +565,18 @@ func TemplateFunctions(engine *html.Engine) {
 				countryname = "Unknown/Hidden"
 			}
 			html = html + " <span title=\"" + countryname + "\" class=\"flag flag-" + cc + "\"></span>"
+		}
+		return template.HTML(html)
+	})
+
+	engine.AddFunc("parseEmail", func(input string) template.HTML {
+		var html string
+		if len(input) > 1 {
+			email := regexp.MustCompile("email:.+@.+\\..+")
+			if email.MatchString(input) {
+				addr := strings.TrimPrefix(input, "email:")
+				html += "<a href='mailto:" + addr + "' class='userEmail'>"
+			}
 		}
 		return template.HTML(html)
 	})

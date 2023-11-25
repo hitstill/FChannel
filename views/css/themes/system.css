@@ -345,6 +345,23 @@
   .fun {
     color: red
   }
+  .nsfw a.userEmail span.name {
+    color: #00e;
+    text-decoration: underline;
+  }
+  
+  .nsfw a.userEmail:hover span.name {
+    color: red;
+  }
+  
+  a.userEmail span.name {
+    color: #34345c;
+    text-decoration: underline;
+  }
+  
+  a.userEmail:hover span.name {
+    color: #d00;
+  }
 }
 @media (prefers-color-scheme: dark) {
   a, a:link, a:visited, a:hover, a:active {
@@ -669,6 +686,14 @@
 .pln {
     color: #c5c8c6
 }
+a.userEmail span.name {
+	color: #81a2be;
+	text-decoration: underline;
+  }
+  
+  a.userEmail:hover span.name {
+	color: #5f89ac;
+  }
 }
 .posteruid .id {
   padding: 0 5px;

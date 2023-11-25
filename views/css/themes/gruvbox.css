@@ -313,3 +313,12 @@ pre {
 .pln {
   color: #d5c4a1;
 }
+
+a.userEmail span.name {
+  color: #458588;
+  text-decoration: underline;
+}
+
+a.userEmail:hover span.name {
+  color: #fb4934;
+}

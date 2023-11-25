@@ -657,3 +657,21 @@ pre {
 .fun {
   color: red
 }
+
+.nsfw a.userEmail span.name {
+  color: #00e;
+  text-decoration: underline;
+}
+
+.nsfw a.userEmail:hover span.name {
+  color: red;
+}
+
+a.userEmail span.name {
+  color: #34345c;
+  text-decoration: underline;
+}
+
+a.userEmail:hover span.name {
+  color: #d00;
+}

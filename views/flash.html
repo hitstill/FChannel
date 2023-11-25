@@ -102,7 +102,7 @@
     <td>[<a href="/delete?id={{ $e.Id }}&board={{ $board.Name }}">Delete</a>]</td>
     {{ end }}
 		<td>{{ shortURL $board.Actor.Outbox $e.Id }}</td>
-		<td class="name"><b>{{ if .AttributedTo }} {{.AttributedTo }} {{ else }} Anonymous {{ end }}</b></td>
+		{{ .Alias | parseEmail }}<td class="name"><b>{{ if .AttributedTo }}{{.AttributedTo }}{{ else }}Anonymous{{ end }}</b></td>{{ if .Alias }}</a>{{ end }}
 		<td>[<a href="{{ proxy (index .Attachment 0).Href}}" download="{{ (index .Attachment 0).Name }}">{{ shortImg (index .Attachment 0).Name  }}</a>]</td>
 		<td>[<a href="#" onclick="swfpopup(this)">Embed</a>]</td>
 		<td class="subject" style="overflow: hidden; word-wrap: break-word; text-overflow: ellipsis; padding-left: 5px;"><b>{{ .Name }}</b></td>
@@ -118,7 +118,7 @@
     <td>[<a href="/delete?id={{ $e.Id }}&board={{ $board.Name }}">Delete</a>]</td>
     {{ end }}
     <td>{{ shortURL $board.Actor.Outbox $e.Id }}</td>
-		<td class="name"><b>{{ if .AttributedTo }} {{.AttributedTo }} {{ else }} Anonymous {{ end }}</b></td>
+		{{ .Alias | parseEmail }}<td class="name"><b>{{ if .AttributedTo }}{{.AttributedTo }}{{ else }}Anonymous{{ end }}</b></td>{{ if .Alias }}</a>{{ end }}
 		<td>[<a href="{{ proxy (index .Attachment 0).Href}}" download="{{ (index .Attachment 0).Name }}">{{ shortImg (index .Attachment 0).Name  }}</a>]</td>
 		<td>[<a href="#" onclick="swfpopup(this)">Embed</a>]</td>
 		<td class="subject" style="overflow: hidden; word-wrap: break-word; text-overflow: ellipsis; padding-left: 5px;"><b>{{ .Name }}</b></td>

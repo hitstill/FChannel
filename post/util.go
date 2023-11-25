@@ -148,6 +148,7 @@ func ParseOptions(ctx *fiber.Ctx, obj activitypub.ObjectBase) activitypub.Object
 				obj.Option = append(obj.Option, "nokosage")
 			} else if email.MatchString(e) {
 				obj.Option = append(obj.Option, "email:"+e)
+				obj.Alias = "email:" + e
 			} else if wallet.MatchString(e) {
 				obj.Option = append(obj.Option, "wallet")
 				var wallet activitypub.CryptoCur
