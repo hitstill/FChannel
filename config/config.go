@@ -35,6 +35,8 @@ var SupportedFiles = []string{"image/avif", "image/gif", "image/jpeg", "image/jx
 var Log = log.New(os.Stdout, "", log.Ltime)
 var MediaHashs = make(map[string]string)
 var Key = GetConfigValue("modkey", "")
+var MinPostDelete = GetConfigValue("minpostdelete", "60")
+var MaxPostDelete = GetConfigValue("maxpostdelete", "1800")
 var Themes []string
 var DB *sql.DB
 

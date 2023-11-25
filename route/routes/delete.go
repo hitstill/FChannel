@@ -3,6 +3,7 @@ package routes
 import (
 	"database/sql"
 	"net/url"
+	"strconv"
 	"time"
 
 	"github.com/FChannel0/FChannel-Server/activitypub"
@@ -38,6 +39,9 @@ func MultiDelete(ctx *fiber.Ctx) error {
 	if len(ban.IP) > 1 {
 		return ctx.Redirect(ctx.BaseURL()+"/banned", 301)
 	}
+
+	minduration, _ := strconv.Atoi(config.MinPostDelete)
+	maxduration, _ := strconv.Atoi(config.MaxPostDelete)
 
 	pwd := ctx.FormValue("pwd")
 
@@ -80,9 +84,9 @@ func MultiDelete(ctx *fiber.Ctx) error {
 
 	for id, posted := range valid_posts {
 		switch duration := time.Now().UTC().Sub(posted.UTC()); {
-		case duration < 1*time.Minute:
+		case duration < time.Duration(minduration)*time.Second:
 			ctx.SendString("Post is too new to delete!")
-		case duration > 30*time.Minute:
+		case duration > time.Duration(maxduration)*time.Second:
 			ctx.SendString("Post is too old to delete!")
 		default:
 			var actor activitypub.Actor
