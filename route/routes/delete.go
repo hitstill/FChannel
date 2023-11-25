@@ -117,7 +117,7 @@ func MultiDelete(ctx *fiber.Ctx) error {
 				if err := obj.TombstonePreview(); err != nil {
 					return util.MakeError(err, "MultiDelete")
 				}
-			} else {
+			} else if ctx.FormValue("onlyimg") != "true" {
 
 				if isOP, _ = obj.CheckIfOP(); !isOP {
 					if err := obj.Tombstone(); err != nil {
