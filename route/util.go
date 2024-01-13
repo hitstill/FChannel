@@ -250,7 +250,7 @@ func ParseOutboxRequest(ctx *fiber.Ctx, actor activitypub.Actor) error {
 				}
 			}
 
-			if len(ctx.Get("PosterIP")) > 1 {
+			if len(ctx.Get("PosterIP")) > 1 || len(ctx.Get("pwd")) > 0 {
 				query := `INSERT INTO "identify" (id, ip, password) VALUES ($1, $2, crypt($3, gen_salt('bf')))`
 				_, err = config.DB.Exec(query, nObj.Id, ctx.Get("PosterIP"), ctx.FormValue("pwd"))
 				if err != nil {
