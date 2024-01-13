@@ -273,3 +273,5 @@ posted timestamp DEFAULT timezone('utc', now())
 --ALTER TABLE ONLY identify ADD CONSTRAINT IF NOT EXISTS identify_id_fkey FOREIGN KEY (id) REFERENCES activitystream(id) ON UPDATE CASCADE ON DELETE CASCADE NOT DEFERRABLE;
 ALTER TABLE activitystream ALTER COLUMN content TYPE varchar(4500);
 ALTER TABLE cacheactivitystream ALTER COLUMN content TYPE varchar(4500);
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
