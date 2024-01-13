@@ -9,6 +9,7 @@ import (
 	"github.com/FChannel0/FChannel-Server/activitypub"
 	"github.com/FChannel0/FChannel-Server/config"
 	"github.com/FChannel0/FChannel-Server/db"
+	"github.com/FChannel0/FChannel-Server/route"
 	"github.com/FChannel0/FChannel-Server/util"
 	"github.com/gofiber/fiber/v2"
 	"github.com/jackc/pgx/v5"
@@ -35,6 +36,8 @@ func MultiDelete(ctx *fiber.Ctx) error {
 	//		Allow moderators to use this for batch deletions
 	var err error
 	var ban db.Ban
+	var failed int
+
 	ban.IP, ban.Reason, ban.Date, ban.Expires, _ = db.IsIPBanned(ctx.IP())
 	if len(ban.IP) > 1 {
 		return ctx.Redirect(ctx.BaseURL()+"/banned", 301)
@@ -46,7 +49,7 @@ func MultiDelete(ctx *fiber.Ctx) error {
 	pwd := ctx.FormValue("pwd")
 
 	if len(pwd) < 1 {
-		return ctx.SendString("No deletion password provided")
+		return route.Send400(ctx, "No deletion password provided")
 	}
 	data, err := ParseFormData(ctx)
 	if err != nil {
@@ -74,9 +77,9 @@ func MultiDelete(ctx *fiber.Ctx) error {
 
 		if err := rows.Scan(&id, &posted); err != nil {
 			if err == pgx.ErrNoRows {
-				return ctx.SendString("Incorrect password, no posts were deleted.")
+				return route.GenericError(ctx, "Incorrect password, no posts were deleted.")
 			} else {
-				return util.MakeError(err, "MultiDelete")
+				return route.Send500(ctx, err)
 			}
 		}
 		valid_posts[id] = posted
@@ -85,9 +88,11 @@ func MultiDelete(ctx *fiber.Ctx) error {
 	for id, posted := range valid_posts {
 		switch duration := time.Now().UTC().Sub(posted.UTC()); {
 		case duration < time.Duration(minduration)*time.Second:
-			ctx.SendString("Post is too new to delete!")
+			failed++
+			route.GenericError(ctx, "Post is too new to delete!")
 		case duration > time.Duration(maxduration)*time.Second:
-			ctx.SendString("Post is too old to delete!")
+			failed++
+			route.GenericError(ctx, "Post is too old to delete!")
 		default:
 			var actor activitypub.Actor
 			var isOP bool
@@ -144,6 +149,9 @@ func MultiDelete(ctx *fiber.Ctx) error {
 				}
 			}
 		}
+	}
+	if failed > 0 {
+		return route.GenericError(ctx, strconv.Itoa(failed)+" post(s) were too new or too old to delete.")
 	}
 	return ctx.RedirectBack("/")
 }

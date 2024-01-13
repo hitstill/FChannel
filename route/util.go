@@ -261,11 +261,9 @@ func ParseOutboxRequest(ctx *fiber.Ctx, actor activitypub.Actor) error {
 			ctx.Response().Header.Set("Status", "200")
 			_, err = ctx.Write([]byte(id))
 			return util.MakeError(err, "ParseOutboxRequest")
+		} else {
+			return Send403(ctx, "Incorrect captcha")
 		}
-
-		ctx.Response().Header.Set("Status", "403")
-		_, err = ctx.Write([]byte("captcha could not auth"))
-		return util.MakeError(err, "")
 	} else { // json request
 		activity, err := activitypub.GetActivityFromJson(ctx)
 		if err != nil {
@@ -445,6 +443,8 @@ func TemplateFunctions(engine *html.Engine) {
 	engine.AddFunc("parseAttachment", post.ParseAttachment)
 
 	engine.AddFunc("parseContent", post.ParseContent)
+
+	engine.AddFunc("formatContent", post.FormatContent)
 
 	engine.AddFunc("shortImg", util.ShortImg)
 
@@ -642,3 +642,82 @@ func TemplateFunctions(engine *html.Engine) {
 		return strings.Join(timeStrings, ", ") + " and " + last
 	})
 }
+
+func StatusTemplate(num int) func(ctx *fiber.Ctx, msg ...string) error {
+	n := fmt.Sprint(num)
+	return func(ctx *fiber.Ctx, msg ...string) error {
+		var m string
+		if msg != nil {
+			m = msg[0]
+		}
+
+		var data PageData
+		var errorData errorData
+
+		data.Boards = webfinger.Boards
+		data.Themes = &config.Themes
+		data.ThemeCookie = GetThemeCookie(ctx)
+		data.Referer = ctx.Get("referer")
+
+		errorData.Message = m
+
+		return ctx.Status(num).Render(n, fiber.Map{
+			"page":  data,
+			"error": errorData,
+		}, "layouts/main")
+	}
+}
+
+func GenericError(ctx *fiber.Ctx, msg ...string) error {
+
+	var m string
+	if msg != nil {
+		m = msg[0]
+	}
+
+	var data PageData
+	var errorData errorData
+
+	data.Boards = webfinger.Boards
+	data.Themes = &config.Themes
+	data.ThemeCookie = GetThemeCookie(ctx)
+	data.Referer = ctx.Get("referer")
+
+	errorData.Message = m
+
+	return ctx.Status(400).Render("gerror", fiber.Map{
+		"page":  data,
+		"error": errorData,
+	}, "layouts/main")
+}
+
+func Send500(ctx *fiber.Ctx, err error, msg ...string) error {
+
+	var m string
+	if msg != nil {
+		m = msg[0]
+	}
+
+	var data PageData
+	var errorData errorData
+
+	data.Boards = webfinger.Boards
+	data.Themes = &config.Themes
+	data.ThemeCookie = GetThemeCookie(ctx)
+	data.Referer = ctx.Get("referer")
+
+	errorData.Message = m
+	errorData.Error = err
+
+	// The results of this call do not matter to us
+	ctx.Status(500).Render("500", fiber.Map{
+		"page":  data,
+		"error": errorData,
+	}, "layouts/main")
+
+	return err
+}
+
+var Send400 = StatusTemplate(400)
+var Send403 = StatusTemplate(403)
+var Send404 = StatusTemplate(404)

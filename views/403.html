@@ -1,7 +1,8 @@
-<div class="box2">
-  <h1>403</h1>
-  <p>{{ .message }}</p>
+<div class="newsbox">
+  <h1>403 Forbidden</h1>
+  <p>You are not allowed to access this resource.</p>
+  {{if .error.Message}}<strong>{{.error.Message}}</strong>{{end}}
   <p>
-    Click <a href="/">here</a> to return to the index.
+    Click <a onclick="history.back()" href="{{ .page.Referer }}">here</a> to return to the previous page.
   </p>
 </div>

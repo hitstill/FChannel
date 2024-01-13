@@ -213,15 +213,11 @@ func MakeActorPost(ctx *fiber.Ctx) error {
 	header, _ := ctx.FormFile("file")
 
 	if ctx.FormValue("inReplyTo") == "" && header == nil {
-		return ctx.Render("403", fiber.Map{
-			"message": "Media is required for new posts",
-		})
+		return route.Send400(ctx, "Media is required for new threads.")
 	}
 
 	if ctx.FormValue("inReplyTo") != "" && !db.IsValidThread(ctx.FormValue("inReplyTo")) {
-		return ctx.Render("403", fiber.Map{
-			"message": "\"" + ctx.FormValue("inReplyTo") + "\" is not a valid thread on this server",
-		})
+		return route.Send400(ctx, "\""+ctx.FormValue("inReplyTo")+"\" is not a valid thread on this server")
 	}
 
 	var file multipart.File
@@ -231,9 +227,7 @@ func MakeActorPost(ctx *fiber.Ctx) error {
 	}
 
 	if file != nil && header.Size > (12<<20) {
-		return ctx.Render("403", fiber.Map{
-			"message": "12MB max file size",
-		})
+		return route.Send400(ctx, "File too large, maximum file size is 12 MB")
 	}
 
 	if is, _, regex := util.IsPostBlacklist(ctx.FormValue("comment")); is {
@@ -243,34 +237,24 @@ func MakeActorPost(ctx *fiber.Ctx) error {
 
 	if ctx.FormValue("inReplyTo") == "" || file == nil {
 		if strings.TrimSpace(ctx.FormValue("comment")) == "" && ctx.FormValue("subject") == "" {
-			return ctx.Render("403", fiber.Map{
-				"message": "Comment or Subject required",
-			})
+			return route.Send400(ctx, "Subject or Comment is required")
 		}
 	}
 
 	if len(ctx.FormValue("comment")) > 4500 {
-		return ctx.Render("403", fiber.Map{
-			"message": "Comment limit 4500 characters",
-		})
+		return route.Send400(ctx, "Comment is longer than 4500 characters")
 	}
 
 	if strings.Count(ctx.FormValue("comment"), "\r\n") > 50 || strings.Count(ctx.FormValue("comment"), "\n") > 50 || strings.Count(ctx.FormValue("comment"), "\r") > 50 {
-		return ctx.Render("403", fiber.Map{
-			"message": "Too many new lines - try again.",
-		})
+		return route.Send400(ctx, "Too many newlines in comment")
 	}
 
 	if len(ctx.FormValue("subject")) > 100 || len(ctx.FormValue("name")) > 100 || len(ctx.FormValue("options")) > 100 {
-		return ctx.Render("403", fiber.Map{
-			"message": "Name, Subject or Options limit 100 characters",
-		})
+		return route.Send400(ctx, "Name, Subject, or Options field(s) contain more than 100 characters")
 	}
 
 	if ctx.FormValue("captcha") == "" {
-		return ctx.Render("403", fiber.Map{
-			"message": "Incorrect Captcha",
-		})
+		return route.Send403(ctx, "No captcha provided")
 	}
 
 	b := bytes.Buffer{}
@@ -336,10 +320,6 @@ func MakeActorPost(ctx *fiber.Ctx) error {
 
 	sendTo := ctx.FormValue("sendTo")
 
-	//if sendTo == config.Domain+"/overboard/outbox" {
-	//return ctx.Render("403", fiber.Map{
-	//	"message": "Replying from /overboard/ is currently disabled, shift + middle click the post No. to enter the the thread",
-	//})
 	re := regexp.MustCompile(`.+\/`)
 	actorid := strings.TrimSuffix(re.FindString(ctx.FormValue("inReplyTo")), "/")
 	actor, err := activitypub.GetActor(actorid)
@@ -347,19 +327,20 @@ func MakeActorPost(ctx *fiber.Ctx) error {
 		local, _ := actor.IsLocal()
 		if local {
 			sendTo = actor.Outbox
-		} else {
-			query := `select id from following where following = $1 AND following != $2 LIMIT 1;`
-			if err := config.DB.QueryRow(query, actorid, config.Domain+"/overboard").Scan(&actorid); err == nil {
-				if actor, err := activitypub.GetActor(actorid); err == nil {
-					sendTo = actor.Outbox
-				}
+		}
+	} else {
+		query := `select id from following where following = $1 AND following != $2 LIMIT 1;`
+		if err := config.DB.QueryRow(query, actorid, config.Domain+"/overboard").Scan(&actorid); err == nil {
+			if actor, err := activitypub.GetActor(actorid); err == nil {
+				sendTo = actor.Outbox
 			}
 		}
-		//actorid := strings.TrimSuffix(re.FindString(ctx.FormValue("inReplyTo")), "/")
-		//sendTo = actorid + "/outbox"
-		//actor, _ := webfinger.GetActorFromPath(actorid, "/")
-		//sendTo = actor.Outbox
 	}
+	//actorid := strings.TrimSuffix(re.FindString(ctx.FormValue("inReplyTo")), "/")
+	//sendTo = actorid + "/outbox"
+	//actor, _ := webfinger.GetActorFromPath(actorid, "/")
+	//sendTo = actor.Outbox
+	//}
 	//}
 
 	req, err := http.NewRequest("POST", sendTo, &b)

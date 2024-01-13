@@ -62,3 +62,8 @@ type BanInfo struct {
 	Bans []db.Ban
 	//Post         activitypub.ObjectBase
 }
+
+type errorData struct {
+	Message string
+	Error   error
+}

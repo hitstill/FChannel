@@ -506,21 +506,15 @@ func ReportPost(ctx *fiber.Ctx) error {
 	var captcha = ctx.FormValue("captchaCode") + ":" + ctx.FormValue("captcha")
 
 	if len(reason) > 100 {
-		return ctx.Status(403).Render("403", fiber.Map{
-			"message": "Report comment limit 100 characters",
-		})
+		return route.Send400(ctx, "Report comment limit 100 characters")
 	}
 
 	if len(strings.TrimSpace(reason)) == 0 {
-		return ctx.Status(403).Render("403", fiber.Map{
-			"message": "Report reason required",
-		})
+		return route.Send400(ctx, "No report reason provided")
 	}
 
 	if ok, _ := post.CheckCaptcha(captcha); !ok && close != "1" {
-		return ctx.Status(403).Render("403", fiber.Map{
-			"message": "Invalid captcha",
-		})
+		return route.Send403(ctx, "Invalid captcha")
 	}
 
 	if err := db.CreateLocalReport(obj.Id, board, reason); err != nil {
