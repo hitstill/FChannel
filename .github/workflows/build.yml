@@ -1,0 +1,22 @@
+name: Fchan build
+
+on:
+  push:
+    branches: [ "usagi" ]
+  pull_request:
+    branches: [ "usagi" ]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.19'
+
+    - name: Build
+      run: make
