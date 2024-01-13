@@ -61,6 +61,7 @@ func main() {
 	app.Post("/outbox", routes.Outbox)
 	app.Get("/following", routes.Following)
 	app.Get("/followers", routes.Followers)
+	app.Get("/feed.:feedtype", routes.GetBoardFeed)
 
 	// Admin routes
 	app.All("/"+config.Key+"/", routes.AdminIndex)
@@ -120,6 +121,7 @@ func main() {
 	app.Get("/:actor/following", routes.ActorFollowing)
 	app.Get("/:actor/followers", routes.ActorFollowers)
 	app.Get("/:actor/archive", routes.ActorArchive)
+	app.Get("/:actor/feed.:feedtype", routes.GetBoardFeed)
 	app.Get("/f", routes.ActorFlash)
 	app.Get("/:actor", routes.ActorPosts)
 	app.Get("/:actor/:post", routes.ActorPost)
