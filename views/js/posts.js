@@ -155,6 +155,68 @@ function closeReport() {
     sessionStorage.setItem("element-closed-report", true);
 }
 
+function timeSince() {
+    var delta, count, head, tail;
+    timestamp = this.dataset.utc;
+    
+    delta = Date.now() / 1000 - timestamp;
+    
+    if (delta < 1) {
+        return this.title = 'moments ago';
+    }
+    
+    if (delta < 60) {
+        return this.title = (0 | delta) + ' seconds ago';
+    }
+    
+    if (delta < 3600) {
+      count = 0 | (delta / 60);
+      
+      if (count > 1) {
+        return this.title = count + ' minutes ago';
+      }
+      else {
+        return this.title = 'one minute ago';
+      }
+    }
+    
+    if (delta < 86400) {
+      count = 0 | (delta / 3600);
+      
+      if (count > 1) {
+        head = count + ' hours';
+      }
+      else {
+        head = 'one hour';
+      }
+      
+      tail = 0 | (delta / 60 - count * 60);
+      
+      if (tail > 1) {
+        head += ' and ' + tail + ' minutes';
+      }
+      
+      return this.title = head + ' ago';
+    }
+    
+    count = 0 | (delta / 86400);
+    
+    if (count > 1) {
+      head = count + ' days';
+    }
+    else {
+      head = 'one day';
+    }
+    
+    tail = 0 | (delta / 3600 - count * 24);
+    
+    if (tail > 1) {
+      head += ' and ' + tail + ' hours';
+    }
+    
+    return this.title = head + ' ago';
+  };
+
 function quote(actorName, opid, id) {
     sessionStorage.setItem("element-closed-reply", false);
     var box = document.getElementById("reply-box");
@@ -376,3 +438,7 @@ else {
     localStorage.setItem("deletionPassword", Math.random().toString(36).slice(-14));
     getdeletionPassword();
 }
+
+document.querySelectorAll('.timestamp').forEach(timestamp => {
+  timestamp.addEventListener('mouseover', timeSince);
+});

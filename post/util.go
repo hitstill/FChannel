@@ -514,6 +514,16 @@ func ParseContent(board activitypub.Actor, op string, content string, thread act
 	return template.HTML(nContent), nil
 }
 
+func FormatContent(content string) template.HTML {
+	nContent := strings.ReplaceAll(content, `<`, "&lt;")
+	nContent = ParseCommentQuotes(nContent)
+	nContent = ParseCommentSpoilers(nContent)
+	//TODO: Don't tuncate code blocks
+	nContent = ParseCommentCode(nContent)
+	nContent = CloseUnclosedTags(nContent)
+	return template.HTML(nContent)
+}
+
 func ParseTruncate(content string, board activitypub.Actor, op string, id string) string {
 	if strings.Count(content, "\r") > 30 {
 		content = strings.ReplaceAll(content, "\r\n", "\r")

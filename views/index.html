@@ -68,7 +68,7 @@
   -webkit-line-clamp: 5;
   -webkit-box-orient: vertical;
   overflow: hidden;">
-            {{ if .Name }}<b>{{ .Name }}{{ if .Content }}:{{ end }}</b>{{ end }}{{ if .Content }} {{.Content}}{{ end }}
+            {{ if .Name }}<b>{{ .Name }}{{ if .Content }}:{{ end }}</b>{{ end }}{{ if .Content }} {{formatContent .Content}}{{ end }}
           </div>
         </a>
       </div>
