@@ -13,6 +13,10 @@ instancesummary:FChan is a federated image board instance.
 
 instancetp:https://
 
+## Header send from an upstream server (e.g. reverse proxy) which has users actual IP
+## The example NGINX config uses X-Real-IP
+proxyheader:X-Real-IP
+
 dbhost:localhost
 dbport:5432
 dbname:server
@@ -37,3 +41,12 @@ instancesalt:
 ## this is the key used to access moderation pages leave empty to randomly generate each restart
 ## share with other admin or jannies if you are having others to moderate
 modkey:
+
+# Seconds after posting before a post/file can be deleted
+minpostdelete:60
+# Seconds after posting before a post/file can no longer be deleted
+maxpostdelete:1800
+
+## Max attachment file size in bytes 
+## Default is 7MiB (7 * 1024 * 1024)
+maxfilesize:7340032

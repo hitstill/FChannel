@@ -136,9 +136,9 @@ func ConvertSize(size int64) string {
 
 	if convert > 1024 {
 		convert = convert / 1024.0
-		rValue = fmt.Sprintf("%.2f MB", convert)
+		rValue = fmt.Sprintf("%.2f MiB", convert)
 	} else {
-		rValue = fmt.Sprintf("%.2f KB", convert)
+		rValue = fmt.Sprintf("%.2f KiB", convert)
 	}
 
 	return rValue

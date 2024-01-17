@@ -226,8 +226,8 @@ func MakeActorPost(ctx *fiber.Ctx) error {
 		file, _ = header.Open()
 	}
 
-	if file != nil && header.Size > (12<<20) {
-		return route.Send400(ctx, "File too large, maximum file size is 12 MB")
+	if file != nil && header.Size > (int64(config.MaxAttachmentSize)<<20) {
+		return route.Send400(ctx, "File too large, maximum file size is "+util.ConvertSize(int64(config.MaxAttachmentSize)))
 	}
 
 	if is, _, regex := util.IsPostBlacklist(ctx.FormValue("comment")); is {

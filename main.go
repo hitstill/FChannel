@@ -35,8 +35,8 @@ func main() {
 		WriteTimeout: 30 * time.Second,
 		IdleTimeout:  60 * time.Second,
 		ServerHeader: "FChannel/" + config.InstanceName,
-		ProxyHeader:  "X-Real-IP",
-		BodyLimit:    12*1024*1024 + 594, // 12 MiB (max file size) + some extra for overhead
+		ProxyHeader:  config.ProxyHeader,
+		BodyLimit:    config.MaxAttachmentSize + 594, // max attachment size + some extra for overhead/headers etc
 	})
 
 	app.Use(logger.New())

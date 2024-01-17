@@ -641,6 +641,10 @@ func TemplateFunctions(engine *html.Engine) {
 		timeStrings = timeStrings[:len(timeStrings)-1]
 		return strings.Join(timeStrings, ", ") + " and " + last
 	})
+
+	engine.AddFunc("maxFileSize", func() string {
+		return util.ConvertSize(int64(config.MaxAttachmentSize))
+	})
 }
 
 func StatusTemplate(num int) func(ctx *fiber.Ctx, msg ...string) error {
