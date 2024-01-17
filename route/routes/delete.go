@@ -89,10 +89,8 @@ func MultiDelete(ctx *fiber.Ctx) error {
 		switch duration := time.Now().UTC().Sub(posted.UTC()); {
 		case duration < time.Duration(minduration)*time.Second:
 			failed++
-			route.GenericError(ctx, "Post is too new to delete!")
 		case duration > time.Duration(maxduration)*time.Second:
 			failed++
-			route.GenericError(ctx, "Post is too old to delete!")
 		default:
 			var actor activitypub.Actor
 			var isOP bool
@@ -106,8 +104,8 @@ func MultiDelete(ctx *fiber.Ctx) error {
 			}
 
 			local, err = obj.IsLocal()
-			if err != nil {
-				return util.MakeError(err, "MultiDelete")
+			if err != nil || !local {
+				return route.GenericError(ctx, "Cannot delete non-local post.")
 			}
 
 			if ctx.FormValue("onlyimg") == "true" && !isOP && local {
@@ -151,7 +149,7 @@ func MultiDelete(ctx *fiber.Ctx) error {
 		}
 	}
 	if failed > 0 {
-		return route.GenericError(ctx, strconv.Itoa(failed)+" post(s) were too new or too old to delete.")
+		return route.GenericError(ctx, strconv.Itoa(failed)+" post(s) were too old or new and have not been deleted.")
 	}
 	return ctx.RedirectBack("/")
 }
