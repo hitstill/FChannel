@@ -7,6 +7,9 @@
   <li>[<a href="/{{ .page.Board.Name }}">Return</a>]</li>
   {{ template "partials/post_nav" .page }}
   <li>[<a href="#bottom" id="top">Bottom</a>]</li>
+  <li style="float: right;">[<a href="./feed.json?limit=100">JSON</a>]</li> 
+  <li style="float: right;">[<a href="./feed.atom?limit=100">Atom</a>]&nbsp;</li> 
+  <li style="float: right;">[<a href="./feed.rss?limit=100">RSS</a>]&nbsp;</li>
 </ul>
 
 <hr>
@@ -83,6 +86,9 @@
   <li>[<a href="/{{ .page.Board.Name }}">Return</a>]</li>
   {{ template "partials/post_nav" .page }}
   <li>[<a href="#top" id="bottom">Top</a>]</li>
+  <li style="float: right;">[<a href="./feed.json?limit=100">JSON</a>]</li> 
+  <li style="float: right;">[<a href="./feed.atom?limit=100">Atom</a>]&nbsp;</li> 
+  <li style="float: right;">[<a href="./feed.rss?limit=100">RSS</a>]&nbsp;</li>
 </ul>
 
 <hr>

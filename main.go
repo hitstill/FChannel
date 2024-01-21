@@ -125,6 +125,7 @@ func main() {
 	app.Get("/f", routes.ActorFlash)
 	app.Get("/:actor", routes.ActorPosts)
 	app.Get("/:actor/:post", routes.ActorPost)
+	app.Get("/:actor/:post/feed.:feedtype", routes.GetThreadFeed)
 
 	// Settings Routes
 	app.Post("/settheme", routes.SetTheme)

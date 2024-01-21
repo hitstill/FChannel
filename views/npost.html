@@ -6,6 +6,13 @@
   <li>[<a href="/{{ .page.Board.Name }}">Return</a>]</li>
   {{ template "partials/post_nav" .page }}
   <li>[<a href="#bottom" id="top">Bottom</a>]</li>
+  {{ if gt (len .page.Posts) 0 }}
+  {{ if eq (index .page.Posts 0).Type "Note" }}
+  <li style="float: right;">[<a href="{{ (index .page.Posts 0).Id }}/feed.json?limit=100">JSON</a>]</li> 
+  <li style="float: right;">[<a href="{{ (index .page.Posts 0).Id }}/feed.atom?limit=100">Atom</a>]&nbsp;</li> 
+  <li style="float: right;">[<a href="{{ (index .page.Posts 0).Id }}/feed.rss?limit=100">RSS</a>]&nbsp;</li>
+  {{ end }}
+  {{ end }}
 </ul>
 
 <hr>
@@ -25,6 +32,13 @@
         <li>[<a href="#top" id="bottom">Top</a>]</li>
         <li><input id="autoreload-checkbox" type="checkbox" onclick="autoTimer()"> Auto refresh <span
             id="autoreload-countdown" style="visibility: hidden;">0</span></li>
+        {{ if gt (len .page.Posts) 0 }}
+        {{ if eq (index .page.Posts 0).Type "Note" }}
+        <li style="float: right;">[<a href="{{ (index .page.Posts 0).Id }}/feed.json">JSON</a>]</li> 
+        <li style="float: right;">[<a href="{{ (index .page.Posts 0).Id }}/feed.atom">Atom</a>]&nbsp;</li> 
+        <li style="float: right;">[<a href="{{ (index .page.Posts 0).Id }}/feed.rss">RSS</a>]&nbsp;</li>
+        {{ end }}
+        {{ end }}
       </ul>
     </td>
 
