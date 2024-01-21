@@ -13,7 +13,7 @@ instancesummary:FChan is a federated image board instance.
 
 instancetp:https://
 
-## Header send from an upstream server (e.g. reverse proxy) which has users actual IP
+## Header sent from an upstream server (e.g. reverse proxy) which has the users actual IP
 ## The example NGINX config uses X-Real-IP
 proxyheader:X-Real-IP
 
