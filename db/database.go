@@ -405,7 +405,7 @@ func IsIPBanned(i string) (string, string, time.Time, time.Time, error) {
 	var expires time.Time
 
 	// Worth also including NULL values just incase?
-	query := `select ip, reason, date, expires from bannedips where ip=$1 AND expires > now() ORDER BY "expires" DESC;`
+	query := `select ip, reason, date, expires from bannedips where $1 <<= ip AND expires > now() ORDER BY "expires" DESC;`
 	_ = config.DB.QueryRow(query, i).Scan(&ip, &reason, &date, &expires)
 
 	return ip, reason, date, expires, nil
@@ -415,7 +415,7 @@ func GetAllBansForIP(ip string) ([]Ban, error) {
 	var bans []Ban
 
 	// Display permanent bans at top, else sort by date
-	query := `SELECT ip, reason, date, expires FROM bannedips WHERE ip=$1 ORDER BY (CASE WHEN expires ='9999-12-31 00:00:00' then '1' else '2' END) ASC, date DESC;`
+	query := `SELECT ip, reason, date, expires FROM bannedips where $1 <<= ip ORDER BY (CASE WHEN expires ='9999-12-31 00:00:00' then '1' else '2' END) ASC, date DESC;`
 	rows, err := config.DB.Query(query, ip)
 	if err != nil {
 		return nil, err

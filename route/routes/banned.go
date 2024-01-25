@@ -38,7 +38,11 @@ func BannedGet(ctx *fiber.Ctx) error {
 	data.ThemeCookie = route.GetThemeCookie(ctx)
 
 	var banned db.Ban
+
 	banned.IP, banned.Reason, banned.Date, banned.Expires, _ = db.IsIPBanned(ctx.IP())
+	if len(banned.IP) > 0 {
+		banned.IP = ctx.IP()
+	}
 
 	return ctx.Render("banned", fiber.Map{"page": data, "banned": banned}, "layouts/main")
 }
