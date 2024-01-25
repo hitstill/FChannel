@@ -34,9 +34,6 @@
             id="autoreload-countdown" style="visibility: hidden;">0</span></li>
         {{ if gt (len .page.Posts) 0 }}
         {{ if eq (index .page.Posts 0).Type "Note" }}
-        <li style="float: right;">[<a href="{{ (index .page.Posts 0).Id }}/feed.json">JSON</a>]</li> 
-        <li style="float: right;">[<a href="{{ (index .page.Posts 0).Id }}/feed.atom">Atom</a>]&nbsp;</li> 
-        <li style="float: right;">[<a href="{{ (index .page.Posts 0).Id }}/feed.rss">RSS</a>]&nbsp;</li>
         {{ end }}
         {{ end }}
       </ul>

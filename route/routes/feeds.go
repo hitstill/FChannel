@@ -41,7 +41,7 @@ func GetThreadFeed(ctx *fiber.Ctx) error {
 
 	now := time.Now()
 	feed := &feeds.Feed{
-		Title:   "/" + actor.Name + "/ - " + ctx.Params("post"),
+		Title:   "/" + actor.Name + "/ - " + ctx.Params("post"), //TODO: Put thread subject here if it exists
 		Link:    &feeds.Link{Href: thread},
 		Created: now,
 	}
@@ -107,7 +107,6 @@ func GetThreadFeed(ctx *fiber.Ctx) error {
 		}
 		feed.Add(feedItem)
 	}
-
 	var feedContent string
 	switch feedtype {
 	case "atom":
@@ -128,8 +127,13 @@ func GetThreadFeed(ctx *fiber.Ctx) error {
 	}
 
 	// check these
-	ctx.Set("Etag", feed.Items[0].Id)
-	ctx.Set("Last-Modified", feed.Items[0].Created.UTC().String())
+	if len(feed.Items) > 0 {
+		ctx.Set("Etag", feed.Items[0].Id)
+		ctx.Set("Last-Modified", feed.Items[0].Created.UTC().String())
+	} else {
+		ctx.Set("Etag", "0")
+		ctx.Set("Last-Modified", time.Now().UTC().String())
+	}
 	return ctx.SendString(feedContent)
 }
 
