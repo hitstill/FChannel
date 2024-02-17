@@ -226,6 +226,10 @@ func MakeActorPost(ctx *fiber.Ctx) error {
 		file, _ = header.Open()
 	}
 
+	if file != nil && len(header.Filename) > 256 {
+		return route.Send400(ctx, "Filename too long, maximum length is 256 characters")
+	}
+
 	if file != nil && header.Size > (int64(config.MaxAttachmentSize)<<20) {
 		return route.Send400(ctx, "File too large, maximum file size is "+util.ConvertSize(int64(config.MaxAttachmentSize)))
 	}
