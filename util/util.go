@@ -15,6 +15,7 @@ import (
 	"strings"
 
 	"github.com/FChannel0/FChannel-Server/config"
+	"github.com/gabriel-vasile/mimetype"
 )
 
 func IsOnion(url string) bool {
@@ -214,7 +215,7 @@ func GetFileContentType(out multipart.File) (string, error) {
 	}
 
 	out.Seek(0, 0)
-	contentType := DetectContentType(buffer)
+	contentType := mimetype.Detect(buffer).String()
 
 	return contentType, nil
 }

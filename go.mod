@@ -23,11 +23,13 @@ require (
 	github.com/mattn/go-runewidth v0.0.15 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
+	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/sys v0.14.0 // indirect
 )
 
 require (
 	github.com/andybalholm/brotli v1.0.6 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.3
 	github.com/klauspost/compress v1.17.3 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/sourcegraph/annotate v0.0.0-20160123013949-f4cad6c6324d // indirect
