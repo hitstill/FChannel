@@ -322,3 +322,14 @@ a.userEmail span.name {
 a.userEmail:hover span.name {
   color: #fb4934;
 }
+
+
+.postMenu > .postMenu-container > a {
+    border: 1px solid #928374;
+	  border-bottom: 1px solid #928374;
+	  color: #ebdbb2
+  }
+  
+.postMenu > .postMenu-container > a:hover {
+  background-color: #504945;
+}

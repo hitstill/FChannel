@@ -442,3 +442,71 @@ else {
 document.querySelectorAll('.timestamp').forEach(timestamp => {
   timestamp.addEventListener('mouseover', timeSince);
 });
+
+/* TODO: better function names */
+function hide(el) {
+    id = el.id.replace('hidebtn-','')
+    console.log(id)
+    if (localStorage.getItem("hide") === null) {
+        var ids = [];
+    } else {
+        var ids = JSON.parse(localStorage.getItem("hide"));
+    }
+
+    ids.push(id);
+    localStorage.setItem("hide", JSON.stringify(ids));
+    hidePost(id);
+}
+
+function unhide(el) {
+    id = el.id.replace('hidebtn-','')
+    console.log(id)
+    if (localStorage.getItem("hide") === null) {
+        var ids = [];
+    } else {
+        var ids = JSON.parse(localStorage.getItem("hide"));
+    }
+
+    ids = ids.filter(elem => elem !== id);
+    localStorage.setItem("hide", JSON.stringify(ids));
+    unhidePost(id);
+}
+
+function hidePost(id) {
+    /* This can probably get pretty slow, posts should probably be wrapped with a div  */
+    /* Also move this into a better file*/
+    content = document.getElementById(id + "-content");
+    if (content) {content.style.display = "none";
+    content.parentElement.classList.add("postHidden");}
+    hidebtn = document.getElementById("hidebtn-"+id);
+    if (hidebtn) {hidebtn.text = "Unhide post";
+    hidebtn.onclick = function() {unhide(this)};}
+    if (content) {content.style.display = "none";}
+    finfo = document.getElementById(id + "-fileinfo");
+    if (finfo) {finfo.style.display = "none";}
+    attach = document.getElementById("media-" + id);
+    if (attach) {attach.style.display = "none";}
+}
+
+function unhidePost(id) {
+    content = document.getElementById(id + "-content");
+    if (content) {content.style.display = "block";
+    content.parentElement.classList.remove("postHidden");}
+    hidebtn = document.getElementById("hidebtn-"+id);
+    if (hidebtn) {hidebtn.text = "Hide post";
+    hidebtn.onclick = function() {hide(this)};}
+    if (content) {content.style.display = "block";}
+    finfo = document.getElementById(id + "-fileinfo");
+    if (finfo) {finfo.style.display = "block";}
+    attach = document.getElementById("media-" + id);
+    if (attach) {attach.style.display = "block";}
+}
+
+if (localStorage.getItem("hide") !== null) {
+    var ids = JSON.parse(localStorage.getItem("hide"));
+    let i = 0;
+    while (i < ids.length) {
+        hidePost(ids[i])
+        i++;
+    }
+}

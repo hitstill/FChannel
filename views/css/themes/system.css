@@ -362,6 +362,44 @@
   a.userEmail:hover span.name {
     color: #d00;
   }
+
+  .postMenu > .postMenu-text {
+    color: #34345c;
+  }
+  
+ /* .postMenu > .postMenu-container {
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.3);
+  }*/
+  .postMenu > .postMenu-container > a {
+    background-color: #d6daf0;
+    border: 1px solid #b7c5d9;
+    border-bottom: 1px solid #b7c5d9;
+  }
+  
+  .postMenu > .postMenu-container > a:hover {
+    background-color: #eef2ff;
+    color: unset;
+  }
+  
+  .nsfw .postMenu > .postMenu-text {
+    color: #000080;
+  }
+  
+  /*.nsfw .postMenu > .postMenu-container {
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.3);
+  } */
+  
+  .nsfw .postMenu > .postMenu-container > a {
+    background-color: #f0e0d6;
+    border: 1px solid #d9bfb7;
+    border-bottom: 1px solid #d9bfb7;
+    color: maroon;
+  }
+  
+  .nsfw .postMenu > .postMenu-container > a:hover {
+    background-color: #ffe;
+    color: unset;
+  }
 }
 @media (prefers-color-scheme: dark) {
   a, a:link, a:visited, a:hover, a:active {
@@ -694,6 +732,20 @@ a.userEmail span.name {
   a.userEmail:hover span.name {
 	color: #5f89ac;
   }
+  .postMenu > .postMenu-text {
+	color: #81a2be;
+  }
+  
+   .postMenu > .postMenu-container > a {
+	background-color: #282a2e;
+  	border: 1px solid #000;
+	border-bottom: 1px solid #000;
+	color: #c5c8c6
+  }
+  
+  .postMenu > .postMenu-container > a:hover {
+	background-color: #1d1f21;
+  }
 }
 .posteruid .id {
   padding: 0 5px;
@@ -707,4 +759,5 @@ s, s a:not(:hover) {
   color: #000 !important;
   background: #000 !important;
   text-decoration: none;
+  
 }
