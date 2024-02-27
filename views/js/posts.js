@@ -446,7 +446,6 @@ document.querySelectorAll('.timestamp').forEach(timestamp => {
 /* TODO: better function names */
 function hide(el) {
     id = el.id.replace('hidebtn-','')
-    console.log(id)
     if (localStorage.getItem("hide") === null) {
         var ids = [];
     } else {
@@ -460,7 +459,6 @@ function hide(el) {
 
 function unhide(el) {
     id = el.id.replace('hidebtn-','')
-    console.log(id)
     if (localStorage.getItem("hide") === null) {
         var ids = [];
     } else {
