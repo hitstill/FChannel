@@ -417,18 +417,18 @@ func ParseAttachment(obj activitypub.ObjectBase, catalog bool) template.HTML {
 		media += "id=\"img\" "
 		media += "main=\"1\" "
 		media += "enlarge=\"0\" "
-		media += "attachment=\"" + obj.Attachment[0].Href + "\""
+		media += "attachment=\"" + obj.Attachment[0].Href + "\" "
 		if catalog {
 			media += "style=\"max-width: 180px; max-height: 180px;\" "
 		} else {
-			media += "style=\"float: left; margin-right: 10px; margin-bottom: 10px; max-width: 250px; max-height: 250px;\""
+			media += "style=\"float: left; margin-right: 10px; margin-bottom: 10px; max-width: 250px; max-height: 250px;\" "
 		}
 		if obj.Preview.Id != "" {
-			media += "src=\"" + util.MediaProxy(obj.Preview.Href) + "\""
-			media += "preview=\"" + util.MediaProxy(obj.Preview.Href) + "\""
+			media += "src=\"" + util.MediaProxy(obj.Preview.Href) + "\" "
+			media += "preview=\"" + util.MediaProxy(obj.Preview.Href) + "\" "
 		} else {
-			media += "src=\"" + util.MediaProxy(obj.Attachment[0].Href) + "\""
-			media += "preview=\"" + util.MediaProxy(obj.Attachment[0].Href) + "\""
+			media += "src=\"" + util.MediaProxy(obj.Attachment[0].Href) + "\" "
+			media += "preview=\"" + util.MediaProxy(obj.Attachment[0].Href) + "\" "
 		}
 
 		media += ">"

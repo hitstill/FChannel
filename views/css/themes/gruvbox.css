@@ -333,3 +333,7 @@ a.userEmail:hover span.name {
 .postMenu > .postMenu-container > a:hover {
   background-color: #504945;
 }
+
+.summary {
+  color: #707070;
+}

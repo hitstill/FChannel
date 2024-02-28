@@ -41,7 +41,7 @@
             <td><label for="file">File:</label></td>
             <td><b id="form-drawlabel" style="display: none;">Drawing</b><input type="file" accept=".gif,.png,.apng,.jpg,.jpeg,.jxl,.webp,.avif,.mp4,.webm,.ogg,.mp2,.mp3,.mpa,.wav,.wave,.swf,.flv" id="file" name="file" {{ if gt $len 1 }} required {{ else }} {{ if eq $len 0 }} required {{ end }} {{ end }} >
 								<span style="float: right;">({{maxFileSize}} max)</span>
-                <br><input type="checkbox" name="sensitive">Mark sensitive</input></td>
+                <br><input type="checkbox" name="sensitive">Mark sensitive</td>
 			          </tr>
 								<tr data-type="Painter" style="display:none;" id="drawform"> 
 									<td>Draw:</td>
@@ -113,13 +113,13 @@
             </td>
           </tr>
           <tr>
-            <td><label for="file">File</label></td>
+            <td><label for="file">File:</label></td>
             <td><b id="form-drawlabel" style="display: none;">Drawing</b><input type="file" accept=".gif,.png,.apng,.jpg,.jpeg,.jxl,.webp,.avif,.mp4,.webm,.ogg,.mp2,.mp3,.mpa,.wav,.wave,.swf,.flv" id="file" name="file" {{ if gt $len 1 }} required {{ else }} {{ if eq $len 0 }} required {{ end }} {{ end }} >
 								<span style="float: right;">({{maxFileSize}} max)</span>
-                <br><input type="checkbox" name="sensitive">Mark sensitive</input></td>
+                <br><input type="checkbox" name="sensitive">Mark sensitive</td>
 								</tr>
 								<tr data-type="Painter" style="display:none;" id="drawform">
-									<td>Draw</td>
+									<td>Draw:</td>
 									<td class="painter-ctrl">Size <input type="text" value="400" maxlength="4"> × <input type="text" value="400" maxlength="4">&nbsp;
 									<button data-dims="400" type="button">Draw</button>
 									<button disabled="" type="button">Clear</button>
@@ -141,8 +141,6 @@
       <input type="hidden" id="boardName" name="boardName" value="{{ .Board.Name }}">
       <input type="hidden" id="captchaCode" name="captchaCode" value="{{ .Board.CaptchaCode }}">
       <input type="hidden" id="returnTo" name="returnTo" value="{{ .ReturnTo }}">    </form>
-  </div>
-
   </div>
   {{ else }}
   <h1 style="text-align: center;">Archived Post</h1>

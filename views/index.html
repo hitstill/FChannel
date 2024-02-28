@@ -60,7 +60,7 @@
           </div>
         </div>
         <a id="{{ .Id }}-anchor" href="{{ .Id }}">
-          <div id="media-{{ .Id }}" style="width:180px;"><div id="status" style="position: absolute;">{{ if .Sticky }}<span id="sticky"><img src="/static/pin.png"></span>{{ end }}{{ if .Locked }}<span id="lock"><img src="/static/locked.png"></span>{{ end }}</div>{{ parseAttachment . true }}</div>
+          <div id="media-{{ .Id }}" style="width:180px;"><div class="status" style="position: absolute;">{{ if .Sticky }}<span class="sticky"><img src="/static/pin.png"></span>{{ end }}{{ if .Locked }}<span class="lock"><img src="/static/locked.png"></span>{{ end }}</div>{{ parseAttachment . true }}</div>
         </a>
         {{ end }}
         <a style="color: unset;" id="{{ .Id }}-link" href="{{ .Id }}">

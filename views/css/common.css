@@ -12,6 +12,8 @@
     display: -webkit-inline-box;
     height:0;
     opacity: 100%;
+    padding-left: 10px;
+    padding-right: 5px;
 }
 .postMenu > .postMenu-text {
     text-decoration: none;
@@ -23,6 +25,9 @@
     text-align: center;
     outline: none;
     opacity: 0.8;
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none; /* IE 10 and IE 11 */
+    user-select: none;
 }
 .postMenu > input {
     top: 0;
@@ -72,4 +77,9 @@
     .postMenu-search:has(~ .postMenu-search:hover) {
         opacity: 100%;
     }
+}
+
+.summary {
+    font-style: italic;
+    margin-top: 10px;
 }

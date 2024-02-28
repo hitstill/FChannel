@@ -43,7 +43,7 @@
 		{{ .Alias | parseEmail }}<span class="name{{if eq .TripCode "#Admin"}} capcodeAdmin{{end}}{{if eq .TripCode "#Mod"}} capcodeMod{{end}}{{if eq .TripCode "#Janitor"}} capcodeJanitor{{end}}"><b>{{ if .AttributedTo }}{{.AttributedTo }}{{ else }}Anonymous{{ end }}</b></span>{{ if .Alias }}</a>{{ end }}
     <span class="tripcode{{if eq .TripCode "#Admin"}} capcodeAdmin{{end}}{{if eq .TripCode "#Mod"}} capcodeMod{{end}}{{if eq .TripCode "#Janitor"}} capcodeJanitor{{end}}"> {{ .TripCode }} </span>
 		{{ .Alias | parseIDandFlag }}
-		<span class="timestamp" data-utc="{{.Published | timeToUnix}}">{{ .Published | timeToReadableLong }}</span> <a id="{{ .Id }}-anchor" href="/{{ $board.Name }}/{{ shortURL $board.Actor.Outbox $opId }}#{{ shortURL $board.Actor.Outbox .Id }}">No.</a> <a id="{{ .Id }}-link" title="{{ .Id }}"   {{ if eq .Locked false }} {{ if eq .Type "Note" }} onclick="quote('{{ $board.Actor.Id }}', '{{ $opId }}', '{{ .Id }}');return false" href="{{ .Id }}" {{ end }} {{ end }}>{{ shortURL $board.Actor.Outbox .Id }}</a> <span id="status" style="margin-right: 5px;">{{ if .Sticky }}<span id="sticky"><img src="/static/pin.png"></span>{{ end }} {{ if .Locked }} <span id="lock"><img src="/static/locked.png"></span>{{ end }}</span>{{ if ne .Type "Tombstone" }}<div class="postMenu">
+		<span class="timestamp" data-utc="{{.Published | timeToUnix}}">{{ .Published | timeToReadableLong }}</span> <a class="postid" id="{{ .Id }}-anchor" href="/{{ $board.Name }}/{{ shortURL $board.Actor.Outbox $opId }}#{{ shortURL $board.Actor.Outbox .Id }}">No.</a> <a class="postid" id="{{ .Id }}-link" title="{{ .Id }}"   {{ if eq .Locked false }} {{ if eq .Type "Note" }} onclick="quote('{{ $board.Actor.Id }}', '{{ $opId }}', '{{ .Id }}');return false" href="{{ .Id }}" {{ end }} {{ end }}>{{ shortURL $board.Actor.Outbox .Id }}</a> <span class="status">{{ if .Sticky }}<span class="sticky"><img src="/static/pin.png"></span>{{ end }} {{ if .Locked }} <span class="lock"><img src="/static/locked.png"></span>{{ end }}</span>{{ if ne .Type "Tombstone" }}<div class="postMenu">
       <div class="postMenu-text">▶</div>
       <input type="checkbox">
       <div class="postMenu-container">
@@ -52,8 +52,8 @@
           <a href="/banmedia?id={{ .Id }}&board={{ $board.Actor.Name }}" onclick="return confirm('Ban Media?');">Ban Media</a>
           <a href="/deleteattach?id={{ .Id }}&board={{ $board.Actor.Name }}" onclick="return confirm('Delete Attachment?');">Delete Attachment</a>
           <a href="/marksensitive?id={{ .Id }}&board={{ $board.Actor.Name }}" onclick="return confirm('Mark Sensitive?');">Mark Sensitive</a>
-          <a href="/sticky?id={{ .Id }}&board={{ $board.Actor.Name }}" onclick="return confirm('Sticky Thread?');">Sticky</a>
-          <a href="/lock?id={{ .Id }}&board={{ $board.Actor.Name }}" onclick="return confirm('Lock Thread?');">Lock</a>
+          <a href="/sticky?id={{ .Id }}&board={{ $board.Actor.Name }}" onclick="return confirm('{{ if .Sticky }}Unsticky Thread?');">Unsticky{{else}}Sticky Thread?');">Sticky{{end}}</a>
+          <a href="/lock?id={{ .Id }}&board={{ $board.Actor.Name }}" onclick="return confirm('{{ if .Locked }}Unlock Thread?');">Unlock{{else}}Lock Thread?');">Lock{{end}}</a>
           {{ end }}
           <a href="/delete?id={{ .Id }}&board={{ $board.Actor.Name }}" onclick="return confirm('Delete Post?');">Delete Post</a>
           <a href="/ban?actor={{ $board.Actor.Id }}&post={{ .Id }}">Ban IP</a>
@@ -65,16 +65,20 @@
           <a class="postMenu-search" style="margin-top: -22px;" href="https://www.google.com/searchbyimage?sbisrc=cr_1_5_2&amp;image_url={{ (index .Attachment 0).Href }}" target="_blank">Google</a>
           <a class="postMenu-search" href="https://www.yandex.com/images/search?img_url={{ (index .Attachment 0).Href }}&amp;rpt=imageview" target="_blank">Yandex</a>
           <a class="postMenu-search" href="https://saucenao.com/search.php?url={{ (index .Attachment 0).Href }}" target="_blank">SauceNAO</a>
+          <a class="postMenu-search" href="https://trace.moe/?auto&amp;url={{ (index .Attachment 0).Href }}" target="_blank">trace.moe</a>
           {{ end }}
+          </div>
       </div>
-  </div>{{ end }}
+  {{ end }}
     </div>
     <blockquote id="{{ .Id }}-content" class="comment" style="white-space: pre-wrap; margin: 10px 30px 10px 30px;">{{ parseContent $board.Actor $opId .Content $thread .Id $page.PostType }}</blockquote>
-    {{ if .Replies }}
+    {{ if .Replies }} 
     {{ $replies := .Replies }}
     {{ if gt $replies.TotalItems 5 }}
     {{ if gt $len 1 }}
-    <span>{{ $replies.TotalItems }} replies{{ if gt $replies.TotalImgs 0}} and {{ $replies.TotalImgs }} images{{ end }}, Click <a id="view" post="{{.Id}}" href="/{{ $board.Name }}/{{ shortURL $board.Actor.Outbox .Id }}">here</a> to view all.</span>
+    <span class="summary">{{ $replies.TotalItems }} replies{{ if gt $replies.TotalImgs 0}} and {{ $replies.TotalImgs }} images{{ end }}, Click <a id="view" post="{{.Id}}" href="/{{ $board.Name }}/{{ shortURL $board.Actor.Outbox .Id }}">here</a> to view all.</span>
+    <br>
+    <br>
     {{ end }}
     {{ end }}
     {{ range $replies.OrderedItems }}
@@ -88,17 +92,15 @@
 					{{ .Alias | parseEmail }}<span class="name{{if eq .TripCode "#Admin"}} capcodeAdmin{{end}}{{if eq .TripCode "#Mod"}} capcodeMod{{end}}{{if eq .TripCode "#Janitor"}} capcodeJanitor{{end}}"><b>{{ if .AttributedTo }}{{.AttributedTo }}{{ else }}Anonymous{{ end }}</b></span>{{ if .Alias }}</a>{{ end }}
           <span class="tripcode{{if eq .TripCode "#Admin"}} capcodeAdmin{{end}}{{if eq .TripCode "#Mod"}} capcodeMod{{end}}{{if eq .TripCode "#Janitor"}} capcodeJanitor{{end}}"> {{ .TripCode }} </span>
 					{{ .Alias | parseIDandFlag }}
-					<span class="timestamp" data-utc="{{ .Published | timeToUnix }}">{{ .Published | timeToReadableLong }}</span> <a id="{{ .Id }}-anchor" href="/{{ $board.Name }}/{{ shortURL $board.Actor.Outbox $opId }}#{{ shortURL $board.Actor.Outbox .Id }}">No. </a><a id="{{ .Id }}-link" title="{{ .Id }}" {{ if eq $thread.Locked false }} {{ if eq .Type "Note" }} onclick="quote('{{ $board.Actor.Id }}', '{{ $opId }}', '{{ .Id }}');return false" href="{{ .Id }}" {{ end }} {{ end }}>{{ shortURL $board.Actor.Outbox .Id }}</a> {{ if ne .Type "Tombstone" }}<div class="postMenu">
+					<span class="timestamp" data-utc="{{ .Published | timeToUnix }}">{{ .Published | timeToReadableLong }}</span> <a class="postid" id="{{ .Id }}-anchor" href="/{{ $board.Name }}/{{ shortURL $board.Actor.Outbox $opId }}#{{ shortURL $board.Actor.Outbox .Id }}">No. </a><a class="postid" id="{{ .Id }}-link" title="{{ .Id }}" {{ if eq $thread.Locked false }} {{ if eq .Type "Note" }} onclick="quote('{{ $board.Actor.Id }}', '{{ $opId }}', '{{ .Id }}');return false" href="{{ .Id }}" {{ end }} {{ end }}>{{ shortURL $board.Actor.Outbox .Id }}</a> {{ if ne .Type "Tombstone" }}<div class="postMenu">
             <div class="postMenu-text">▶</div>
             <input type="checkbox">
             <div class="postMenu-container">
                 {{ if eq $board.ModCred $board.Domain $board.Actor.Id }}
-                {{ if .Attachment }}
+                {{ if (index .Attachment 0).Id }}
                 <a href="/banmedia?id={{ .Id }}&board={{ $board.Actor.Name }}" onclick="return confirm('Ban Media?');">Ban Media</a>
                 <a href="/deleteattach?id={{ .Id }}&board={{ $board.Actor.Name }}" onclick="return confirm('Delete Attachment?');">Delete Attachment</a>
                 <a href="/marksensitive?id={{ .Id }}&board={{ $board.Actor.Name }}" onclick="return confirm('Mark Sensitive?');">Mark Sensitive</a>
-                <a href="/sticky?id={{ .Id }}&board={{ $board.Actor.Name }}" onclick="return confirm('Sticky Thread?');">Sticky</a>
-                <a href="/lock?id={{ .Id }}&board={{ $board.Actor.Name }}" onclick="return confirm('Lock Thread?');">Lock</a>
                 {{ end }}
                 <a href="/delete?id={{ .Id }}&board={{ $board.Actor.Name }}" onclick="return confirm('Delete Post?');">Delete Post</a>
                 <a href="/ban?actor={{ $board.Actor.Id }}&post={{ .Id }}">Ban IP</a>
@@ -110,16 +112,17 @@
                 <a class="postMenu-search" style="margin-top: -22px;" href="https://www.google.com/searchbyimage?sbisrc=cr_1_5_2&amp;image_url={{ (index .Attachment 0).Href }}" target="_blank">Google</a>
                 <a class="postMenu-search" href="https://www.yandex.com/images/search?img_url={{ (index .Attachment 0).Href }}&amp;rpt=imageview" target="_blank">Yandex</a>
                 <a class="postMenu-search" href="https://saucenao.com/search.php?url={{ (index .Attachment 0).Href }}" target="_blank">SauceNAO</a>
+                <a class="postMenu-search" href="https://trace.moe/?auto&amp;url={{ (index .Attachment 0).Href }}" target="_blank">trace.moe</a>
                 {{ end }}
             </div>
         </div>{{ end }}
-          </div>
           {{ $parentId := .Id }}
           {{ if .Replies.OrderedItems }}
           {{ range .Replies.OrderedItems }}
           <span id="{{$parentId}}-replyto-{{.Id}}">{{ parseReplyLink $board.Actor.Id $opId .Id .Content }}</span>
           {{ end }}
           {{ end }}
+        </div>
           {{ if (index .Attachment 0).Id }}
           <span id="{{ .Id }}-fileinfo" style="display: block;">File: <a id="{{ .Id }}-img" href="{{ proxy (index .Attachment 0).Href}}" download="{{ (index .Attachment 0).Name  }}">{{ shortImg (index .Attachment 0).Name  }}</a> <span id="{{ .Id }}-size">({{ convertSize (index .Attachment 0).Size  }})</span>{{ if eq .Locked false }} {{ if eq .Type "Note" }} [<a href="javascript:quote('{{ $board.Actor.Id }}', '{{ $opId }}', '{{ .Id }}')" onclick="EditImage(this.previousElementSibling.previousElementSibling.href)">Draw</a>]{{ end }} {{ end }}</span>
           <div id="hide-{{ .Id }}" style="display: none;">[Hide]</div>
@@ -150,14 +153,11 @@
           </script>
           {{ end }}
           <blockquote id="{{ .Id }}-content" class="comment" style="white-space: pre-wrap; margin: 10px 30px 10px 30px;">{{ parseContent $board.Actor $opId .Content $thread .Id $page.PostType }}</blockquote>
-          <div>
-        </div>
+      </div>
       </div>
     </div>
     {{ end }}
     {{ end }}
-  </div>
+    </div>
 </div>
-</div>
-</form>
 {{ end }}

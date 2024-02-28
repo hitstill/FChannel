@@ -265,7 +265,7 @@ expires timestamp DEFAULT '9999-12-31 00:00:00' NOT NULL
 
 CREATE TABLE IF NOT EXISTS identify (
 id varchar(256) NOT NULL,
-ip varchar(45),
+ip inet,
 password character varying,
 posted timestamp DEFAULT timezone('utc', now())
 );

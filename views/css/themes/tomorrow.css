@@ -58,19 +58,13 @@ body {
 	font-weight: 400 !important;
 }
 /* post No. and ID */
-.timestamp>a {
+a.postid {
 	color: #c5c8c6;
 }
-.timestamp>a:hover {
+a.postid:hover {
 	color: #5f89ac;
 }
-/* report and open buttons */
-.timestamp>a:nth-child(3), .timestamp>a:nth-child(4) {
-	color: #81a2be;
-}
-.timestamp>a:nth-child(3):hover, .timestamp>a:nth-child(4):hover {
-	color: #5f89ac;
-}
+
 a.reply {
 	text-decoration: 1px underline;
 }
@@ -358,4 +352,8 @@ a.userEmail span.name {
   
   .postMenu > .postMenu-container > a:hover {
 	background-color: #1d1f21;
+  }
+
+  .summary {
+    color: #707070;
   }
