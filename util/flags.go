@@ -4,6 +4,7 @@ import (
 	"net"
 	"strings"
 
+	"github.com/FChannel0/FChannel-Server/config"
 	"github.com/oschwald/maxminddb-golang"
 )
 
@@ -34,9 +35,10 @@ import (
 
 func GetCC(ip string) string {
 	if IsTorExit(ip) || ip == "172.16.0.1" {
-		return "xx"
+		return "xp"
 	}
-	db, err := maxminddb.Open("/usr/share/GeoIP/GeoLite2-Country.mmdb")
+	
+	db, err := maxminddb.Open(config.MaxMindDB)
 	if err != nil {
 		return "xx"
 	}

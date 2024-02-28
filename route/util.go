@@ -159,15 +159,6 @@ func ParseOutboxRequest(ctx *fiber.Ctx, actor activitypub.Actor) error {
 				}
 			}
 
-			//if actor.Name == "int" {
-			//	re := regexp.MustCompile(`[🇦-🇿]{2}|🏴`)
-			//	nObj.AttributedTo = re.ReplaceAllString(nObj.AttributedTo, "${1}")
-			//	if strings.TrimSpace(nObj.AttributedTo) == "" {
-			//		nObj.AttributedTo = "Anonymous"
-			//	}
-			//	nObj.AttributedTo = util.GetFlag(ctx.Get("PosterIP")) + nObj.AttributedTo
-			//}
-
 			if actor.Name == "int" || actor.Name == "bint" {
 				nObj.Alias = "cc:" + util.GetCC(ctx.Get("PosterIP"))
 			}
@@ -177,12 +168,6 @@ func ParseOutboxRequest(ctx *fiber.Ctx, actor activitypub.Actor) error {
 				if ctx.Get("PosterIP") == "172.16.0.1" || util.IsTorExit(ctx.Get("PosterIP")) {
 					nObj.Alias = nObj.Alias + "id:HiddenID"
 				} else {
-
-					//	return ctx.Render("403", fiber.Map{
-					//		"message": "Proxies are not allowed on /" + actor.Name + "/",
-					//	})
-					//}
-
 					input := []byte(ctx.Get("PosterIP"))
 					hasher := sha256.New()
 					hasher.Write(input)
@@ -559,10 +544,15 @@ func TemplateFunctions(engine *html.Engine) {
 			var countryname string
 			cc = strings.TrimPrefix(cc, "cc:")
 			//TODO: remove external library for country
-			if posterCountry, ok := country.ByAlpha2CodeStr(cc); ok {
-				countryname = posterCountry.Name().String()
-			} else {
-				countryname = "Unknown/Hidden"
+			switch cc {
+			case "xp":
+				countryname = "Tor/Proxy"
+			default:
+				if posterCountry, ok := country.ByAlpha2CodeStr(cc); ok {
+					countryname = posterCountry.Name().String()
+				} else {
+					countryname = "Unknown/Hidden"
+				}
 			}
 			html = html + " <span title=\"" + countryname + "\" class=\"flag flag-" + cc + "\"></span>"
 		}

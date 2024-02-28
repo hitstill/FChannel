@@ -40,6 +40,8 @@ var MaxPostDelete = GetConfigValue("maxpostdelete", "1800")
 
 // TODO: this is bad but I don't feel like doing a new config system yet, and I can't into computers
 var MaxAttachmentSize, _ = strconv.Atoi(GetConfigValue("maxattachsize", "7340032"))
+var MaxMindDB = GetConfigValue("maxminddb", "")
+var TorExitList = GetConfigValue("torexitlist", "")
 var ProxyHeader = GetConfigValue("proxyheader", "")
 var Themes []string
 var DB *sql.DB

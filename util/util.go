@@ -24,14 +24,15 @@ func IsOnion(url string) bool {
 }
 
 func IsTorExit(ip string) bool {
-	b, err := ioutil.ReadFile("/tmp/tor-exit-nodes.lst")
+	exits, err := os.ReadFile(config.TorExitList)
 	if err != nil {
-		panic(err)
+		config.Log.Println("IsTorExit: Failed to read file \"" + config.TorExitList + ".")
+		return false
 	}
 
-	isExit, err := regexp.Match(ip, b)
+	isExit, err := regexp.Match(ip, exits)
 	if err != nil {
-		panic(err)
+		config.Log.Println("IsTorExit: Regex for IP (" + ip + ") failed.")
 	}
 	return isExit
 }

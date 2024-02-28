@@ -50,3 +50,11 @@ maxpostdelete:1800
 ## Max attachment file size in bytes 
 ## Default is 7MiB (7 * 1024 * 1024)
 maxfilesize:7340032
+
+## File path to MaxMind database Country database
+## See: https://dev.maxmind.com/geoip/updating-databases
+## GeoIP updater stores in /usr/share/GeoIP/GeoLite2-Country.mmdb
+maxminddb:
+
+## File path to list of Tor Exit node IP addresses
+torexitlist:
