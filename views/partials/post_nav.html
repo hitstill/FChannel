@@ -4,4 +4,4 @@
 {{ if and (ne .ReturnTo "archive") (ne .PostType "reply") (showArchive .Board.Actor) }}
 <li>[<a href="/{{ .Board.Name }}/archive">Archive</a>]</li>
 {{ end }}
-<li>[<a href="javascript:location.reload()">Refresh</a>]</li>
+<li>[<a href=".">Refresh</a>]</li>

@@ -455,6 +455,20 @@ a.userEmail:hover span.name {
   color: #707070;
   margin-top: 10px;
 }
+
+div.pagelist {
+  background:#d6daf0;
+  border-right:1px solid #b7c5d9;
+  border-bottom:1px solid #b7c5d9;
+  color:#89a
+}
+
+div.pagelist strong {
+  color:#000
+}
+div.pagelist div.cataloglink {
+  border-left:1px solid #b7c5d9;
+}
 }
 
 @media (prefers-color-scheme: dark) {
@@ -816,5 +830,15 @@ a.userEmail span.name {
 
   .summary {
     color: #707070;
+  }
+
+  div.pagelist {
+	background:#282a2e;
+	border:1px solid #111;
+	color:#c5c8c6
+  }
+
+  div.pagelist div.cataloglink {
+	border-left:1px solid #111;
   }
 }

@@ -357,3 +357,13 @@ a.userEmail span.name {
   .summary {
     color: #707070;
   }
+
+  div.pagelist {
+	background:#282a2e;
+	border:1px solid #111;
+	color:#c5c8c6
+  }
+
+  div.pagelist div.cataloglink {
+	border-left:1px solid #111;
+  }
