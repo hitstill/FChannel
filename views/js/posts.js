@@ -29,8 +29,9 @@ function hidePost(id) {
     /* This can probably get pretty slow, posts should probably be wrapped with a div  */
     /* Also move this into a better file*/
     content = document.getElementById(id + "-content");
-    if (content) {content.style.display = "none";
-    content.parentElement.classList.add("postHidden");}
+    if (content) {
+    content.style.display = "none";
+    content.parentElement.classList.add("postHidden");
     hidebtn = document.getElementById("hidebtn-"+id);
     if (hidebtn) {hidebtn.text = "Unhide post";
     hidebtn.onclick = function() {unhide(this)};}
@@ -39,6 +40,7 @@ function hidePost(id) {
     if (finfo) {finfo.style.display = "none";}
     attach = document.getElementById("media-" + id);
     if (attach) {attach.style.display = "none";}
+    }
 }
 
 function unhidePost(id) {
