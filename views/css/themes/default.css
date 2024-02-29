@@ -416,6 +416,14 @@ a.userEmail:hover span.name {
   color: #34345c;
 }
 
+.postMenu > input[type=checkbox]:hover + .postMenu-text {
+  color: #d00;
+}
+
+.nsfw .postMenu > input[type=checkbox]:hover + .postMenu-text {
+  color: red;
+}
+
 /*.postMenu > .postMenu-container, .postMenu > .postMenu-container > li {
   box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.3);
 }*/

@@ -6,8 +6,8 @@ a.reply {
   color: #cc241d;
   text-decoration: 1px underline;
 }
-a:hover.reply {
-  color: #fb4934;
+a:hover {
+  color: #fb4934!important;
 }
 body {
   background: #282828;
@@ -323,6 +323,13 @@ a.userEmail:hover span.name {
   color: #fb4934;
 }
 
+.postMenu > .postMenu-text {
+  color: #83a598;
+}
+
+.postMenu > .postMenu-text:hover {
+  color: #fb4934;
+}
 
 .postMenu > .postMenu-container > a {
     border: 1px solid #928374;

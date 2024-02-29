@@ -44,8 +44,8 @@
     <span class="tripcode{{if eq .TripCode "#Admin"}} capcodeAdmin{{end}}{{if eq .TripCode "#Mod"}} capcodeMod{{end}}{{if eq .TripCode "#Janitor"}} capcodeJanitor{{end}}"> {{ .TripCode }} </span>
 		{{ .Alias | parseIDandFlag }}
 		<span class="timestamp" data-utc="{{.Published | timeToUnix}}">{{ .Published | timeToReadableLong }}</span> <a class="postid" id="{{ .Id }}-anchor" href="/{{ $board.Name }}/{{ shortURL $board.Actor.Outbox $opId }}#{{ shortURL $board.Actor.Outbox .Id }}">No.</a> <a class="postid" id="{{ .Id }}-link" title="{{ .Id }}"   {{ if eq .Locked false }} {{ if eq .Type "Note" }} onclick="quote('{{ $board.Actor.Id }}', '{{ $opId }}', '{{ .Id }}');return false" href="{{ .Id }}" {{ end }} {{ end }}>{{ shortURL $board.Actor.Outbox .Id }}</a> <span class="status">{{ if .Sticky }}<span class="sticky"><img src="/static/pin.png"></span>{{ end }} {{ if .Locked }} <span class="lock"><img src="/static/locked.png"></span>{{ end }}</span>{{ if ne .Type "Tombstone" }}<div class="postMenu">
+      <input title="Post menu" type="checkbox">
       <div class="postMenu-text">▶</div>
-      <input type="checkbox">
       <div class="postMenu-container">
           {{ if eq $board.ModCred $board.Domain $board.Actor.Id }}
           {{ if .Attachment }}
@@ -83,9 +83,9 @@
     {{ end }}
     {{ range $replies.OrderedItems }}
     <div id="{{ shortURL $board.Actor.Outbox .Id }}">
-      <div  style="display: inline-block; overflow: auto;">
-        <div style="float: left; display: block; margin-right: 5px;">&gt;&gt;</div>
-        <div class="post" style="overflow: auto; padding: 5px; margin-bottom: 2px;">
+      <div style="overflow: auto;">
+        <div style="float: left; margin-right: 5px;">&gt;&gt;</div>
+        <div class="post" style="overflow: auto; padding: 5px; margin-bottom: 2px; display: inline-block;max-width: 90%;">
           <div id="{{.Id}}-info">
           <span class="postchk"><input type="checkbox" name="{{ .Id }}" value="delete"></span>
           <span class="subject"><b>{{.Name}}</b></span>
@@ -93,8 +93,8 @@
           <span class="tripcode{{if eq .TripCode "#Admin"}} capcodeAdmin{{end}}{{if eq .TripCode "#Mod"}} capcodeMod{{end}}{{if eq .TripCode "#Janitor"}} capcodeJanitor{{end}}"> {{ .TripCode }} </span>
 					{{ .Alias | parseIDandFlag }}
 					<span class="timestamp" data-utc="{{ .Published | timeToUnix }}">{{ .Published | timeToReadableLong }}</span> <a class="postid" id="{{ .Id }}-anchor" href="/{{ $board.Name }}/{{ shortURL $board.Actor.Outbox $opId }}#{{ shortURL $board.Actor.Outbox .Id }}">No. </a><a class="postid" id="{{ .Id }}-link" title="{{ .Id }}" {{ if eq $thread.Locked false }} {{ if eq .Type "Note" }} onclick="quote('{{ $board.Actor.Id }}', '{{ $opId }}', '{{ .Id }}');return false" href="{{ .Id }}" {{ end }} {{ end }}>{{ shortURL $board.Actor.Outbox .Id }}</a> {{ if ne .Type "Tombstone" }}<div class="postMenu">
+            <input title="Post menu" type="checkbox">
             <div class="postMenu-text">▶</div>
-            <input type="checkbox">
             <div class="postMenu-container">
                 {{ if eq $board.ModCred $board.Domain $board.Actor.Id }}
                 {{ if (index .Attachment 0).Id }}

@@ -11,7 +11,7 @@ imgArray.forEach(function(img, i){
         {
             var attachment = img.getAttribute("attachment");
             img.setAttribute("enlarge", "1");
-            img.setAttribute("style", "float: left; margin-right: 10px; cursor: pointer;");
+            img.setAttribute("style", "float: left; margin-right: 10px; cursor: pointer; max-width: 100%");
             img.src = attachment;
         }
         else
