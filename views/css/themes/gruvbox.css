@@ -347,8 +347,7 @@ a.userEmail:hover span.name {
 
 div.pagelist {
   background: #32302f;
-  border-right:1px solid #928374;
-  border-bottom:1px solid #928374;
+  border: 1px solid #928374;
 }
 
 div.pagelist div.pages a {
