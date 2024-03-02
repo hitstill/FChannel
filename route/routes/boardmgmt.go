@@ -3,6 +3,10 @@ package routes
 import (
 	"errors"
 	"fmt"
+	"image"
+	_ "image/gif"
+	_ "image/jpeg"
+	_ "image/png"
 	"net/http"
 	"net/smtp"
 	"os"
@@ -15,6 +19,7 @@ import (
 	"github.com/FChannel0/FChannel-Server/config"
 	"github.com/FChannel0/FChannel-Server/route"
 	"github.com/FChannel0/FChannel-Server/webfinger"
+	"github.com/corona10/goimagehash"
 
 	"github.com/FChannel0/FChannel-Server/db"
 	"github.com/FChannel0/FChannel-Server/post"
@@ -71,6 +76,27 @@ func BoardBanMedia(ctx *fiber.Ctx) error {
 
 	defer f.Close()
 
+	//TODO: Fall back to old method if anything fails
+	mimetype, _ := util.GetFileContentType(f)
+	config.Log.Println("mimetype: " +  mimetype)
+	if mimetype == "image/jpeg" || mimetype == "image/png" || mimetype == "image/gif" {
+		image, _, err := image.Decode(f)
+		if err != nil {
+			return util.MakeError(err, "BoardBanMedia")
+		}
+		
+		phash, err := goimagehash.PerceptionHash(image)
+		if err != nil {
+			return util.MakeError(err, "BoardBanMedia")
+		}
+
+		config.Log.Println("Banning hash: ", uint64(phash.GetHash()))
+		
+		query := `insert into bannedimages (phash) values ($1)`
+		if _, err := config.DB.Exec(query, uint64(phash.GetHash())); err != nil {
+			return util.MakeError(err, "BoardBanMedia")
+		}
+	} else {
 	bytes := make([]byte, 2048)
 
 	if _, err = f.Read(bytes); err != nil {
@@ -81,6 +107,7 @@ func BoardBanMedia(ctx *fiber.Ctx) error {
 		query := `insert into bannedmedia (hash) values ($1)`
 		if _, err := config.DB.Exec(query, util.HashBytes(bytes)); err != nil {
 			return util.MakeError(err, "BoardBanMedia")
+			}
 		}
 	}
 
