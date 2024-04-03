@@ -48,8 +48,8 @@
   {{ if lt .page.CurrentPage .page.TotalPage }}
 	<div class="pages next">[<a href="/{{ $board.Name }}?page={{ add $page 1 }}" title="Next">&gt;</a>]</div>
   {{ end }}
-	<div class="pages cataloglink"><a href="{{ $board.Name }}/catalog">Catalog</a></div>
-	{{ if (showArchive $board.Actor) }}<div class="pages cataloglink"><a href="{{ $board.Name }}/archive">Archive</a></div>{{ end }}
+	<div class="pages cataloglink"><a href="/{{ $board.Name }}/catalog">Catalog</a></div>
+	{{ if (showArchive $board.Actor) }}<div class="pages cataloglink"><a href="/{{ $board.Name }}/archive">Archive</a></div>{{ end }}
 </div>
 {{ end }}
 
