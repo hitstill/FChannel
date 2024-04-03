@@ -4,7 +4,8 @@ const defythost = "https://www.youtube-nocookie.com"
 var Config = {
 	embedYT: true,
 //	ytHost: "https://www.youtube-nocookie.com",
-	embedSC: true
+	embedSC: true,
+	embedNND: true
 };
 
 Config.load = function() {
@@ -110,6 +111,26 @@ var scembed = function(element) {
 };
 }
 
+if (Config.embedNND) {
+	var nndembed = function(element) {
+		id = element.getAttribute('data');
+		if (element.textContent == 'Remove') {
+			element.parentNode.removeChild(element.nextElementSibling);
+			element.textContent = 'Embed';
+		} else {
+			el = document.createElement('div');
+			el.className = 'media-embed';
+			el.innerHTML = '<iframe src="https://embed.nicovideo.jp/watch/' +
+				id +'" width="854" height="480" frameborder="0" allowfullscreen style="max-width:100%;max-height:100%;"></iframe>';
+	
+			element.parentNode.insertBefore(el, element.nextElementSibling);
+	
+			element.textContent = 'Remove';
+		}
+		return false
+	};
+	}
+
 
 
 document.querySelectorAll('.comment').forEach(function(element) {
@@ -120,5 +141,9 @@ document.querySelectorAll('.comment').forEach(function(element) {
 	if (Config.embedSC) {
 		const scregExp = /((?:(?:on.)?soundcloud\.com|snd\.sc)\/[^\s<]+(?:<wbr>)?[^\s<]*)/g;
 		element.innerHTML = element.innerHTML.replace(scregExp, "$1 <span>[<a href='https://$1' data='$1' onclick='return scembed(this)'>Embed</a>]</span>");
+	}
+	if (Config.embedNND) {
+		const nndregExp = /(nicovideo\.jp\/watch\/((sm|so|lv)\d+))/g;
+		element.innerHTML = element.innerHTML.replace(nndregExp, "$1 <span>[<a href='https://$1' data='$2' onclick='return nndembed(this)'>Embed</a>]</span>");
 	}
 });
