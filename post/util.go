@@ -226,22 +226,22 @@ func IsMediaBanned(f multipart.File) (bool, error) {
 			break
 		}
 		if rows != nil {
-		defer rows.Close()
-		for rows.Next() {
-			var phash uint64
-			err := rows.Scan(&phash)
-			if err != nil {
-				break
-			}
-			
-			current := goimagehash.NewImageHash(phash, 2)
-			distance, _ := current.Distance(imagehash)
-			if (distance == 0) {
-				config.Log.Printf("phash (%d) similar to banned hash (%d)", imagehash.GetHash(), current.GetHash())
-				return true, nil
+			defer rows.Close()
+			for rows.Next() {
+				var phash uint64
+				err := rows.Scan(&phash)
+				if err != nil {
+					break
+				}
+
+				current := goimagehash.NewImageHash(phash, 2)
+				distance, _ := current.Distance(imagehash)
+				if distance == 0 {
+					config.Log.Printf("phash (%d) similar to banned hash (%d)", imagehash.GetHash(), current.GetHash())
+					return true, nil
+				}
 			}
 		}
-	}
 	}
 
 	f.Seek(0, 0)
@@ -338,14 +338,16 @@ func ObjectFromForm(ctx *fiber.Ctx, obj activitypub.ObjectBase) (activitypub.Obj
 		}
 	}
 
-	re := regexp.MustCompile(`>>(\S*)`)
+	re := regexp.MustCompile(`>>([a-zA-Z0-9-]*)`)
 	match := re.FindAllStringSubmatch(obj.Content, -1)
 	for i := 0; i < len(match); i++ {
-		curid := strings.Replace(match[i][0], ">>", "", -1)
-		curid = regexp.MustCompile(`\S*-`).ReplaceAllString(curid, "")
-		replyid, err := db.GetPostIDFromNum(curid)
-		if err == nil {
-			obj.Content = strings.ReplaceAll(obj.Content, match[i][0], ">>"+replyid)
+		if !strings.Contains(match[i][0], "https") {
+			curid := strings.Replace(match[i][0], ">>", "", -1)
+			curid = regexp.MustCompile(`\S*-`).ReplaceAllString(curid, "")
+			replyid, err := db.GetPostIDFromNum(curid)
+			if err == nil {
+				obj.Content = strings.ReplaceAll(obj.Content, match[i][0], ">>"+replyid)
+			}
 		}
 	}
 	replyingTo, err := ParseCommentForReplies(ctx.FormValue("comment"), originalPost.Id)
