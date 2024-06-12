@@ -12,6 +12,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/simia-tech/crypt"
+	oldcrypt "gitlab.com/nyarla/go-crypt"
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/transform"
 )
@@ -98,31 +99,30 @@ func CreateNameTripCode(ctx *fiber.Ctx) (string, string, error) {
 			}
 		}
 
-		hash, err := TripCode(chunck)
-		return trip.ReplaceAllString(input, ""), "!" + hash, util.MakeError(err, "CreateNameTripCode")
+		hash := TripCode(chunck)
+		return trip.ReplaceAllString(input, ""), "!" + hash, nil
 	}
 
 	return input, "", nil
 }
 
-func TripCode(pass string) (string, error) {
+func TripCode(pass string) string {
 	var salt [2]rune
 
+	if len(pass) > 8 {
+		pass = pass[:8]
+	}
+
 	pass = TripCodeConvert(pass)
-	s := []rune(pass + "H..")[1:3]
+	s := []rune(pass + "H.")[1:3]
 
 	for i, r := range s {
 		salt[i] = rune(SaltTable[r%256])
 	}
 
-	enc, err := crypt.Crypt(pass, "$1$"+string(salt[:]))
+	enc := oldcrypt.Crypt(pass, string(salt[:]))
 
-	if err != nil {
-		return "", util.MakeError(err, "TripCode")
-	}
-
-	// normally i would just return error here but if the encrypt fails, this operation may fail and as a result cause a panic
-	return enc[len(enc)-10 : len(enc)], nil
+	return enc[len(enc)-10 : len(enc)]
 }
 
 func TripCodeConvert(str string) string {

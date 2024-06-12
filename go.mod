@@ -11,6 +11,7 @@ require (
 	github.com/mikekonan/go-countries v1.1.2
 	github.com/oschwald/maxminddb-golang v1.12.0
 	github.com/simia-tech/crypt v0.5.1
+	gitlab.com/nyarla/go-crypt v0.0.0-20160106005555-d9a5dc2b789b
 	golang.org/x/text v0.14.0
 )
 
