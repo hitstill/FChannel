@@ -639,6 +639,10 @@ func ParseLinkComments(board activitypub.Actor, op string, content string, threa
 			} else {
 				// If we want to keep user on same instance then use current actor, or redirect them to the /main/ actor
 				//link, _ = db.GetPostIDFromNum(parsedLink)
+				if db.IsTombstone(parsedLink) {
+					return strings.Replace(content, match[i][0], "<a class=\"reply deadlink\">&gt;&gt;"+util.ShortURL(board.Outbox, parsedLink)+"</a>", -1), nil
+				}
+
 				link = parsedLink
 			}
 

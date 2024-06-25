@@ -1,7 +1,7 @@
 a, a:link, a:visited, a:hover, a:active {
 	text-decoration: none 
 }
-a:link, a:visited, a:active {
+a:link, a:visited, a:active, a.reply {
 	color: #81a2be;
 }
 a:hover {

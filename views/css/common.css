@@ -124,3 +124,8 @@ div.pagelist {
     padding-left:12px;
     margin-left:7px
   }
+
+.nsfw a.deadlink, a.deadlink {
+	text-decoration: line-through;
+	pointer-events: none;
+}

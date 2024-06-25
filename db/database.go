@@ -475,23 +475,15 @@ func GetPostIDFromNum(num string) (string, error) {
 	return postID, nil
 }
 
-func IsValidThread(post string) bool {
-	var postID string
+func IsValidThread(id string) bool {
+	var result bool
 
-	query := `select id from replies where id = $1 AND inreplyto = ''`
-	if err := config.DB.QueryRow(query, post).Scan(&postID); err != nil {
-		return false
-	}
-
-	query = `select id from activitystream where id = $1`
-	if err := config.DB.QueryRow(query, post).Scan(&postID); err != nil {
-		query = `select id from cacheactivitystream where id = $1`
-		if err := config.DB.QueryRow(query, post).Scan(&postID); err != nil {
-			return false
-		}
-	}
-
-	return true
+	query := `select exists
+	(select 1 from replies where id = $1 AND inreplyto = '')
+	and (exists (select 1 from activitystream where id = $1 and type = 'Note')
+	or exists (select 1 from cacheactivitystream where id = $1 and type = 'Note'))`
+	config.DB.QueryRow(query, id).Scan(&result)
+	return result
 }
 
 func GetPostIP(post string) string {
@@ -504,4 +496,15 @@ func GetPostIP(post string) string {
 		return ""
 	}
 	return ip
+}
+
+func IsTombstone(id string) bool {
+	var result bool
+
+	query := `select
+	exists (select id from activitystream where id = $1 and type = 'Tombstone')
+	or exists (select id from cacheactivitystream where id = $1 and type = 'Tombstone')`
+	config.DB.QueryRow(query, id).Scan(&result)
+
+	return result
 }
