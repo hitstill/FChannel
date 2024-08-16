@@ -51,7 +51,7 @@ func RouteProxy(req *http.Request) (*http.Response, error) {
 		}
 
 		proxyTransport := &http.Transport{Proxy: http.ProxyURL(proxyUrl)}
-		client := &http.Client{Transport: proxyTransport, Timeout: time.Second * 30}
+		client := &http.Client{Transport: proxyTransport, Timeout: time.Second * 60}
 
 		return client.Do(req)
 	}
