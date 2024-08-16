@@ -28,7 +28,7 @@ follower varchar(100)
 
 CREATE TABLE IF NOT EXISTS verification(
 type varchar(50) default '',
-identifier varchar(50),
+identifier varchar(100),
 code varchar(50),
 created TIMESTAMP default NOW()
 );

@@ -88,7 +88,7 @@ func (activity Activity) AddFollowersTo() (Activity, error) {
 func (activity Activity) CheckValid() (Collection, bool, error) {
 	var respCollection Collection
 
-	re := regexp.MustCompile(`.+\.onion(.+)?`)
+	re := regexp.MustCompile(`(.+\.onion(.+)|.+\.loki(.+)|.+\.i2p(.+))?`)
 	if re.MatchString(activity.Id) {
 		activity.Id = strings.Replace(activity.Id, "https", "http", 1)
 	}

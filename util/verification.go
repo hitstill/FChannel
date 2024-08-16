@@ -246,7 +246,7 @@ func CreateNewCaptcha() error {
 		return MakeError(err, "CreateNewCaptcha")
 	}
 
-	cmd = exec.Command("convert", file, "-fill", "blue", "-pointsize", "62", "-annotate", "+0+70", captcha, "-tile", "pattern:left30", "-gravity", "center", "-transparent", "white", file)
+	cmd = exec.Command("convert", file, "-font", "/usr/share/fonts/freefont/FreeMono.otf", "-fill", "blue", "-pointsize", "62", "-annotate", "+0+70", captcha, "-tile", "pattern:left30", "-gravity", "center", "-transparent", "white", file)
 	cmd.Stderr = os.Stderr
 
 	if err := cmd.Run(); err != nil {

@@ -37,7 +37,7 @@ func AdminVerify(ctx *fiber.Ctx) error {
 
 	req.Header.Set("Content-Type", config.ActivityStreams)
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := util.RouteProxy(req)
 
 	if err != nil {
 		return util.MakeError(err, "AdminVerify")

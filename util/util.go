@@ -19,7 +19,7 @@ import (
 )
 
 func IsOnion(url string) bool {
-	re := regexp.MustCompile(`\.onion`)
+	re := regexp.MustCompile(`(\.onion|\.loki|\.i2p)`)
 	return re.MatchString(url)
 }
 
