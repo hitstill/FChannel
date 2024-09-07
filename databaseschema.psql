@@ -280,3 +280,5 @@ ALTER TABLE activitystream ALTER COLUMN content TYPE varchar(4500);
 ALTER TABLE cacheactivitystream ALTER COLUMN content TYPE varchar(4500);
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+ALTER TABLE actor ADD COLUMN IF NOT EXISTS boardtype varchar default 'image';

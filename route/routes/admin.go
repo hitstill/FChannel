@@ -219,6 +219,10 @@ func AdminAddBoard(ctx *fiber.Ctx) error {
 	board.PreferredUsername = ctx.FormValue("prefname")
 	board.Summary = ctx.FormValue("summary")
 	board.Restricted = restrict
+	board.BoardType = ctx.FormValue("boardtype")
+	if board.BoardType != "image" && board.BoardType != "text" && board.BoardType != "flash" {
+		return route.Send403(ctx, "Board type \"" + board.BoardType + "\" is invalid" )
+	} 
 
 	newActorActivity.AtContext.Context = "https://www.w3.org/ns/activitystreams"
 	newActorActivity.Type = "New"
@@ -231,6 +235,7 @@ func AdminAddBoard(ctx *fiber.Ctx) error {
 	newActorActivity.Object.Name = board.PreferredUsername
 	newActorActivity.Object.Summary = board.Summary
 	newActorActivity.Object.Sensitive = board.Restricted
+	newActorActivity.Object.MediaType = board.BoardType // Didn't want to add new struct field, close enough
 
 	newActorActivity.MakeRequestOutbox()
 
@@ -302,6 +307,7 @@ func AdminActorIndex(ctx *fiber.Ctx) error {
 	data.Instance, _ = activitypub.GetActorFromDB(config.Domain)
 
 	data.AutoSubscribe, _ = actor.GetAutoSubscribe()
+	data.BoardType = actor.BoardType
 
 	jannies, err := actor.GetJanitors()
 
@@ -389,6 +395,39 @@ func AdminEditSummary(ctx *fiber.Ctx) error {
 
 	return ctx.Redirect("/"+config.Key+"/"+redirect, http.StatusSeeOther)
 
+}
+
+func AdminSetBoardType(ctx *fiber.Ctx) error {
+	id, pass := util.GetPasswordFromSession(ctx)
+	actor, _ := webfinger.GetActorFromPath(ctx.Path(), "/"+config.Key+"/")
+
+	if actor.Id == "" {
+		actor, _ = activitypub.GetActorByNameFromDB(config.Domain)
+	}
+
+	hasAuth, _type := util.HasAuth(pass, actor.Id)
+
+	if !hasAuth || _type != "admin" || (id != actor.Id && id != config.Domain) {
+		return util.MakeError(errors.New("Error"), "AdminEditSummary")
+	}
+
+	boardtype := ctx.FormValue("boardtype")
+
+	if boardtype == "image" || boardtype == "text" || boardtype == "flash" {
+
+	query := `update actor set boardtype=$1 where id=$2`
+	if _, err := config.DB.Exec(query, boardtype, actor.Id); err != nil {
+		return util.MakeError(err, "AdminEditSummary")
+	}
+
+	var redirect string
+	if actor.Name != "main" {
+		redirect = actor.Name
+	}
+
+	return ctx.Redirect("/"+config.Key+"/"+redirect, http.StatusSeeOther)
+	}
+	return route.Send403(ctx, "Board type \"" + boardtype + "\" is invalid" )
 }
 
 func AdminDeleteJanny(ctx *fiber.Ctx) error {

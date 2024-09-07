@@ -37,7 +37,6 @@
               <small>(for post deletion)</small>
             </td>
           </tr>
-          <input type="hidden" id="drawform"></input>
           <tr>
             <td><label for="file">File:</label></td>
             <td><input type="file" accept=".swf,.flv" id="file" name="file" required>
@@ -104,7 +103,7 @@
 		<td>{{ shortURL $board.Actor.Outbox $e.Id }}</td>
 		{{ .Alias | parseEmail }}<td class="name"><b>{{ if .AttributedTo }}{{.AttributedTo }}{{ else }}Anonymous{{ end }}</b></td>{{ if .Alias }}</a>{{ end }}
 		<td>[<a href="{{ proxy (index .Attachment 0).Href}}" download="{{ (index .Attachment 0).Name }}">{{ shortImg (index .Attachment 0).Name  }}</a>]</td>
-		<td>[<a href="#" onclick="swfpopup(this)">Embed</a>]</td>
+		<td>[<a href="#" onclick="swfpopup(this, 'list')">Embed</a>]</td>
 		<td class="subject" style="overflow: hidden; word-wrap: break-word; text-overflow: ellipsis; padding-left: 5px;"><b>{{ .Name }}</b></td>
 		<td>{{ convertSize (index .Attachment 0).Size  }}</td>
 		<td class="timestamp" data-utc="{{ .Published | timeToUnix }}">{{ .Published | timeToReadableLong }}</td>
@@ -120,7 +119,7 @@
     <td>{{ shortURL $board.Actor.Outbox $e.Id }}</td>
 		{{ .Alias | parseEmail }}<td class="name"><b>{{ if .AttributedTo }}{{.AttributedTo }}{{ else }}Anonymous{{ end }}</b></td>{{ if .Alias }}</a>{{ end }}
 		<td>[<a href="{{ proxy (index .Attachment 0).Href}}" download="{{ (index .Attachment 0).Name }}">{{ shortImg (index .Attachment 0).Name  }}</a>]</td>
-		<td>[<a href="#" onclick="swfpopup(this)">Embed</a>]</td>
+		<td>[<a href="#" onclick="swfpopup(this, 'list')">Embed</a>]</td>
 		<td class="subject" style="overflow: hidden; word-wrap: break-word; text-overflow: ellipsis; padding-left: 5px;"><b>{{ .Name }}</b></td>
 		<td>{{ convertSize (index .Attachment 0).Size  }}</td>
 		<td class="timestamp" data-utc="{{ .Published | timeToUnix }}">{{ .Published | timeToReadableLong }}</td>
@@ -138,8 +137,3 @@
 {{ template "partials/footer" .page }}
 {{ template "partials/general_scripts" .page }}
 {{ template "partials/post_scripts" .page }}
-
-<script src="/static/ruffle/ruffle.js"></script>
-<script src="/static/js/flashpopup.js"></script>
-
-<div id="swf-embed" style="display: none; width: 100%; height: 100%; position: fixed; top: 0px; left: 0px; background: rgba(128, 128, 128, 0.5);"><div style="background: black; color: white; position: fixed; width: 480px; height: 360px; top: 50%; left: 50%; margin-top: -190px; margin-left: -240px;"><div id="swf-embed-header" class="box-header"><span id="swf-embed-header-text"></span><img id="swf-embed-close" style="cursor: pointer;" src="/static/cross.png" onclick="document.getElementById('swf-embed').style.display='none'; document.getElementById('swf-container').remove();"></div><div id="state" style="display: none"></div></div>

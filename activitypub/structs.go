@@ -83,6 +83,7 @@ type Actor struct {
 	Summary           string       `json:"summary,omitempty"`
 	AuthRequirement   []string     `json:"authrequirement,omitempty"`
 	Restricted        bool         `json:"restricted"`
+	BoardType         string       `json:"boardtype,omitempty"`
 }
 
 type PublicKeyPem struct {

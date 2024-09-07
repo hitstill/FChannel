@@ -1,3 +1,8 @@
+{{ $threadType := .Board.BoardType}}
+{{ if .Board.InReplyTo }}
+{{ $threadType = .Board.InReplyTo | boardtypeFromInReplyTo }}
+{{ end }}
+
 <div style="max-width: 800px; margin: 0 auto;">
   <h1 style="text-align: center;">/{{ .Board.Name }}/ - {{ .Board.PrefName }}</h1>
   <p style="text-align: center;">{{ .Board.Summary }}</p>
@@ -37,6 +42,7 @@
               <small>(for post deletion)</small>
             </td>
           </tr>
+          {{ if ne $threadType "text" }}
           <tr>
             <td><label for="file">File:</label></td>
             <td><b id="form-drawlabel" style="display: none;">Drawing</b><input type="file" accept=".gif,.png,.apng,.jpg,.jpeg,.jxl,.webp,.avif,.mp4,.webm,.ogg,.mp2,.mp3,.mpa,.wav,.wave,.swf,.flv" id="file" name="file" {{ if gt $len 1 }} required {{ else }} {{ if eq $len 0 }} required {{ end }} {{ end }} >
@@ -50,6 +56,7 @@
 									<button disabled="" type="button">Clear</button>
 					</td>
 					</tr>
+          {{ end }}
           <tr>
             <td><label for="captcha">Captcha:</label></td>
             <td>
@@ -112,6 +119,7 @@
               <small>(for post deletion)</small>
             </td>
           </tr>
+          {{ if ne $threadType "text" }}
           <tr>
             <td><label for="file">File:</label></td>
             <td><b id="form-drawlabel" style="display: none;">Drawing</b><input type="file" accept=".gif,.png,.apng,.jpg,.jpeg,.jxl,.webp,.avif,.mp4,.webm,.ogg,.mp2,.mp3,.mpa,.wav,.wave,.swf,.flv" id="file" name="file" {{ if gt $len 1 }} required {{ else }} {{ if eq $len 0 }} required {{ end }} {{ end }} >
@@ -125,6 +133,7 @@
 									<button disabled="" type="button">Clear</button>
 					</td>
 					</tr>
+          {{ end }}
           <tr>
             <td><label for="captcha">Captcha:</label></td>
             <td>

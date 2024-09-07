@@ -133,7 +133,7 @@ func ParseOutboxRequest(ctx *fiber.Ctx, actor activitypub.Actor) error {
 				contentType, _ := util.GetFileContentType(f)
 				if actor.Name == "f" && len(util.EscapeString(ctx.FormValue("inReplyTo"))) == 0 && contentType != "application/x-shockwave-flash" {
 					ctx.Response().Header.SetStatusCode(403)
-					_, err := ctx.Write([]byte("file type not supported"))
+					_, err := ctx.Write([]byte("file type not supported on this board"))
 					return util.MakeError(err, "ParseOutboxRequest")
 				}
 
@@ -317,8 +317,9 @@ func ParseOutboxRequest(ctx *fiber.Ctx, actor activitypub.Actor) error {
 				prefname := activity.Object.Name
 				summary := activity.Object.Summary
 				restricted := activity.Object.Sensitive
+				boardtype := activity.Object.MediaType // Didn't want to add new struct field, close enough
 
-				actor, err := db.CreateNewBoard(*activitypub.CreateNewActor(name, prefname, summary, config.AuthReq, restricted))
+				actor, err := db.CreateNewBoard(*activitypub.CreateNewActor(name, prefname, summary, config.AuthReq, restricted, boardtype))
 				if err != nil {
 					return util.MakeError(err, "ParseOutboxRequest")
 				}
@@ -634,6 +635,25 @@ func TemplateFunctions(engine *html.Engine) {
 
 	engine.AddFunc("maxFileSize", func() string {
 		return util.ConvertSize(int64(config.MaxAttachmentSize))
+	})
+
+	engine.AddFunc("boardtypeFromInReplyTo", func(id string) string {
+		re := regexp.MustCompile(`.+\/`)
+		actorid := strings.TrimSuffix(re.FindString(id), "/")
+		actor, err := activitypub.GetActor(actorid)
+		if err != nil {
+			return "image" //TODO: Test this
+		}
+		return actor.BoardType
+	})
+
+	engine.AddFunc("tegakiSupportsImage", func (contentType string) bool {
+		switch contentType {
+		case "image/png", "image/jpeg":
+			return true
+		default:
+			return false
+		}
 	})
 }
 

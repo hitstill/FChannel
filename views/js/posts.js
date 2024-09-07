@@ -70,7 +70,10 @@ function startNewPost() {
     var el = document.getElementById("newpostbtn");
     el.style = "display:none;";
     el.setAttribute("state", "1");
-    document.getElementById("drawform").style = "";
+    drawform = document.getElementById("drawform")
+    if (drawform) {
+        drawform.style = "";
+    }
     document.getElementById("newpost").style = "";
     document.getElementById("stopTablePost").style = "cursor: pointer; display:unset;";
     sessionStorage.setItem("newpostState", true);

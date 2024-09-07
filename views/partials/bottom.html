@@ -1,3 +1,8 @@
+{{ $threadType := .Board.BoardType}}
+{{ if .Board.InReplyTo }}
+{{ $threadType = .Board.InReplyTo | boardtypeFromInReplyTo }}
+{{ end }}
+
 <div id="reply-box" class="popup-box" style="display: none;">
   <div id="reply-header">
     <span id="reply-header-text">...</span>
@@ -7,25 +12,31 @@
     <input id="reply-name" name="name" type="text" placeholder="Name" maxlength="100">
     <input id="reply-options" name="options" type="text" placeholder="Options" maxlength="100">
     <textarea id="reply-comment" name="comment" maxlength="4500" oninput="sessionStorage.setItem('element-reply-comment', document.getElementById('reply-comment').value)"></textarea>
+    {{ if ne $threadType "text" }}
 		<b style="display: none;" id="qr-drawlabel">Drawing</b>
     <input id="reply-file" name="file" type="file" accept=".gif,.png,.apng,.jpg,.jpeg,.jxl,.webp,.avif,.mp4,.webm,.ogg,.mp2,.mp3,.mpa,.wav,.wave,.swf,.flv">
 		<span>({{maxFileSize}} max)</span>
+    {{ end }}
     <input id="reply-submit" type="submit" value="Reply" style="float: right;">
     <input type="hidden" id="inReplyTo-box" name="inReplyTo" value="{{ .Board.InReplyTo }}">
     <input type="hidden" id="sendTo" name="sendTo" value="{{ .Board.To }}">
     <input type="hidden" id="boardName" name="boardName" value="{{ .Board.Name }}">
     <input type="hidden" id="captchaCode" name="captchaCode" value="{{ .Board.CaptchaCode }}">
     <input type="hidden" id="returnTo" name="returnTo" value="{{ .ReturnTo }}"><br>
+    {{ if ne $threadType "text" }}
     <input type="checkbox" name="sensitive"><span>Mark sensitive</span>
+    {{ end }}
     <br>
     <br>
     Password: <input type="password" name="pwd">
 		<br>
 		<br>
+    {{ if ne $threadType "text" }}
 		<span class="painter-ctrl">Size <input type="text" value="400" maxlength="4"> × <input type="text" value="400" maxlength="4">&nbsp;
 									<button data-dims="400" type="button">Draw</button>
 									<button disabled="" type="button">Clear</button>
 		</span>
+    {{ end }}
     <div style="width: 202px; margin: 0 auto; padding-top: 12px;">
       <label for="captcha">Captcha:</label><br>
       <input style="display: inline-block;"  type="text" id="captcha" name="captcha" autocomplete="off"><br>
@@ -57,6 +68,6 @@
     </div>
   </form>
 </div>
-<div class="bottomCtrl desktop"><span class="deleteform"> Delete Post: [<input type="checkbox" name="onlyimg"
-      value="true" form="delform">File Only]<input type="password" id="delPassword" name="pwd" form="delform"> <input type="submit" value="Delete" form="delform"></span>
+<div class="bottomCtrl desktop"><span class="deleteform"> Delete Post: {{ if ne $threadType "text" }}[<input type="checkbox" name="onlyimg"
+      value="true" form="delform">File Only]{{ end }}<input type="password" id="delPassword" name="pwd" form="delform"> <input type="submit" value="Delete" form="delform"></span>
 </div>

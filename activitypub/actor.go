@@ -1376,3 +1376,15 @@ func (actor Actor) GetRecentThreads() (Collection, error) {
 
 	return nColl, nil
 }
+
+func (actor Actor) GetBoardType() (string) {
+	//TODO: unused!
+	var boardtype string
+
+	query := `select boardtype from actor where id=$1`
+	if err := config.DB.QueryRow(query, actor.Id).Scan(&boardtype); err != nil {
+		boardtype = "image";
+	}
+
+	return boardtype
+}

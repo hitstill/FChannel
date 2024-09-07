@@ -86,5 +86,23 @@
 </div>
 {{ end }}
 
+{{ if eq .page.Board.ModCred "admin" }}
+<div id="boardsettings" class="box2" style="margin-bottom: 25px; padding: 12px;">
+  <h4 style="margin: 0; margin-bottom: 5px;">Board Settings</h4>
+  <form id="boardsettings-form" action="/{{ .page.Key }}/{{ .page.Board.Name }}/setboardtype" method="post" enctype="application/x-www-form-urlencoded" style="margin-top: 5px;">
+    <label for="boardtypes">Board type:</label>
+    <select id="boardtypes" name="boardtype">
+      <option value="image"{{if eq "image" .page.BoardType}} selected{{end}}>Image</option>
+      <option value="text"{{if eq "text" .page.BoardType}} selected{{end}}>Text</option>
+      <option value="flash"{{if eq "flash" .page.BoardType}} selected{{end}}>Flash</option>
+    </select> 
+    <input type="submit" value="Set board type"><br>
+    <input type="hidden" name="actor" value="{{ $board.Actor.Id }}">
+  </form>
+  <ul style="display: inline-block; padding: 0; margin: 0; list-style-type: none;">
+  </ul>
+</div>
+{{ end }}
+
 {{ template "partials/footer" .page }}
 {{ template "partials/general_scripts" .page }}

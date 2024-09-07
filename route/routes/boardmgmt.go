@@ -588,6 +588,7 @@ func ReportGet(ctx *fiber.Ctx) error {
 	data.Board.InReplyTo = ctx.Query("post")
 	data.Board.To = actor.Outbox
 	data.Board.Restricted = actor.Restricted
+	data.Board.BoardType = actor.BoardType
 
 	capt, err := util.GetRandomCaptcha()
 
@@ -748,6 +749,7 @@ func BanGet(ctx *fiber.Ctx) error {
 	data.Board.InReplyTo = post
 	data.Board.To = actor.Outbox
 	data.Board.Restricted = actor.Restricted
+	data.Board.BoardType = actor.BoardType
 
 	data.Meta.Description = data.Board.Summary
 	data.Meta.Url = data.Board.Actor.Id

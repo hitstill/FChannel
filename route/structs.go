@@ -43,6 +43,7 @@ type AdminPage struct {
 	IsLocal       bool
 	PostBlacklist []util.PostBlacklist
 	AutoSubscribe bool
+	BoardType	  string
 	RecentPosts   []activitypub.ObjectBase
 	Instance      activitypub.Actor
 	Meta          Meta

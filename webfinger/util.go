@@ -29,6 +29,7 @@ type Board struct {
 	TP          string
 	Restricted  bool
 	Post        activitypub.ObjectBase
+	BoardType	string
 }
 
 type BoardSortAsc []Board

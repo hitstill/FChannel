@@ -1,6 +1,10 @@
 {{ template "partials/top" .page }}
 
 <hr>
+{{ if eq .page.Board.BoardType "text" }}
+<h2 style="text-align: center;margin-top: 0.2em;margin-bottom: 0.2em;">Text mode</h2>
+<hr>
+{{ end }}
 
 <ul id="navlinks">
   <li>[<a href="/{{ .page.Board.Name }}">Return</a>]</li>
@@ -17,7 +21,11 @@
 
 <hr>
 <form name="delform" id="delform" action="/multidelete" method="post">
-  {{ template "partials/posts" .page }}
+  {{ if eq .page.Board.BoardType "text" }}
+    {{ template "partials/posts-text" .page }}
+  {{ else }}
+    {{ template "partials/posts" .page }}
+  {{ end }}
 </form>
 
 <hr>

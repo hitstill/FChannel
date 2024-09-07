@@ -109,11 +109,19 @@ function playSWF(player, settings) {
 		});
 }
 
-function swfpopup(e) {
+function swfpopup(e, boardtype) {
 	let container = document.createElement('div');
 	container.id = "swf-container";
-	let url = e.parentElement.previousElementSibling.firstElementChild.href;
-	let title = e.parentElement.previousElementSibling.firstElementChild.download;
+	var url;
+	var title;
+	if (boardtype === "list") {
+		url = e.parentElement.previousElementSibling.firstElementChild.href;
+		title = e.parentElement.previousElementSibling.firstElementChild.download;
+	}
+	else if (boardtype === "image") {
+		url = e.parentElement.firstElementChild.href;
+		title = e.parentElement.firstElementChild.download;
+	}
 	document.getElementById("swf-embed-header-text").textContent = title;
 
 	document.getElementById("swf-embed").firstChild.appendChild(container);
