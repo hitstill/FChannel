@@ -123,8 +123,8 @@
     <td>[<a href="/delete?id={{ $e.Id }}&board={{ $board.Name }}">Delete</a>]</td>
     {{ end }}
 		<td>{{ shortURL $board.Actor.Outbox $e.Id }}</td>
-		{{ .Alias | parseEmail }}<td class="name"><b>{{ if .AttributedTo }}{{.AttributedTo }}{{ else }}Anonymous{{ end }}</b></td>{{ if .Alias }}</a>{{ end }}
-        {{ if ne $board.BoardType "text" }}<td>{{if (index .Attachment 0).Name}}[<a href="{{ proxy (index .Attachment 0).Href}}" download="{{ (index .Attachment 0).Name }}">{{ shortImg (index .Attachment 0).Name  }}</a>]{{ end }}</td>
+		<td><span class="name{{if eq .TripCode "#Admin"}} capcodeAdmin{{end}}{{if eq .TripCode "#Mod"}} capcodeMod{{end}}{{if eq .TripCode "#Janitor"}} capcodeJanitor{{end}}"><b>{{ .Alias | parseEmail }}{{ if .AttributedTo }}{{ .AttributedTo }}{{ else }}Anonymous{{ end }}{{ if .Alias }}</a>{{ end }}</b></span><span class="tripcode{{if eq .TripCode "#Admin"}} capcodeAdmin{{end}}{{if eq .TripCode "#Mod"}} capcodeMod{{end}}{{if eq .TripCode "#Janitor"}} capcodeJanitor{{end}}"> {{ .TripCode }} </span>{{ .Alias | parseIDandFlag }}</td>
+    {{ if ne $board.BoardType "text" }}<td>{{if (index .Attachment 0).Name}}[<a href="{{ proxy (index .Attachment 0).Href}}" download="{{ (index .Attachment 0).Name }}">{{ shortImg (index .Attachment 0).Name  }}</a>]{{ end }}</td>
 		<td>{{ if eq (index .Attachment 0).MediaType "application/x-shockwave-flash" }}[<a href="#" onclick="swfpopup(this, 'list')">Embed</a>] {{ end }}</td>{{ end }}
 		<td class="subject" style="overflow: hidden; word-wrap: break-word; text-overflow: ellipsis; padding-left: 5px;"><b>{{ .Name }}</b></td>
 		{{ if ne $board.BoardType "text" }}<td>{{ convertSize (index .Attachment 0).Size  }}</td>{{ end }}
@@ -139,8 +139,8 @@
     <td>[<a href="/delete?id={{ $e.Id }}&board={{ $board.Name }}">Delete</a>]</td>
     {{ end }}
     <td>{{ shortURL $board.Actor.Outbox $e.Id }}</td>
-		{{ .Alias | parseEmail }}<td class="name"><b>{{ if .AttributedTo }}{{.AttributedTo }}{{ else }}Anonymous{{ end }}</b></td>{{ if .Alias }}</a>{{ end }}
-		{{ if ne $board.BoardType "text" }}<td>{{if (index .Attachment 0).Name}}[<a href="{{ proxy (index .Attachment 0).Href}}" download="{{ (index .Attachment 0).Name }}">{{ shortImg (index .Attachment 0).Name  }}</a>]{{ end }}</td>
+		<td><span class="name{{if eq .TripCode "#Admin"}} capcodeAdmin{{end}}{{if eq .TripCode "#Mod"}} capcodeMod{{end}}{{if eq .TripCode "#Janitor"}} capcodeJanitor{{end}}"><b>{{ .Alias | parseEmail }}{{ if .AttributedTo }}{{ .AttributedTo }}{{ else }}Anonymous{{ end }}{{ if .Alias }}</a>{{ end }}</b></span><span class="tripcode{{if eq .TripCode "#Admin"}} capcodeAdmin{{end}}{{if eq .TripCode "#Mod"}} capcodeMod{{end}}{{if eq .TripCode "#Janitor"}} capcodeJanitor{{end}}"> {{ .TripCode }} </span>{{ .Alias | parseIDandFlag }}</td>
+    {{ if ne $board.BoardType "text" }}<td>{{if (index .Attachment 0).Name}}[<a href="{{ proxy (index .Attachment 0).Href}}" download="{{ (index .Attachment 0).Name }}">{{ shortImg (index .Attachment 0).Name  }}</a>]{{ end }}</td>
 		<td>{{ if eq (index .Attachment 0).MediaType "application/x-shockwave-flash" }}[<a href="#" onclick="swfpopup(this, 'list')">Embed</a>]{{ end }}</td>{{ end }}
 		<td class="subject" style="overflow: hidden; word-wrap: break-word; text-overflow: ellipsis; padding-left: 5px;"><b>{{ .Name }}</b></td>
 		{{ if ne $board.BoardType "text" }}<td>{{ convertSize (index .Attachment 0).Size  }}</td> {{ end }}

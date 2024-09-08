@@ -728,17 +728,15 @@ func ActorArchive(ctx *fiber.Ctx) error {
 }
 
 func ActorList(ctx *fiber.Ctx) error {
-	actorName := ctx.Params("actor")
-	actor, err := activitypub.GetActorByNameFromDB(actorName)
+	actor, err := activitypub.GetActorByNameFromDB(ctx.Params("actor"))
 
 	if err != nil {
-		return util.MakeError(err, "ActorList")
+		return ctx.Status(404).Render("404", fiber.Map{})
 	}
 
-	collection, err := actor.GetCatalogCollection()
-
+	collection, err := actor.GetCollectionType("Note")
 	if err != nil {
-		return util.MakeError(err, "ActorList")
+		return util.MakeError(err, "OutboxGet")
 	}
 
 	var data route.PageData
@@ -747,31 +745,24 @@ func ActorList(ctx *fiber.Ctx) error {
 	data.Board.InReplyTo = ""
 	data.Board.To = actor.Outbox
 	data.Board.Actor = actor
-	data.Board.Summary = actor.Summary
 	data.Board.ModCred, _ = util.GetPasswordFromSession(ctx)
 	data.Board.Domain = config.Domain
 	data.Board.Restricted = actor.Restricted
 	data.Board.BoardType = actor.BoardType
-	data.Key = config.Key
 	data.ReturnTo = "list"
 	data.PostType = "new"
 
 	data.Board.Post.Actor = actor.Id
 
-	data.Instance, err = activitypub.GetActorFromDB(config.Domain)
-	if err != nil {
-		return util.MakeError(err, "CatalogGet")
-	}
-
 	capt, err := util.GetRandomCaptcha()
 	if err != nil {
-		return util.MakeError(err, "CatalogGet")
+		return util.MakeError(err, "OutboxGet")
 	}
-
 	data.Board.Captcha = config.Domain + "/" + capt
 	data.Board.CaptchaCode = post.GetCaptchaCode(data.Board.Captcha)
 
-	data.Title = "/" + data.Board.Name + "/ - Thread list"
+	data.Title = "/" + actor.Name + "/ - Thread list"
+	data.Key = config.Key
 
 	data.Boards = webfinger.Boards
 	data.Posts = collection.OrderedItems
