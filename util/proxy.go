@@ -11,7 +11,7 @@ import (
 
 func GetPathProxyType(path string) string {
 	if config.TorProxy != "" {
-		re := regexp.MustCompile(`(http://|http://)?(www.)?\w+\.onion`)
+		re := regexp.MustCompile(`(http://|http://)?(www.)?(\w+\.onion|\w+\.loki|\w+\.i2p)`)
 		onion := re.MatchString(path)
 
 		if onion {
@@ -28,7 +28,7 @@ func MediaProxy(url string) string {
 		return url
 	}
 
-	re = regexp.MustCompile("(.+)?\\.onion(.+)?")
+	re = regexp.MustCompile("(.+)?(\\.onion(.+)|\\.loki(.+)|\\.i2p(.+))?")
 	if re.MatchString(url) {
 		return url
 	}
@@ -44,14 +44,14 @@ func RouteProxy(req *http.Request) (*http.Response, error) {
 	req.Header.Set("User-Agent", "FChannel/"+config.InstanceName)
 
 	if proxyType == "tor" {
-		proxyUrl, err := url.Parse("socks5://" + config.TorProxy)
+		proxyUrl, err := url.Parse(config.TorProxy)
 
 		if err != nil {
 			return nil, MakeError(err, "RouteProxy")
 		}
 
 		proxyTransport := &http.Transport{Proxy: http.ProxyURL(proxyUrl)}
-		client := &http.Client{Transport: proxyTransport, Timeout: time.Second * 30}
+		client := &http.Client{Transport: proxyTransport, Timeout: time.Second * 60}
 
 		return client.Do(req)
 	}
