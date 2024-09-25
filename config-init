@@ -65,3 +65,8 @@ maxminddb:
 
 ## File path to list of Tor Exit node IP addresses
 torexitlist:
+
+## Override captcha font (set this if server fails to generate captchas on your system)
+## Can be a path to a font file e.g. /somedir/MyFont.otf or the name of a font detected by ImageMagick
+## Run 'convert -list font | grep Font' to see fonts detected by ImageMagick
+captchafont:

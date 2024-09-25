@@ -43,6 +43,7 @@ var MaxAttachmentSize, _ = strconv.Atoi(GetConfigValue("maxattachsize", "7340032
 var MaxMindDB = GetConfigValue("maxminddb", "")
 var TorExitList = GetConfigValue("torexitlist", "")
 var ProxyHeader = GetConfigValue("proxyheader", "")
+var CaptchaFont = GetConfigValue("captchafont", "") // TODO: should probably check user not passing anything weird to exec.Command
 var Themes []string
 var DB *sql.DB
 
