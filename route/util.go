@@ -638,16 +638,21 @@ func TemplateFunctions(engine *html.Engine) {
 	})
 
 	engine.AddFunc("boardtypeFromInReplyTo", func(id string) string {
+		//TODO: Hangs entire instance if remote instance is down
+		// so for now always fallback to "image" if remote
+		if !strings.Contains(id, config.Domain) {
+			return "image"
+		}
 		re := regexp.MustCompile(`.+\/`)
 		actorid := strings.TrimSuffix(re.FindString(id), "/")
 		actor, err := activitypub.GetActor(actorid)
 		if err != nil {
-			return "image" //TODO: Test this
+			return "image"
 		}
 		return actor.BoardType
 	})
 
-	engine.AddFunc("tegakiSupportsImage", func (contentType string) bool {
+	engine.AddFunc("tegakiSupportsImage", func(contentType string) bool {
 		switch contentType {
 		case "image/png", "image/jpeg":
 			return true

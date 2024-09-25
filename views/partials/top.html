@@ -1,5 +1,5 @@
 {{ $threadType := .Board.BoardType}}
-{{ if .Board.InReplyTo }}
+{{ if and (ne .Board.BoardType "text") (.Board.InReplyTo) }}
 {{ $threadType = .Board.InReplyTo | boardtypeFromInReplyTo }}
 {{ end }}
 
