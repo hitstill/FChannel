@@ -31,6 +31,14 @@ emailpass:
 ## comma seperated emails To
 emailnotify:
 
+## Use ntfy for post reports
+## Address to ntfy topic (e.g https://ntfy.sh/reports)
+ntfyurl:
+## Authorization header (https://docs.ntfy.sh/publish/#authentication)
+## If using tokens set to: Bearer tk_restoftokenhere
+## If using username and password use the output of: echo "Basic $(echo -n 'username_here:password_here' | base64)"
+ntfyauth:
+
 ## enter proxy ip and port if you want to have tor connections supported
 ## for tor socks5://127.0.0.1:9050
 ## for i2p socks5://127.0.0.1:4447

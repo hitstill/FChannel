@@ -486,6 +486,13 @@ func ReportPost(ctx *fiber.Ctx) error {
 	if err != nil {
 		return util.MakeError(err, "BoardReport")
 	}
+
+	var ban db.Ban
+	ban.IP, ban.Reason, ban.Date, ban.Expires, _ = db.IsIPBanned(ctx.IP())
+	if len(ban.IP) > 1 {
+		return ctx.Redirect(ctx.BaseURL()+"/banned", 301)
+	}
+
 	_, auth := util.GetPasswordFromSession(ctx)
 
 	var obj = activitypub.ObjectBase{Id: id}
@@ -551,6 +558,19 @@ func ReportPost(ctx *fiber.Ctx) error {
 		})
 	}
 
+	if len(config.NtfyURL) > 0 {
+		req, _ := http.NewRequest("POST", config.NtfyURL, 
+		strings.NewReader(id + "\nReason: " + reason))
+		req.Header.Set("Click", "ntfy://"+config.NtfyURL) // Opens ntfy app, also prevents message copy to clipboard on tap.
+		req.Header.Set("Actions", "view, View post, "+id+", clear=true")
+		if len(config.NtfyAuth) > 0 { req.Header.Set("Authorization", config.NtfyAuth)}
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			config.Log.Printf("Error sending report to ntfy server: %s", err)
+		}
+		resp.Body.Close()
+	}
+
 	if setup := util.IsEmailSetup(); setup {
 		from := config.SiteEmail
 		user := config.SiteEmailUsername
@@ -558,7 +578,7 @@ func ReportPost(ctx *fiber.Ctx) error {
 		to := config.SiteEmailNotifyTo
 		body := fmt.Sprintf("New report: %s\nReason: %s", id, reason)
 
-		msg := "From: Udonge <" + from + ">\n" +
+		msg := "From: Fchan <" + from + ">\n" +
 			"To: " + to + "\n" +
 			"Subject: IB Report\n\n" +
 			body
@@ -579,6 +599,11 @@ func ReportPost(ctx *fiber.Ctx) error {
 
 func ReportGet(ctx *fiber.Ctx) error {
 	actor, _ := activitypub.GetActor(ctx.Query("actor"))
+	var ban db.Ban
+	ban.IP, ban.Reason, ban.Date, ban.Expires, _ = db.IsIPBanned(ctx.IP())
+	if len(ban.IP) > 1 {
+		return ctx.Redirect(ctx.BaseURL()+"/banned", 301)
+	}
 
 	var data route.PageData
 	data.Board.Actor = actor

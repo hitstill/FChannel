@@ -457,6 +457,7 @@ func ParseAttachment(obj activitypub.ObjectBase, catalog bool) template.HTML {
 		media += "id=\"img\" "
 		media += "main=\"1\" "
 		media += "enlarge=\"0\" "
+		media += "loading=\"lazy\" "
 		media += "attachment=\"" + obj.Attachment[0].Href + "\" "
 		if catalog {
 			media += "style=\"max-width: 180px; max-height: 180px;\" "
@@ -500,7 +501,6 @@ func ParseAttachment(obj activitypub.ObjectBase, catalog bool) template.HTML {
 		media = "<video "
 		media += "controls=\"controls\" "
 		media += "preload=\"metadata\" "
-		//media += "muted=\"muted\" "
 		if catalog {
 			media += "style=\"margin-right: 10px; margin-bottom: 10px; max-width: 180px; max-height: 180px;\" "
 		} else {
