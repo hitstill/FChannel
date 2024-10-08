@@ -1,12 +1,12 @@
 package routes
 
 import (
-	"github.com/FChannel0/FChannel-Server/activitypub"
-	"github.com/FChannel0/FChannel-Server/config"
-	"github.com/FChannel0/FChannel-Server/db"
-	"github.com/FChannel0/FChannel-Server/route"
-	"github.com/FChannel0/FChannel-Server/util"
-	"github.com/FChannel0/FChannel-Server/webfinger"
+	"github.com/anomalous69/fchannel/activitypub"
+	"github.com/anomalous69/fchannel/config"
+	"github.com/anomalous69/fchannel/db"
+	"github.com/anomalous69/fchannel/route"
+	"github.com/anomalous69/fchannel/util"
+	"github.com/anomalous69/fchannel/webfinger"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -54,12 +54,14 @@ func Index(ctx *fiber.Ctx) error {
 		data.BoardRemainer = make([]int, 0)
 	}
 
-	data.Meta.Description = data.PreferredUsername + " a federated image board based on ActivityPub. The current version of the code running on the server is still a work-in-progress product, expect a bumpy ride for the time being. Get the server code here: https://github.com/FChannel0."
+	data.Meta.Description = data.PreferredUsername + " a federated image board based on ActivityPub. The current version of the code running on the server is still a work-in-progress product, expect a bumpy ride for the time being. Get the server code here: https://github.com/anomalous69/FChannel."
 	data.Meta.Url = data.Board.Domain
 	data.Meta.Title = data.Title
 
 	data.Themes = &config.Themes
 	data.ThemeCookie = route.GetThemeCookie(ctx)
+
+	data.ServerVersion = config.Version
 
 	return ctx.Render("index", fiber.Map{
 		"page": data,

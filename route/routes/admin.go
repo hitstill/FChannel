@@ -10,12 +10,12 @@ import (
 	"sort"
 	"time"
 
-	"github.com/FChannel0/FChannel-Server/activitypub"
-	"github.com/FChannel0/FChannel-Server/config"
-	"github.com/FChannel0/FChannel-Server/db"
-	"github.com/FChannel0/FChannel-Server/route"
-	"github.com/FChannel0/FChannel-Server/util"
-	"github.com/FChannel0/FChannel-Server/webfinger"
+	"github.com/anomalous69/fchannel/activitypub"
+	"github.com/anomalous69/fchannel/config"
+	"github.com/anomalous69/fchannel/db"
+	"github.com/anomalous69/fchannel/route"
+	"github.com/anomalous69/fchannel/util"
+	"github.com/anomalous69/fchannel/webfinger"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -159,6 +159,8 @@ func AdminIndex(ctx *fiber.Ctx) error {
 
 	adminData.Themes = &config.Themes
 	adminData.ThemeCookie = route.GetThemeCookie(ctx)
+
+	adminData.ServerVersion = config.Version
 
 	return ctx.Render("admin", fiber.Map{
 		"page":    adminData,
@@ -326,6 +328,8 @@ func AdminActorIndex(ctx *fiber.Ctx) error {
 	if cookie := ctx.Cookies("theme"); cookie != "" {
 		data.ThemeCookie = cookie
 	}
+
+	data.ServerVersion = config.Version
 
 	return ctx.Render("manage", fiber.Map{
 		"page":    data,

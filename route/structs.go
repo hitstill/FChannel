@@ -1,10 +1,10 @@
 package route
 
 import (
-	"github.com/FChannel0/FChannel-Server/activitypub"
-	"github.com/FChannel0/FChannel-Server/db"
-	"github.com/FChannel0/FChannel-Server/util"
-	"github.com/FChannel0/FChannel-Server/webfinger"
+	"github.com/anomalous69/fchannel/activitypub"
+	"github.com/anomalous69/fchannel/db"
+	"github.com/anomalous69/fchannel/util"
+	"github.com/anomalous69/fchannel/webfinger"
 )
 
 type PageData struct {
@@ -29,6 +29,8 @@ type PageData struct {
 	ThemeCookie string
 
 	Referer string
+
+	ServerVersion string
 }
 
 type AdminPage struct {
@@ -47,6 +49,7 @@ type AdminPage struct {
 	RecentPosts   []activitypub.ObjectBase
 	Instance      activitypub.Actor
 	Meta          Meta
+	ServerVersion string
 
 	Themes      *[]string
 	ThemeCookie string

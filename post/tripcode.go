@@ -7,8 +7,8 @@ import (
 
 	"os/exec"
 
-	"github.com/FChannel0/FChannel-Server/config"
-	"github.com/FChannel0/FChannel-Server/util"
+	"github.com/anomalous69/fchannel/config"
+	"github.com/anomalous69/fchannel/util"
 	"github.com/gofiber/fiber/v2"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/simia-tech/crypt"

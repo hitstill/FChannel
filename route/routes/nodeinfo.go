@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/FChannel0/FChannel-Server/config"
-	"github.com/FChannel0/FChannel-Server/util"
+	"github.com/anomalous69/fchannel/config"
+	"github.com/anomalous69/fchannel/util"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -58,9 +58,9 @@ func NodeInfo(ctx *fiber.Ctx) error {
 		"version": schemaVersion,
 		"software": map[string]interface{}{
 			"name":       "FChannel",
-			"version":    "0.1.1", // Should be dynamic
-			"repository": "https://github.com/FChannel0/FChannel-Server",
-			"homepage":   "https://fchannel.org",
+			"version":    config.Version,
+			"repository": "https://github.com/anomalous69/FChannel",
+			"homepage":   "https://github.com/anomalous69/FChannel",
 		},
 		"protocols": []string{"activitypub"},
 		"usage": map[string]interface{}{

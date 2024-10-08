@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/FChannel0/FChannel-Server/config"
-	"github.com/FChannel0/FChannel-Server/util"
+	"github.com/anomalous69/fchannel/config"
+	"github.com/anomalous69/fchannel/util"
 	"github.com/gofiber/fiber/v2"
 )
 

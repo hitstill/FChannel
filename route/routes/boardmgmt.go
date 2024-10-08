@@ -15,15 +15,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/FChannel0/FChannel-Server/activitypub"
-	"github.com/FChannel0/FChannel-Server/config"
-	"github.com/FChannel0/FChannel-Server/route"
-	"github.com/FChannel0/FChannel-Server/webfinger"
+	"github.com/anomalous69/fchannel/activitypub"
+	"github.com/anomalous69/fchannel/config"
+	"github.com/anomalous69/fchannel/route"
+	"github.com/anomalous69/fchannel/webfinger"
 	"github.com/corona10/goimagehash"
 
-	"github.com/FChannel0/FChannel-Server/db"
-	"github.com/FChannel0/FChannel-Server/post"
-	"github.com/FChannel0/FChannel-Server/util"
+	"github.com/anomalous69/fchannel/db"
+	"github.com/anomalous69/fchannel/post"
+	"github.com/anomalous69/fchannel/util"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -633,6 +633,8 @@ func ReportGet(ctx *fiber.Ctx) error {
 	data.Themes = &config.Themes
 	data.ThemeCookie = route.GetThemeCookie(ctx)
 
+	data.ServerVersion = config.Version
+
 	data.Key = config.Key
 	data.Board.ModCred, _ = util.GetPasswordFromSession(ctx)
 	data.Board.Domain = config.Domain
@@ -784,6 +786,8 @@ func BanGet(ctx *fiber.Ctx) error {
 
 	data.Themes = &config.Themes
 	data.ThemeCookie = route.GetThemeCookie(ctx)
+
+	data.ServerVersion = config.Version
 
 	data.Key = config.Key
 	data.Board.ModCred, _ = util.GetPasswordFromSession(ctx)

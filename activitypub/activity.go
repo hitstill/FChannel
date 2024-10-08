@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/FChannel0/FChannel-Server/config"
-	"github.com/FChannel0/FChannel-Server/util"
+	"github.com/anomalous69/fchannel/config"
+	"github.com/anomalous69/fchannel/util"
 )
 
 func (activity Activity) AcceptFollow() Activity {

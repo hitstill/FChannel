@@ -14,7 +14,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/FChannel0/FChannel-Server/config"
+	"github.com/anomalous69/fchannel/config"
 	"github.com/gabriel-vasile/mimetype"
 )
 

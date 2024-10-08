@@ -1,34 +1,27 @@
-# Usagi fork
-This fork may break a number of features or introduce bugs which will rape your server, no support it provided.
-
 # About
 
-FChannel is a [libre](https://en.wikipedia.org/wiki/Free_and_open-source_software), [self-hostable](https://en.wikipedia.org/wiki/Self-hosting_(web_services)), [federated](https://en.wikipedia.org/wiki/Federation_(information_technology)), [imageboard](https://en.wikipedia.org/wiki/Imageboard) platform that utilizes [ActivityPub](https://activitypub.rocks/).
+FChannel is a
+[libre](https://en.wikipedia.org/wiki/Free_and_open-source_software),
+[self-hostable](https://en.wikipedia.org/wiki/Self-hosting_(web_services)),
+[federated](https://en.wikipedia.org/wiki/Federation_(information_technology)),
+[imageboard](https://en.wikipedia.org/wiki/Imageboard) platform that utilizes
+[ActivityPub](https://activitypub.rocks/) to federate between other instances.
 
-There are currently several instances federated with each other, for a full list see: https://fchan.xyz
+The primary instance used by this fork is: [https://usagi.reisen](https://usagi.reisen)
 
-There is an anon testing FChannel instances on TOR/Loki/I2P. Find more information here: https://fchan.xyz/g/MORL0KUT
-It is a testing environment, so the instances might come and go.
-
-## To Do List
-Current things that will be implemented first are:
-- A way to automatically index new instances into a list so others can discover instances as they come online.
-- Setting up a server proxy so that clearnet instances can talk to TOR/Loki/I2P instances.
-- Other improvements will be made over time, first it needs to be as easy as possible for new instances to come online and connect with others reliably.
-
-Try and run your own instances and federate with one of the instances above.
-Any contributions or suggestions are appreciated. Best way to give immediate feedback is the XMPP: `xmpp:general@rooms.fchannel.org` or Matrix: `#fchan:matrix.org`
+Any contributions or suggestions are appreciated.  
+Best way to give immediate feedback is the Matrix: `#fchan:matrix.org`
 
 ## Development
 To get started on hacking the code of FChannel, it is recommended you setup your
-git hooks by simply running `git config core.hooksPath .githooks`.
-
-This currently helps enforce the Go style guide, but may be expanded upon in the
-future.
+Git hooks by simply running `git config core.hooksPath .githooks`.
 
 Before you make a pull request, ensure everything you changed works as expected,
 and to fix errors reported by `go vet` and make your code better with
 `staticcheck`.
+
+### Nix
+`shell.nix` is available for those who use direnv and Lorri.
 
 ## Server Installation and Configuration
 
@@ -47,49 +40,6 @@ and to fix errors reported by `go vet` and make your code better with
 - Create the database, username, and password for psql that is used in the `config` file.
 - Build the server with `make`
 - Start the server with `./fchan`.
-
-### Server Configuration
-
-#### config file
-
-  `instance:fchan.xyz`  Domain name that the host can be located at without www and `http://` or `https://`
-
-  `instancetp:https://` Transfer protocol your domain is using, should be https if possible. Do not put `https://` if you are using `http://`
-
-  `instanceport:3000`   Port the server is running on locally, on your server.
-
-  `instancename:FChan`  Full name that you want your instances to be called.
-
-  `instancesummary:FChan is a federated image board instance.` Brief description of your instance.
-
-
-  `dbhost:localhost`    Database host. Most likely leave as `localhost`.
-
-  `dbport:5432`         Port number for database. Most likely leave the default value.
-
-  `dbname:fchan_server` Database name for psql.
-
-  `dbuser:admin`        Database user that can connect to dbname.
-
-  `dbpass:password`     Database password for dbuser.
-
-
-  `torproxy:127.0.0.1:9050`     Tor proxy route and port, leave blank if you do not want to support
-
-  `instancesalt:put your salt string here`     Used for secure tripcodes currently.
-
-  `modkey:3358bed397c1f32cf7532fa37a8778`     Set a static modkey instead of one randomly generated on restart.
-
-
-  `emailserver:mail.fchan.xyz`
-
-  `emailport:465`
-
-  `emailaddress:contact@fchan.xyz`
-
-  `emailpass:password`
-
-  `emailnotify:email1@so.co, email2@bo.uo`     Comma seperated emails To.
 
 ### Customization
 Extra links to external boards, websites, etc... can be appended to the board navigation header by modifying [views/partials/extboards.html](views/partials/extboards.html).  

@@ -4,7 +4,7 @@ import (
 	"net"
 	"strings"
 
-	"github.com/FChannel0/FChannel-Server/config"
+	"github.com/anomalous69/fchannel/config"
 	"github.com/oschwald/maxminddb-golang"
 )
 

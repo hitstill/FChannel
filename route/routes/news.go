@@ -6,12 +6,12 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/FChannel0/FChannel-Server/activitypub"
-	"github.com/FChannel0/FChannel-Server/config"
-	"github.com/FChannel0/FChannel-Server/db"
-	"github.com/FChannel0/FChannel-Server/route"
-	"github.com/FChannel0/FChannel-Server/util"
-	"github.com/FChannel0/FChannel-Server/webfinger"
+	"github.com/anomalous69/fchannel/activitypub"
+	"github.com/anomalous69/fchannel/config"
+	"github.com/anomalous69/fchannel/db"
+	"github.com/anomalous69/fchannel/route"
+	"github.com/anomalous69/fchannel/util"
+	"github.com/anomalous69/fchannel/webfinger"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gorilla/feeds"
 )
@@ -49,12 +49,14 @@ func NewsGet(ctx *fiber.Ctx) error {
 
 	data.Title = actor.PreferredUsername + ": " + data.NewsItems[0].Title
 
-	data.Meta.Description = data.PreferredUsername + " is a federated image board based on ActivityPub. The current version of the code running on the server is still a work-in-progress product, expect a bumpy ride for the time being. Get the server code here: https://git.fchannel.org."
+	data.Meta.Description = data.PreferredUsername + " is a federated image board based on ActivityPub. The current version of the code running on the server is still a work-in-progress product, expect a bumpy ride for the time being. Get the server code here: https://github.com/anomalous69/FChannel."
 	data.Meta.Url = data.Board.Actor.Id
 	data.Meta.Title = data.Title
 
 	data.Themes = &config.Themes
 	data.ThemeCookie = route.GetThemeCookie(ctx)
+
+	data.ServerVersion = config.Version
 
 	return ctx.Render("news", fiber.Map{"page": data}, "layouts/main")
 }
@@ -87,12 +89,14 @@ func NewsGetAll(ctx *fiber.Ctx) error {
 		return ctx.Redirect("/", http.StatusSeeOther)
 	}
 
-	data.Meta.Description = data.PreferredUsername + " is a federated image board based on ActivityPub. The current version of the code running on the server is still a work-in-progress product, expect a bumpy ride for the time being. Get the server code here: https://git.fchannel.org."
+	data.Meta.Description = data.PreferredUsername + " is a federated image board based on ActivityPub. The current version of the code running on the server is still a work-in-progress product, expect a bumpy ride for the time being. Get the server code here: https://github.com/anomalous69/FChannel."
 	data.Meta.Url = data.Board.Actor.Id
 	data.Meta.Title = data.Title
 
 	data.Themes = &config.Themes
 	data.ThemeCookie = route.GetThemeCookie(ctx)
+
+	data.ServerVersion = config.Version
 
 	return ctx.Render("anews", fiber.Map{"page": data}, "layouts/main")
 }

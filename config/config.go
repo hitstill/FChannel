@@ -48,6 +48,7 @@ var ProxyHeader = GetConfigValue("proxyheader", "")
 var CaptchaFont = GetConfigValue("captchafont", "") // TODO: should probably check user not passing anything weird to exec.Command
 var Themes []string
 var DB *sql.DB
+var Version string
 
 // TODO Change this to some other config format like YAML
 // to save into a struct and only read once

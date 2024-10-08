@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/FChannel0/FChannel-Server/config"
+	"github.com/anomalous69/fchannel/config"
 )
 
 func GetPathProxyType(path string) string {

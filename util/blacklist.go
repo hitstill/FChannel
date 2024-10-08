@@ -3,7 +3,7 @@ package util
 import (
 	"regexp"
 
-	"github.com/FChannel0/FChannel-Server/config"
+	"github.com/anomalous69/fchannel/config"
 )
 
 type PostBlacklist struct {

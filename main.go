@@ -2,15 +2,18 @@ package main
 
 import (
 	"math/rand"
+	"os/exec"
+	"regexp"
+	"strings"
 	"time"
 
-	"github.com/FChannel0/FChannel-Server/activitypub"
-	"github.com/FChannel0/FChannel-Server/config"
-	"github.com/FChannel0/FChannel-Server/db"
-	"github.com/FChannel0/FChannel-Server/route"
-	"github.com/FChannel0/FChannel-Server/route/routes"
-	"github.com/FChannel0/FChannel-Server/util"
-	"github.com/FChannel0/FChannel-Server/webfinger"
+	"github.com/anomalous69/fchannel/activitypub"
+	"github.com/anomalous69/fchannel/config"
+	"github.com/anomalous69/fchannel/db"
+	"github.com/anomalous69/fchannel/route"
+	"github.com/anomalous69/fchannel/route/routes"
+	"github.com/anomalous69/fchannel/util"
+	"github.com/anomalous69/fchannel/webfinger"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/encryptcookie"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -20,8 +23,21 @@ import (
 func main() {
 
 	Init()
-
 	defer db.Close()
+
+	// Make should set the version in config.Version based on git describe when building.
+	// If FChannel was built without using the Makefile then this won't be set, so first we define
+	// the current software version as a fallback, then try to create version string from git describe at runtime.
+	// The way version is set could be much better.
+	if len(config.Version) == 0 {
+		config.Version = "v0.2.0" // REMEMBER TO ALSO UPDATE THE VERSION HERE WHEN ADDING A NEW GIT TAG (format: vMAJOR.MINOR.PATCH)
+		stdout, err := exec.Command("git", "describe", "--tags", "--dirty=-dev").Output()
+		ver := strings.TrimSpace(string(stdout))
+		if err == nil && len(ver) > 0 {
+			re := regexp.MustCompile("[0-9]*-g")
+			config.Version = re.ReplaceAllString(ver, "")
+		}
+	}
 
 	// Routing and templates
 	template := html.New("./views", ".html")
@@ -29,7 +45,7 @@ func main() {
 	route.TemplateFunctions(template)
 
 	app := fiber.New(fiber.Config{
-		AppName:      "FChannel",
+		AppName:      "FChannel (" + config.Version + ")",
 		Views:        template,
 		ReadTimeout:  30 * time.Second,
 		WriteTimeout: 30 * time.Second,

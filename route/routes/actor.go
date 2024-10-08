@@ -12,13 +12,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/FChannel0/FChannel-Server/activitypub"
-	"github.com/FChannel0/FChannel-Server/config"
-	"github.com/FChannel0/FChannel-Server/db"
-	"github.com/FChannel0/FChannel-Server/post"
-	"github.com/FChannel0/FChannel-Server/route"
-	"github.com/FChannel0/FChannel-Server/util"
-	"github.com/FChannel0/FChannel-Server/webfinger"
+	"github.com/anomalous69/fchannel/activitypub"
+	"github.com/anomalous69/fchannel/config"
+	"github.com/anomalous69/fchannel/db"
+	"github.com/anomalous69/fchannel/post"
+	"github.com/anomalous69/fchannel/route"
+	"github.com/anomalous69/fchannel/util"
+	"github.com/anomalous69/fchannel/webfinger"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -522,6 +522,8 @@ func ActorPost(ctx *fiber.Ctx) error {
 	data.Themes = &config.Themes
 	data.ThemeCookie = route.GetThemeCookie(ctx)
 
+	data.ServerVersion = config.Version
+
 	return ctx.Render("npost", fiber.Map{
 		"page": data,
 	}, "layouts/main")
@@ -582,6 +584,8 @@ func ActorCatalog(ctx *fiber.Ctx) error {
 
 	data.Themes = &config.Themes
 	data.ThemeCookie = route.GetThemeCookie(ctx)
+
+	data.ServerVersion = config.Version
 
 	return ctx.Render("catalog", fiber.Map{
 		"page": data,
@@ -665,6 +669,8 @@ func ActorPosts(ctx *fiber.Ctx) error {
 	data.Themes = &config.Themes
 	data.ThemeCookie = route.GetThemeCookie(ctx)
 
+	data.ServerVersion = config.Version
+
 	return ctx.Render("index-"+data.Board.BoardType, fiber.Map{
 		"page": data,
 	}, "layouts/main")
@@ -722,6 +728,8 @@ func ActorArchive(ctx *fiber.Ctx) error {
 	returnData.Themes = &config.Themes
 	returnData.ThemeCookie = route.GetThemeCookie(ctx)
 
+	returnData.ServerVersion = config.Version
+
 	return ctx.Render("archive", fiber.Map{
 		"page": returnData,
 	}, "layouts/main")
@@ -773,6 +781,8 @@ func ActorList(ctx *fiber.Ctx) error {
 
 	data.Themes = &config.Themes
 	data.ThemeCookie = route.GetThemeCookie(ctx)
+
+	data.ServerVersion = config.Version
 
 	return ctx.Render("list", fiber.Map{
 		"page": data,
