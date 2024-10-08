@@ -126,7 +126,7 @@ func GetThreadFeed(ctx *fiber.Ctx) error {
 		return util.MakeError(err, "NewsFeed")
 	}
 
-	// check these
+	//TODO: Handle these
 	if len(feed.Items) > 0 {
 		ctx.Set("Etag", feed.Items[0].Id)
 		ctx.Set("Last-Modified", feed.Items[0].Created.UTC().String())
@@ -255,8 +255,13 @@ func GetBoardFeed(ctx *fiber.Ctx) error {
 		return util.MakeError(err, "NewsFeed")
 	}
 
-	// check these
-	ctx.Set("Etag", feed.Items[0].Id)
-	ctx.Set("Last-Modified", feed.Items[0].Created.UTC().String())
+	//TODO: Handle these
+	if len(feed.Items) > 0 {
+		ctx.Set("Etag", feed.Items[0].Id)
+		ctx.Set("Last-Modified", feed.Items[0].Created.UTC().String())
+	} else {
+		ctx.Set("Etag", "0")
+		ctx.Set("Last-Modified", time.Now().UTC().String())
+	}
 	return ctx.SendString(feedContent)
 }
