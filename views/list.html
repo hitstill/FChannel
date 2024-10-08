@@ -85,9 +85,9 @@
   <li>[<a href="#bottom" id="top">Bottom</a>]</li>
   {{ if gt (len .page.Posts) 0 }}
   {{ if eq (index .page.Posts 0).Type "Note" }}
-  <li style="float: right;">[<a href="{{ (index .page.Posts 0).Id }}/feed.json?limit=100">JSON</a>]</li> 
-  <li style="float: right;">[<a href="{{ (index .page.Posts 0).Id }}/feed.atom?limit=100">Atom</a>]&nbsp;</li> 
-  <li style="float: right;">[<a href="{{ (index .page.Posts 0).Id }}/feed.rss?limit=100">RSS</a>]&nbsp;</li>
+  <li style="float: right;">[<a href="./feed.json?limit=100">JSON</a>]</li> 
+  <li style="float: right;">[<a href="./feed.atom?limit=100">Atom</a>]&nbsp;</li> 
+  <li style="float: right;">[<a href="./feed.rss?limit=100">RSS</a>]&nbsp;</li>
   {{ end }}
   {{ end }}
 </ul>
@@ -129,7 +129,7 @@
 		<td class="subject" style="overflow: hidden; word-wrap: break-word; text-overflow: ellipsis; padding-left: 5px;"><b>{{ .Name }}</b></td>
 		{{ if ne $board.BoardType "text" }}<td>{{ convertSize (index .Attachment 0).Size  }}</td>{{ end }}
 		<td class="timestamp" data-utc="{{ .Published | timeToUnix }}">{{ .Published | timeToReadableLong }}</td>
-		<td>{{ .Replies.TotalItems }}</td>
+		<td>{{if .Replies}}{{.Replies.TotalItems}}{{else}}0{{end}}</td>
     <td style="text-align: center;">[<a href="/{{ $board.Actor.Name }}/{{ shortURL $board.Actor.Outbox $e.Id }}">View</a>]</td>
   </tr>
   {{ else }}
@@ -145,7 +145,7 @@
 		<td class="subject" style="overflow: hidden; word-wrap: break-word; text-overflow: ellipsis; padding-left: 5px;"><b>{{ .Name }}</b></td>
 		{{ if ne $board.BoardType "text" }}<td>{{ convertSize (index .Attachment 0).Size  }}</td> {{ end }}
 		<td class="timestamp" data-utc="{{ .Published | timeToUnix }}">{{ .Published | timeToReadableLong }}</td>
-		<td>{{ .Replies.TotalItems }}</td>
+		<td>{{if .Replies}}{{.Replies.TotalItems}}{{else}}0{{end}}</td>
     <td style="text-align: center;">[<a href="/{{ $board.Actor.Name }}/{{ shortURL $board.Actor.Outbox $e.Id }}">View</a>]</td>
   </tr>
   {{ end }}

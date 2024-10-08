@@ -51,7 +51,7 @@ func WantToServeCatalog(actorName string) (activitypub.Collection, bool, error) 
 			return collection, false, util.MakeError(err, "WantToServeCatalog")
 		}
 
-		collection.Actor = actor
+		collection.Actor = &actor
 		return collection, true, nil
 	}
 
@@ -73,7 +73,7 @@ func WantToServeArchive(actorName string) (activitypub.Collection, bool, error) 
 			return collection, false, util.MakeError(err, "WantToServeArchive")
 		}
 
-		collection.Actor = actor
+		collection.Actor = &actor
 		return collection, true, nil
 	}
 
@@ -81,10 +81,11 @@ func WantToServeArchive(actorName string) (activitypub.Collection, bool, error) 
 }
 
 func GetActorPost(ctx *fiber.Ctx, path string) error {
-	obj := activitypub.ObjectBase{Id: config.Domain + "" + path}
+	obj := activitypub.ObjectBase{Id: config.Domain + path}
 	collection, err := obj.GetCollectionFromPath()
 
 	if err != nil {
+		ctx.Status(404)
 		return util.MakeError(err, "GetActorPost")
 	}
 

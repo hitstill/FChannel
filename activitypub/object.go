@@ -171,7 +171,9 @@ func (obj ObjectBase) DeleteAndRepliesRequest() error {
 	}
 
 	for _, e := range following {
-		activity.To = append(activity.To, e.Id)
+		if !util.IsInStringArray(activity.To, e.Id) {
+			activity.To = append(activity.To, e.Id)
+		}
 	}
 
 	err = activity.MakeRequestInbox()
@@ -332,7 +334,9 @@ func (obj ObjectBase) DeleteRequest() error {
 	}
 
 	for _, e := range following {
-		activity.To = append(activity.To, e.Id)
+		if !util.IsInStringArray(activity.To, e.Id) {
+			activity.To = append(activity.To, e.Id)
+		}
 	}
 
 	err = activity.MakeRequestInbox()
@@ -365,12 +369,10 @@ func (obj ObjectBase) GetCollectionLocal() (Collection, error) {
 		var post ObjectBase
 
 		var attch ObjectBase
-		post.Attachment = append(post.Attachment, attch)
 
 		var prev NestedObjectBase
-		post.Preview = &prev
 
-		err = rows.Scan(&post.Id, &post.Name, &post.Alias, &post.Content, &post.Type, &post.Published, &post.Updated, &post.AttributedTo, &post.Attachment[0].Id, &post.Preview.Id, &actor.Id, &post.TripCode, &post.Sensitive)
+		err = rows.Scan(&post.Id, &post.Name, &post.Alias, &post.Content, &post.Type, &post.Published, &post.Updated, &post.AttributedTo, &attch.Id, &prev.Id, &actor.Id, &post.TripCode, &post.Sensitive)
 
 		if err != nil {
 			return nColl, util.MakeError(err, "GetCollectionLocal")
@@ -385,26 +387,33 @@ func (obj ObjectBase) GetCollectionLocal() (Collection, error) {
 			return nColl, util.MakeError(err, "GetCollectionLocal")
 		}
 
-		var postCnt int
-		var imgCnt int
-
-		if post.Replies, postCnt, imgCnt, err = post.GetReplies(); err != nil {
+		if post.Replies, err = post.GetReplies(); err != nil {
 			return nColl, util.MakeError(err, "GetCollectionLocal")
 		}
 
-		if post.Replies.TotalItems, post.Replies.TotalImgs, err = post.GetRepliesCount(); err != nil {
-			return nColl, util.MakeError(err, "GetCollectionLocal")
+		if post.Replies != nil {
+			var postCnt int
+			var imgCnt int
+
+			if postCnt, imgCnt, err = post.GetRepliesCount(); err != nil {
+				return nColl, util.MakeError(err, "GetCollectionLocal")
+			}
+
+			post.Replies.TotalItems += postCnt
+			post.Replies.TotalImgs += imgCnt
 		}
 
-		post.Replies.TotalItems = post.Replies.TotalItems + postCnt
-		post.Replies.TotalImgs = post.Replies.TotalImgs + imgCnt
-
-		if post.Attachment, err = post.Attachment[0].GetAttachment(); err != nil {
-			return nColl, util.MakeError(err, "GetCollectionLocal")
+		if attch.Id != "" {
+			post.Attachment, err = attch.GetAttachment()
+			if err != nil {
+				return nColl, util.MakeError(err, "GetCollectionLocal")
+			}
 		}
 
-		if post.Preview, err = post.Preview.GetPreview(); err != nil {
-			return nColl, util.MakeError(err, "GetCollectionLocal")
+		if prev.Id != "" {
+			if post.Preview, err = prev.GetPreview(); err != nil {
+				return nColl, util.MakeError(err, "GetCollectionLocal")
+			}
 		}
 
 		result = append(result, post)
@@ -412,7 +421,7 @@ func (obj ObjectBase) GetCollectionLocal() (Collection, error) {
 
 	nColl.AtContext.Context = "https://www.w3.org/ns/activitystreams"
 
-	nColl.Actor.Id = obj.Id
+	nColl.Actor = &Actor{Id: obj.Id}
 
 	nColl.OrderedItems = result
 
@@ -462,16 +471,14 @@ func (obj ObjectBase) GetCollectionFromPath() (Collection, error) {
 	var actor Actor
 
 	var attch ObjectBase
-	post.Attachment = append(post.Attachment, attch)
 
 	var prev NestedObjectBase
-	post.Preview = &prev
 
 	var err error
 
 	query := `select x.id, x.name, x.alias, x.content, x.type, x.published, x.updated, x.attributedto, x.attachment, x.preview, x.actor, x.tripcode, x.sensitive from (select id, name, alias, content, type, published, updated, attributedto, attachment, preview, actor, tripcode, sensitive from activitystream where id like $1 and (type='Note' or type='Archive') union select id, name, alias, content, type, published, updated, attributedto, attachment, preview, actor, tripcode, sensitive from cacheactivitystream where id like $1 and (type='Note' or type='Archive')) as x order by x.updated`
-	if err = config.DB.QueryRow(query, obj.Id).Scan(&post.Id, &post.Name, &post.Alias, &post.Content, &post.Type, &post.Published, &post.Updated, &post.AttributedTo, &post.Attachment[0].Id, &post.Preview.Id, &actor.Id, &post.TripCode, &post.Sensitive); err != nil {
-		return nColl, nil
+	if err = config.DB.QueryRow(query, obj.Id).Scan(&post.Id, &post.Name, &post.Alias, &post.Content, &post.Type, &post.Published, &post.Updated, &post.AttributedTo, &attch.Id, &prev.Id, &actor.Id, &post.TripCode, &post.Sensitive); err != nil {
+		return nColl, err
 	}
 
 	post.Sticky, _ = post.IsSticky()
@@ -483,23 +490,28 @@ func (obj ObjectBase) GetCollectionFromPath() (Collection, error) {
 		return nColl, util.MakeError(err, "GetCollectionFromPath")
 	}
 
-	if post.Replies, post.Replies.TotalItems, post.Replies.TotalImgs, err = post.GetReplies(); err != nil {
+	if post.Replies, err = post.GetReplies(); err != nil {
 		return nColl, util.MakeError(err, "GetCollectionFromPath")
 	}
 
-	if post.Attachment, err = post.Attachment[0].GetAttachment(); err != nil {
-		return nColl, util.MakeError(err, "GetCollectionFromPath")
+	if attch.Id != "" {
+		post.Attachment, err = attch.GetAttachment()
+		if err != nil {
+			return nColl, util.MakeError(err, "GetCollectionFromPath")
+		}
 	}
 
-	if post.Preview, err = post.Preview.GetPreview(); err != nil {
-		return nColl, util.MakeError(err, "GetCollectionFromPath")
+	if prev.Id != "" {
+		if post.Preview, err = prev.GetPreview(); err != nil {
+			return nColl, util.MakeError(err, "GetCollectionFromPath")
+		}
 	}
 
 	result = append(result, post)
 
 	nColl.AtContext.Context = "https://www.w3.org/ns/activitystreams"
 
-	nColl.Actor.Id = post.Actor
+	nColl.Actor = &Actor{Id: post.Actor}
 
 	nColl.OrderedItems = result
 
@@ -510,42 +522,48 @@ func (obj ObjectBase) GetFromPath() (ObjectBase, error) {
 	var post ObjectBase
 
 	var attch ObjectBase
-	post.Attachment = append(post.Attachment, attch)
 
 	var prev NestedObjectBase
-	post.Preview = &prev
 
 	query := `select id, name, alias, content, type, published, attributedto, attachment, preview, actor from activitystream where id=$1 order by published desc`
-	err := config.DB.QueryRow(query, obj.Id).Scan(&post.Id, &post.Name, &post.Alias, &post.Content, &post.Type, &post.Published, &post.AttributedTo, &post.Attachment[0].Id, &post.Preview.Id, &post.Actor)
+	err := config.DB.QueryRow(query, obj.Id).Scan(&post.Id, &post.Name, &post.Alias, &post.Content, &post.Type, &post.Published, &post.AttributedTo, &attch.Id, &prev.Id, &post.Actor)
 
 	if err != nil {
 		return post, util.MakeError(err, "GetFromPath")
 	}
 
-	var postCnt int
-	var imgCnt int
-
-	post.Replies, postCnt, imgCnt, err = post.GetReplies()
-
+	post.Replies, err = post.GetReplies()
 	if err != nil {
 		return post, util.MakeError(err, "GetFromPath")
 	}
 
-	post.Replies.TotalItems, post.Replies.TotalImgs, err = post.GetRepliesCount()
+	if post.Replies != nil {
+		var postCnt int
+		var imgCnt int
 
-	if err != nil {
-		return post, util.MakeError(err, "GetFromPath")
+		postCnt, imgCnt, err = post.GetRepliesCount()
+		if err != nil {
+			return post, util.MakeError(err, "GetFromPath")
+		}
+
+		post.Replies.TotalItems += postCnt
+		post.Replies.TotalImgs += imgCnt
 	}
 
-	post.Replies.TotalItems = post.Replies.TotalItems + postCnt
-	post.Replies.TotalImgs = post.Replies.TotalImgs + imgCnt
-	post.Attachment, err = post.Attachment[0].GetAttachment()
-
-	if err != nil {
-		return post, util.MakeError(err, "GetFromPath")
+	if attch.Id != "" {
+		post.Attachment, err = attch.GetAttachment()
+		if err != nil {
+			return post, util.MakeError(err, "GetFromPath")
+		}
 	}
 
-	post.Preview, err = post.Preview.GetPreview()
+	if prev.Id != "" {
+		post.Preview, err = post.Preview.GetPreview()
+		if err != nil {
+			return post, util.MakeError(err, "GetFromPath")
+		}
+	}
+
 	return post, util.MakeError(err, "GetFromPath")
 }
 
@@ -553,8 +571,12 @@ func (obj NestedObjectBase) GetPreview() (*NestedObjectBase, error) {
 	var preview NestedObjectBase
 
 	query := `select x.id, x.type, x.name, x.href, x.mediatype, x.size, x.published from (select id, type, name, href, mediatype, size, published from activitystream where id=$1 union select id, type, name, href, mediatype, size, published from cacheactivitystream where id=$1) as x`
-	_ = config.DB.QueryRow(query, obj.Id).Scan(&preview.Id, &preview.Type, &preview.Name, &preview.Href, &preview.MediaType, &preview.Size, &preview.Published)
-
+	if err := config.DB.QueryRow(query, obj.Id).Scan(&preview.Id, &preview.Type, &preview.Name, &preview.Href, &preview.MediaType, &preview.Size, &preview.Published); err != nil {
+		return nil, err
+	}
+	if preview.Id == "" {
+		return nil, nil
+	}
 	return &preview, nil
 }
 
@@ -571,8 +593,7 @@ func (obj ObjectBase) GetRepliesCount() (int, int, error) {
 	return countId, countImg, nil
 }
 
-func (obj ObjectBase) GetReplies() (CollectionBase, int, int, error) {
-	var nColl CollectionBase
+func (obj ObjectBase) GetReplies() (*CollectionBase, error) {
 	var result []ObjectBase
 
 	var postCount int
@@ -583,7 +604,7 @@ func (obj ObjectBase) GetReplies() (CollectionBase, int, int, error) {
 
 	query := `select count(x.id) over(), sum(case when RTRIM(x.attachment) = '' then 0 else 1 end) over(), x.id, x.name, x.alias, x.content, x.type, x.published, x.attributedto, x.attachment, x.preview, x.actor, x.tripcode, x.sensitive from (select * from activitystream where id in (select id from replies where inreplyto=$1) and (type='Note' or type='Archive') union select * from cacheactivitystream where id in (select id from replies where inreplyto=$1) and (type='Note' or type='Archive')) as x order by x.published asc`
 	if rows, err = config.DB.Query(query, obj.Id); err != nil {
-		return nColl, postCount, attachCount, util.MakeError(err, "GetReplies")
+		return nil, util.MakeError(err, "GetReplies")
 	}
 
 	defer rows.Close()
@@ -592,49 +613,54 @@ func (obj ObjectBase) GetReplies() (CollectionBase, int, int, error) {
 		var actor Actor
 
 		var attch ObjectBase
-		post.Attachment = append(post.Attachment, attch)
 
 		var prev NestedObjectBase
-		post.Preview = &prev
 
-		err = rows.Scan(&postCount, &attachCount, &post.Id, &post.Name, &post.Alias, &post.Content, &post.Type, &post.Published, &post.AttributedTo, &post.Attachment[0].Id, &post.Preview.Id, &actor.Id, &post.TripCode, &post.Sensitive)
+		err = rows.Scan(&postCount, &attachCount, &post.Id, &post.Name, &post.Alias, &post.Content, &post.Type, &post.Published, &post.AttributedTo, &attch.Id, &prev.Id, &actor.Id, &post.TripCode, &post.Sensitive)
 
 		if err != nil {
-			return nColl, postCount, attachCount, util.MakeError(err, "GetReplies")
+			return nil, util.MakeError(err, "GetReplies")
 		}
 
 		post.InReplyTo = append(post.InReplyTo, obj)
 
 		post.Actor = actor.Id
 
-		post.Replies, post.Replies.TotalItems, post.Replies.TotalImgs, err = post.GetRepliesReplies()
+		post.Replies, err = post.GetRepliesReplies()
 
 		if err != nil {
-			return nColl, postCount, attachCount, util.MakeError(err, "GetReplies")
+			return nil, util.MakeError(err, "GetReplies")
 		}
 
-		post.Attachment, err = post.Attachment[0].GetAttachment()
-
-		if err != nil {
-			return nColl, postCount, attachCount, util.MakeError(err, "GetReplies")
+		if attch.Id != "" {
+			post.Attachment, err = attch.GetAttachment()
+			if err != nil {
+				return nil, util.MakeError(err, "GetReplies")
+			}
 		}
 
-		post.Preview, err = post.Preview.GetPreview()
-
-		if err != nil {
-			return nColl, postCount, attachCount, util.MakeError(err, "GetReplies")
+		if prev.Id != "" {
+			post.Preview, err = prev.GetPreview()
+			if err != nil {
+				return nil, util.MakeError(err, "GetReplies")
+			}
 		}
 
 		result = append(result, post)
 	}
 
-	nColl.OrderedItems = result
+	if postCount == 0 {
+		return nil, nil
+	}
 
-	return nColl, postCount, attachCount, nil
+	return &CollectionBase{
+		OrderedItems: result,
+		TotalItems: postCount,
+		TotalImgs: attachCount,
+	}, nil
 }
 
-func (obj ObjectBase) GetRepliesLimit(limit int) (CollectionBase, int, int, error) {
-	var nColl CollectionBase
+func (obj ObjectBase) GetRepliesLimit(limit int) (*CollectionBase, error) {
 	var result []ObjectBase
 
 	var postCount int
@@ -645,7 +671,7 @@ func (obj ObjectBase) GetRepliesLimit(limit int) (CollectionBase, int, int, erro
 
 	query := `select count(x.id) over(), sum(case when RTRIM(x.attachment) = '' then 0 else 1 end) over(), x.id, x.name, x.alias, x.content, x.type, x.published, x.attributedto, x.attachment, x.preview, x.actor, x.tripcode, x.sensitive from (select * from activitystream where id in (select id from replies where inreplyto=$1) and type='Note' union select * from cacheactivitystream where id in (select id from replies where inreplyto=$1) and type='Note') as x order by x.published desc limit $2`
 	if rows, err = config.DB.Query(query, obj.Id, limit); err != nil {
-		return nColl, postCount, attachCount, util.MakeError(err, "GetRepliesLimit")
+		return nil, util.MakeError(err, "GetRepliesLimit")
 	}
 
 	defer rows.Close()
@@ -654,51 +680,56 @@ func (obj ObjectBase) GetRepliesLimit(limit int) (CollectionBase, int, int, erro
 		var actor Actor
 
 		var attch ObjectBase
-		post.Attachment = append(post.Attachment, attch)
 
 		var prev NestedObjectBase
-		post.Preview = &prev
 
-		err = rows.Scan(&postCount, &attachCount, &post.Id, &post.Name, &post.Alias, &post.Content, &post.Type, &post.Published, &post.AttributedTo, &post.Attachment[0].Id, &post.Preview.Id, &actor.Id, &post.TripCode, &post.Sensitive)
+		err = rows.Scan(&postCount, &attachCount, &post.Id, &post.Name, &post.Alias, &post.Content, &post.Type, &post.Published, &post.AttributedTo, &attch.Id, &prev.Id, &actor.Id, &post.TripCode, &post.Sensitive)
 
 		if err != nil {
-			return nColl, postCount, attachCount, util.MakeError(err, "GetRepliesLimit")
+			return nil, util.MakeError(err, "GetRepliesLimit")
 		}
 
 		post.InReplyTo = append(post.InReplyTo, obj)
 
 		post.Actor = actor.Id
 
-		post.Replies, post.Replies.TotalItems, post.Replies.TotalImgs, err = post.GetRepliesReplies()
+		post.Replies, err = post.GetRepliesReplies()
 
 		if err != nil {
-			return nColl, postCount, attachCount, util.MakeError(err, "GetRepliesLimit")
+			return nil, util.MakeError(err, "GetRepliesLimit")
 		}
 
-		post.Attachment, err = post.Attachment[0].GetAttachment()
-
-		if err != nil {
-			return nColl, postCount, attachCount, util.MakeError(err, "GetRepliesLimit")
+		if attch.Id != "" {
+			post.Attachment, err = attch.GetAttachment()
+			if err != nil {
+				return nil, util.MakeError(err, "GetRepliesLimit")
+			}
 		}
 
-		post.Preview, err = post.Preview.GetPreview()
-
-		if err != nil {
-			return nColl, postCount, attachCount, util.MakeError(err, "GetRepliesLimit")
+		if prev.Id != "" {
+			post.Preview, err = prev.GetPreview()
+			if err != nil {
+				return nil, util.MakeError(err, "GetRepliesLimit")
+			}
 		}
 
 		result = append(result, post)
 	}
 
-	nColl.OrderedItems = result
+	if postCount == 0 {
+		return nil, nil
+	}
 
-	sort.Sort(ObjectBaseSortAsc(nColl.OrderedItems))
+	sort.Sort(ObjectBaseSortAsc(result))
 
-	return nColl, postCount, attachCount, nil
+	return &CollectionBase{
+		OrderedItems: result,
+		TotalItems: postCount,
+		TotalImgs: attachCount,
+	}, nil
 }
 
-func (obj ObjectBase) GetRepliesReplies() (CollectionBase, int, int, error) {
-	var nColl CollectionBase
+func (obj ObjectBase) GetRepliesReplies() (*CollectionBase, error) {
 	var result []ObjectBase
 
 	var postCount int
@@ -709,7 +740,7 @@ func (obj ObjectBase) GetRepliesReplies() (CollectionBase, int, int, error) {
 
 	query := `select count(x.id) over(), sum(case when RTRIM(x.attachment) = '' then 0 else 1 end) over(), x.id, x.name, x.alias, x.content, x.type, x.published, x.attributedto, x.attachment, x.preview, x.actor, x.tripcode, x.sensitive from (select * from activitystream where id in (select id from replies where inreplyto=$1) and (type='Note' or type='Archive') union select * from cacheactivitystream where id in (select id from replies where inreplyto=$1) and (type='Note' or type='Archive')) as x order by x.published asc`
 	if rows, err = config.DB.Query(query, obj.Id); err != nil {
-		return nColl, postCount, attachCount, util.MakeError(err, "GetRepliesReplies")
+		return nil, util.MakeError(err, "GetRepliesReplies")
 	}
 
 	defer rows.Close()
@@ -719,38 +750,44 @@ func (obj ObjectBase) GetRepliesReplies() (CollectionBase, int, int, error) {
 		var actor Actor
 
 		var attch ObjectBase
-		post.Attachment = append(post.Attachment, attch)
 
 		var prev NestedObjectBase
-		post.Preview = &prev
 
-		err = rows.Scan(&postCount, &attachCount, &post.Id, &post.Name, &post.Alias, &post.Content, &post.Type, &post.Published, &post.AttributedTo, &post.Attachment[0].Id, &post.Preview.Id, &actor.Id, &post.TripCode, &post.Sensitive)
+		err = rows.Scan(&postCount, &attachCount, &post.Id, &post.Name, &post.Alias, &post.Content, &post.Type, &post.Published, &post.AttributedTo, &attch.Id, &prev.Id, &actor.Id, &post.TripCode, &post.Sensitive)
 		if err != nil {
-			return nColl, postCount, attachCount, util.MakeError(err, "GetRepliesReplies")
+			return nil, util.MakeError(err, "GetRepliesReplies")
 		}
 
 		post.InReplyTo = append(post.InReplyTo, obj)
 
 		post.Actor = actor.Id
 
-		post.Attachment, err = post.Attachment[0].GetAttachment()
-
-		if err != nil {
-			return nColl, postCount, attachCount, util.MakeError(err, "GetRepliesReplies")
+		if attch.Id != "" {
+			post.Attachment, err = attch.GetAttachment()
+			if err != nil {
+				return nil, util.MakeError(err, "GetRepliesReplies")
+			}
 		}
 
-		post.Preview, err = post.Preview.GetPreview()
-
-		if err != nil {
-			return nColl, postCount, attachCount, util.MakeError(err, "GetRepliesReplies")
+		if prev.Id != "" {
+			post.Preview, err = prev.GetPreview()
+			if err != nil {
+				return nil, util.MakeError(err, "GetRepliesReplies")
+			}
 		}
 
 		result = append(result, post)
 	}
 
-	nColl.OrderedItems = result
+	if postCount == 0 {
+		return nil, nil
+	}
 
-	return nColl, postCount, attachCount, nil
+	return &CollectionBase{
+		OrderedItems: result,
+		TotalItems: postCount,
+		TotalImgs: attachCount,
+	}, nil
 }
 
 func (obj ObjectBase) GetType() (string, error) {
@@ -1132,6 +1169,7 @@ func (obj ObjectBase) Write() (ObjectBase, error) {
 	}
 
 	if len(obj.Attachment) > 0 {
+		now := time.Now().UTC()
 		if obj.Preview.Href != "" {
 			id, err := util.CreateUniqueID(obj.Actor)
 			if err != nil {
@@ -1139,8 +1177,8 @@ func (obj ObjectBase) Write() (ObjectBase, error) {
 			}
 
 			obj.Preview.Id = fmt.Sprintf("%s/%s", obj.Actor, id)
-			obj.Preview.Published = time.Now().UTC()
-			obj.Preview.Updated = time.Now().UTC()
+			obj.Preview.Published = now
+			obj.Preview.Updated = &now
 			obj.Preview.AttributedTo = obj.Id
 			if err := obj.Preview.WritePreview(); err != nil {
 				return obj, util.MakeError(err, "Write")
@@ -1153,8 +1191,8 @@ func (obj ObjectBase) Write() (ObjectBase, error) {
 			}
 
 			obj.Attachment[i].Id = fmt.Sprintf("%s/%s", obj.Actor, id)
-			obj.Attachment[i].Published = time.Now().UTC()
-			obj.Attachment[i].Updated = time.Now().UTC()
+			obj.Attachment[i].Published = now
+			obj.Attachment[i].Updated = &now
 			obj.Attachment[i].AttributedTo = obj.Id
 			obj.Attachment[i].WriteAttachment()
 			obj.WriteWithAttachment(obj.Attachment[i])
@@ -1197,8 +1235,8 @@ func (obj ObjectBase) WriteAttachmentCache() error {
 
 	query := `select id from cacheactivitystream where id=$1`
 	if err := config.DB.QueryRow(query, obj.Id).Scan(&id); err != nil {
-		if obj.Updated.IsZero() {
-			obj.Updated = obj.Published
+		if obj.Updated == nil {
+			obj.Updated = &obj.Published
 		}
 
 		query = `insert into cacheactivitystream (id, type, name, href, published, updated, attributedTo, mediatype, size) values ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
@@ -1218,8 +1256,8 @@ func (obj ObjectBase) _WriteCache() error {
 
 	query := `select id from cacheactivitystream where id=$1`
 	if err := config.DB.QueryRow(query, obj.Id).Scan(&id); err != nil {
-		if obj.Updated.IsZero() {
-			obj.Updated = obj.Published
+		if obj.Updated == nil {
+			obj.Updated = &obj.Published
 		}
 
 		query = `insert into cacheactivitystream (id, type, name, content, published, updated, attributedto, actor, tripcode, sensitive) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`
@@ -1239,8 +1277,8 @@ func (obj ObjectBase) WriteCacheWithAttachment(attachment ObjectBase) error {
 
 	query := `select id from cacheactivitystream where id=$1`
 	if err := config.DB.QueryRow(query, obj.Id).Scan(&id); err != nil {
-		if obj.Updated.IsZero() {
-			obj.Updated = obj.Published
+		if obj.Updated == nil {
+			obj.Updated = &obj.Published
 		}
 
 		query = `insert into cacheactivitystream (id, type, name, content, attachment, preview, published, updated, attributedto, actor, tripcode, sensitive) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`
@@ -1263,8 +1301,8 @@ func (obj NestedObjectBase) WritePreviewCache() error {
 	query := `select id from cacheactivitystream where id=$1`
 	err := config.DB.QueryRow(query, obj.Id).Scan(&id)
 	if err != nil {
-		if obj.Updated.IsZero() {
-			obj.Updated = obj.Published
+		if obj.Updated == nil {
+			obj.Updated = &obj.Published
 		}
 
 		query = `insert into cacheactivitystream (id, type, name, href, published, updated, attributedTo, mediatype, size) values ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
@@ -1356,7 +1394,7 @@ func (obj ObjectBase) WriteCache() (ObjectBase, error) {
 
 	obj.WriteReply()
 
-	if obj.Replies.OrderedItems != nil {
+	if obj.Replies != nil {
 		for _, e := range obj.Replies.OrderedItems {
 			e.WriteCache()
 		}

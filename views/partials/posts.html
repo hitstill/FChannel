@@ -99,7 +99,7 @@
             <div class="postMenu-text">▶</div>
             <div class="postMenu-container">
                 {{ if eq $board.ModCred $board.Domain $board.Actor.Id }}
-                {{ if (index .Attachment 0).Id }}
+                {{ if and (gt (len .Attachment) 0) (index .Attachment 0).Id }}
                 <a href="/banmedia?id={{ .Id }}&board={{ $board.Actor.Name }}" onclick="return confirm('Ban Media?');">Ban Media</a>
                 <a href="/deleteattach?id={{ .Id }}&board={{ $board.Actor.Name }}" onclick="return confirm('Delete Attachment?');">Delete Attachment</a>
                 <a href="/marksensitive?id={{ .Id }}&board={{ $board.Actor.Name }}" onclick="return confirm('Mark Sensitive?');">Mark Sensitive</a>
@@ -109,7 +109,7 @@
                 {{ end }}
                 <a href="/make-report?actor={{ $board.Actor.Id }}&post={{ .Id }}">Report post</a>
                 <a id="hidebtn-{{ .Id }}" href="javascript:void(0);" onclick="hide(this)">Hide post <noscript>(JS)</noscript></a>
-                {{ if (index .Attachment 0).Id }}
+                {{ if and (gt (len .Attachment) 0) (index .Attachment 0).Id }}
                 <a class="postMenu-smenu">Image search »</a>
                 <a class="postMenu-search" style="margin-top: -22px;" href="https://www.google.com/searchbyimage?sbisrc=cr_1_5_2&amp;image_url={{ (index .Attachment 0).Href }}" target="_blank">Google</a>
                 <a class="postMenu-search" href="https://www.yandex.com/images/search?img_url={{ (index .Attachment 0).Href }}&amp;rpt=imageview" target="_blank">Yandex</a>
@@ -119,13 +119,13 @@
             </div>
         </div>{{ end }}
           {{ $parentId := .Id }}
-          {{ if .Replies.OrderedItems }}
+          {{ if and .Replies .Replies.OrderedItems }}
           {{ range .Replies.OrderedItems }}
           <span id="{{$parentId}}-replyto-{{.Id}}">{{ parseReplyLink $board.Actor.Id $opId .Id .Content }}</span>
           {{ end }}
           {{ end }}
         </div>
-          {{ if (index .Attachment 0).Id }}
+        {{ if and (gt (len .Attachment) 0) (index .Attachment 0).Id }}
           <span id="{{ .Id }}-fileinfo" style="display: block;">File: <a id="{{ .Id }}-img" href="{{ proxy (index .Attachment 0).Href}}" download="{{ (index .Attachment 0).Name  }}">{{ shortImg (index .Attachment 0).Name  }}</a> <span id="{{ .Id }}-size">({{ convertSize (index .Attachment 0).Size  }})</span>{{ if eq .Locked false }} {{ if eq .Type "Note" }} {{ if (index .Attachment 0).MediaType | tegakiSupportsImage }}[<a href="javascript:quote('{{ $board.Actor.Id }}', '{{ $opId }}', '{{ .Id }}')" onclick="EditImage(this.previousElementSibling.previousElementSibling.href)">Draw</a>]{{ end }}{{ end }} {{ end }}</span>
           <div id="hide-{{ .Id }}" style="display: none;">[Hide]</div>
           <div id="sensitive-{{ .Id }}" style="display: none;"><div style="position: relative; text-align: center;"><img id="sensitive-img-{{ .Id }}" style="float: left; margin-right: 10px; margin-bottom: 10px; max-width: 250px; max-height: 250px;" src="/static/sensitive.png"><div id="sensitive-text-{{ .Id }}" style="width: 240px; position: absolute; margin-top: 110px; padding: 5px; background-color: black; color: white; cursor: default; ">NSFW Content</div></div></div>
