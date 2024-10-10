@@ -129,3 +129,11 @@ div.pagelist {
 	text-decoration: line-through;
 	pointer-events: none;
 }
+
+.statusbox {
+  max-width: 800px;
+  margin: 0 auto;
+  margin-top: 50px;
+  padding-top: 0;
+  text-align: center;
+}

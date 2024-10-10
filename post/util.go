@@ -185,7 +185,7 @@ func CheckCaptcha(captcha string) (bool, error) {
 		return false, util.MakeError(err, "ParseOptions")
 	}
 
-	if code != "" {
+	if (code != "") && (code == strings.ToUpper(parts[1])) {
 		err = util.DeleteCaptchaCode(path)
 		if err != nil {
 			return false, util.MakeError(err, "ParseOptions")

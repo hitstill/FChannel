@@ -49,6 +49,7 @@ var CaptchaFont = GetConfigValue("captchafont", "") // TODO: should probably che
 var Themes []string
 var DB *sql.DB
 var Version string
+var Debug = true //TODO: read this from config file
 
 // TODO Change this to some other config format like YAML
 // to save into a struct and only read once

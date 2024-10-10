@@ -13,7 +13,9 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/simia-tech/crypt"
 	oldcrypt "gitlab.com/nyarla/go-crypt"
+	"golang.org/x/text/cases"
 	"golang.org/x/text/encoding/japanese"
+	"golang.org/x/text/language"
 	"golang.org/x/text/transform"
 )
 
@@ -54,19 +56,17 @@ func CreateNameTripCode(ctx *fiber.Ctx) (string, string, error) {
 		janitor := cejanitor.MatchString(chunck)
 		board, modcred := util.GetPasswordFromSession(ctx)
 
-		if hasAuth, _ := util.HasAuth(modcred, board); hasAuth {
-			if chunck == "" { // If no capcode specified then use modcred as level
-				modlevel := strings.Title(util.GetModLevel(board, modcred))
-				if modlevel == "Admin" {
-					modlevel = "Admin"
-				}
-				return tripSecure.ReplaceAllString(input, ""), "#" + modlevel, nil
-			}
-			if admin {
+		if hasAuth, modlevel := util.HasAuth(modcred, board); hasAuth {
+			if chunck == "" { // If tripcode field is just ## then select correct modlevel for "user"
+				return tripSecure.ReplaceAllString(input, ""), "#" + cases.Title(language.Und).String(modlevel), nil
+			} // Allow admins to post as mods and janitors, allow mods to post as janitors
+			  // If a mod accidently posts with ##admin, or a janitor with ##admin or ##mod, fallback to their correct modlevel
+			  // Auth will be replaced with a proper Username & Password system soon, so this will work for now.
+			if (admin) && (modlevel == "admin") {
 				return tripSecure.ReplaceAllString(input, ""), "#Admin", nil
-			} else if mod {
-				return tripSecure.ReplaceAllString(input, ""), "#Mod", nil
-			} else if janitor {
+			} else if (mod || admin) && (modlevel == "admin" || modlevel == "mod") {
+				return tripSecure.ReplaceAllString(input, ""), "#Moderator", nil
+			} else if (janitor || mod || admin) && (modlevel == "admin" || modlevel == "janitor") {
 				return tripSecure.ReplaceAllString(input, ""), "#Janitor", nil
 			}
 		}

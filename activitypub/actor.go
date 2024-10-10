@@ -341,7 +341,8 @@ func (actor Actor) GetCollectionPage(page int) (Collection, error) {
 		if prev.Id != "" {
 			post.Preview, err = prev.GetPreview()
 			if err != nil {
-				return nColl, util.MakeError(err, "GetCollectionPage")
+				util.MakeError(err, "GetCollectionPage")
+				continue
 			}
 		}
 

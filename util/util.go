@@ -290,6 +290,9 @@ func MakeError(err error, msg string) error {
 	if err != nil {
 		_, _, line, _ := runtime.Caller(1)
 		s := fmt.Sprintf("%s:%d : %s", msg, line, err.Error())
+		if config.Debug { // Catch and print pretty much all errors to log
+			config.Log.Println(s)
+		}
 		return errors.New(s)
 	}
 

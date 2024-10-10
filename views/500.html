@@ -1,8 +1,0 @@
-<div class="newsbox">
-  <h1>500 Internal Server Error</h1>
-  <p>We encountered an error while processing your request.Try again later.</p>
-  {{if .error.Message}}<strong>{{ .error.Message}}</strong>{{end}}
-  <p>
-    Click <a onclick="history.back()" href="{{ .page.Referer }}">here</a> to return to the previous page.
-  </p>
-</div>

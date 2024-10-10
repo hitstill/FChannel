@@ -223,7 +223,7 @@ func AdminAddBoard(ctx *fiber.Ctx) error {
 	board.Restricted = restrict
 	board.BoardType = ctx.FormValue("boardtype")
 	if board.BoardType != "image" && board.BoardType != "text" && board.BoardType != "flash" {
-		return route.Send403(ctx, "Board type \"" + board.BoardType + "\" is invalid" )
+		return route.Send400(ctx, "Board type \"" + board.BoardType + "\" is invalid" )
 	} 
 
 	newActorActivity.AtContext.Context = "https://www.w3.org/ns/activitystreams"
@@ -431,7 +431,7 @@ func AdminSetBoardType(ctx *fiber.Ctx) error {
 
 	return ctx.Redirect("/"+config.Key+"/"+redirect, http.StatusSeeOther)
 	}
-	return route.Send403(ctx, "Board type \"" + boardtype + "\" is invalid" )
+	return route.Send400(ctx, "Board type \"" + boardtype + "\" is invalid" )
 }
 
 func AdminDeleteJanny(ctx *fiber.Ctx) error {

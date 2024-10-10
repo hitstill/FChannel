@@ -1,7 +1,7 @@
 <div class="newsbox" style="text-align: left; max-width: 800px; margin: 0 auto;margin-top: 50px;padding-top:0;">
   {{ if .banned.IP }}
   <div class="newsbox-news">
-    <h1>You are banned!</h1><br>
+    <h1 style="text-align: center;">You are banned!</h1><br>
     <p>You have been banned from posting on {{ .page.PreferredUsername }} for the following reason:</p>
     <br>
     <p><b>{{ .banned.Reason }}</p></b>

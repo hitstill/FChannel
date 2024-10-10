@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"html/template"
 	"math/rand"
+	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
@@ -85,14 +86,13 @@ func GetActorPost(ctx *fiber.Ctx, path string) error {
 	collection, err := obj.GetCollectionFromPath()
 
 	if err != nil {
-		ctx.Status(404)
-		return util.MakeError(err, "GetActorPost")
+		return Send404(ctx, "Post not found", util.MakeError(err, "GetActorPost"))
 	}
 
 	if len(collection.OrderedItems) > 0 {
 		enc, err := json.MarshalIndent(collection, "", "\t")
 		if err != nil {
-			return util.MakeError(err, "GetActorPost")
+			return Send500(ctx, "Failed to get thread", util.MakeError(err, "GetActorPost"))
 		}
 
 		ctx.Response().Header.Set("Content-Type", "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"")
@@ -109,7 +109,7 @@ func ParseOutboxRequest(ctx *fiber.Ctx, actor activitypub.Actor) error {
 	if contentType == "multipart/form-data" || contentType == "application/x-www-form-urlencoded" {
 		hasCaptcha, err := util.BoardHasAuthType(actor.Name, "captcha")
 		if err != nil {
-			return util.MakeError(err, "ParseOutboxRequest")
+			return Send500(ctx, "Failed to post", util.MakeError(err, "ParseOutboxRequest"))
 		}
 
 		valid, err := post.CheckCaptcha(ctx.FormValue("captcha"))
@@ -118,37 +118,28 @@ func ParseOutboxRequest(ctx *fiber.Ctx, actor activitypub.Actor) error {
 			if header != nil {
 				f, _ := header.Open()
 				defer f.Close()
-				if header.Size > (12 << 20) {
-					ctx.Response().Header.SetStatusCode(403)
-					_, err := ctx.Write([]byte("12MB max file size"))
-					return util.MakeError(err, "ParseOutboxRequest")
+				if header.Size > (int64(config.MaxAttachmentSize)<<20) {
+					return Send400(ctx, "File too large, maximum file size is "+util.ConvertSize(int64(config.MaxAttachmentSize)))
 				} else if isBanned, err := post.IsMediaBanned(f); err == nil && isBanned {
-					config.Log.Println("media banned")
-					ctx.Response().Header.SetStatusCode(403)
-					_, err := ctx.Write([]byte(""))
-					return util.MakeError(err, "ParseOutboxRequest")
+					return Send403(ctx, "Attached file is banned")
 				} else if err != nil {
-					return util.MakeError(err, "ParseOutboxRequest")
+					return Send500(ctx, "Failed to post", util.MakeError(err, "ParseOutboxRequest"))
 				}
 
 				contentType, _ := util.GetFileContentType(f)
-				if actor.Name == "f" && len(util.EscapeString(ctx.FormValue("inReplyTo"))) == 0 && contentType != "application/x-shockwave-flash" {
-					ctx.Response().Header.SetStatusCode(403)
-					_, err := ctx.Write([]byte("file type not supported on this board"))
-					return util.MakeError(err, "ParseOutboxRequest")
+				if actor.Type == "flash" && len(util.EscapeString(ctx.FormValue("inReplyTo"))) == 0 && (contentType != "application/x-shockwave-flash" || contentType != "video/x-flv") {
+					return Send400(ctx, "New threads on this board must have a SWF or Flash Video file")
 				}
 
 				if !post.SupportedMIMEType(contentType) {
-					ctx.Response().Header.SetStatusCode(403)
-					_, err := ctx.Write([]byte("file type not supported"))
-					return util.MakeError(err, "ParseOutboxRequest")
+					return Send400(ctx, "File type ("+contentType+") not supported on this board")
 				}
 			}
 
 			var nObj = activitypub.CreateObject("Note")
 			nObj, err := post.ObjectFromForm(ctx, nObj)
 			if err != nil {
-				return util.MakeError(err, "ParseOutboxRequest")
+				return Send500(ctx, "Failed to post", util.MakeError(err, "ParseOutboxRequest"))
 			}
 
 			op := len(nObj.InReplyTo) - 1
@@ -183,19 +174,17 @@ func ParseOutboxRequest(ctx *fiber.Ctx, actor activitypub.Actor) error {
 			nObj.Actor = config.Domain + "/" + actor.Name
 
 			if locked, _ := nObj.InReplyTo[0].IsLocked(); locked {
-				ctx.Response().Header.SetStatusCode(403)
-				_, err := ctx.Write([]byte("thread is locked"))
-				return util.MakeError(err, "ParseOutboxRequest")
+				return Send403(ctx, "Thread is locked")
 			}
 
 			nObj, err = nObj.Write()
 			if err != nil {
-				return util.MakeError(err, "ParseOutboxRequest")
+				return Send500(ctx, "Failed to post", util.MakeError(err, "ParseOutboxRequest"))
 			}
 
-			if len(nObj.To) == 0 {
+			if len(nObj.To) == 0 && actor.Name != "overboard" {
 				if err := actor.ArchivePosts(); err != nil {
-					return util.MakeError(err, "ParseOutboxRequest")
+					return Send500(ctx, "Failed to post", util.MakeError(err, "ParseOutboxRequest"))
 				}
 			}
 
@@ -240,13 +229,13 @@ func ParseOutboxRequest(ctx *fiber.Ctx, actor activitypub.Actor) error {
 				query := `INSERT INTO "identify" (id, ip, password) VALUES ($1, $2, crypt($3, gen_salt('bf')))`
 				_, err = config.DB.Exec(query, nObj.Id, ctx.Get("PosterIP"), ctx.FormValue("pwd"))
 				if err != nil {
-					return util.MakeError(err, "ParseOutboxRequest")
+					return Send500(ctx, "Failed to post", util.MakeError(err, "ParseOutboxRequest"))
 				}
 			}
 
 			ctx.Response().Header.Set("Status", "200")
 			_, err = ctx.Write([]byte(id))
-			return util.MakeError(err, "ParseOutboxRequest")
+			return Send500(ctx, "Failed to post", util.MakeError(err, "ParseOutboxRequest"))
 		} else {
 			return Send403(ctx, "Incorrect captcha")
 		}
@@ -663,81 +652,53 @@ func TemplateFunctions(engine *html.Engine) {
 	})
 }
 
-func StatusTemplate(num int) func(ctx *fiber.Ctx, msg ...string) error {
-	n := fmt.Sprint(num)
-	return func(ctx *fiber.Ctx, msg ...string) error {
+func StatusTemplate(num int) func(ctx *fiber.Ctx, msg string, err ...error) error {
+	return func(ctx *fiber.Ctx, msg string, err ...error) error {
 		var m string
-		if msg != nil {
-			m = msg[0]
+		if len(msg) > 0 {
+			m = msg
+		} else {
+			switch num{
+			case 400:
+				m = "Your request could not be processed due to errors."
+			case 403:
+				m = "You are not allowed to access this resource."
+			case 404:
+				m = "The resource you are trying to access does not exist."
+			case 500:
+				m = "The server encountered an error and could not complete your request."
+			}
 		}
 
 		var data PageData
-		var errorData errorData
+		var statusData StatusData
 
 		data.Boards = webfinger.Boards
 		data.Themes = &config.Themes
 		data.ThemeCookie = GetThemeCookie(ctx)
 		data.Referer = ctx.Get("referer")
 
-		errorData.Message = m
+		statusData.Code = num
+		statusData.Meaning = http.StatusText(num)
+		statusData.Message = m
 
-		return ctx.Status(num).Render(n, fiber.Map{
+		// Display error on page if instance admin
+		_, modcred := util.GetPasswordFromSession(ctx)
+		if hasAuth, modlevel := util.HasAuth(modcred, config.Domain); (hasAuth) && (modlevel == "admin") && (err != nil) {
+			statusData.Error = err
+		}
+
+		data.Title = strconv.Itoa(num) + " " + statusData.Meaning
+
+		return ctx.Status(num).Render("status", fiber.Map{
 			"page":  data,
-			"error": errorData,
+			"status": statusData,
 		}, "layouts/main")
 	}
 }
 
-func GenericError(ctx *fiber.Ctx, msg ...string) error {
-
-	var m string
-	if msg != nil {
-		m = msg[0]
-	}
-
-	var data PageData
-	var errorData errorData
-
-	data.Boards = webfinger.Boards
-	data.Themes = &config.Themes
-	data.ThemeCookie = GetThemeCookie(ctx)
-	data.Referer = ctx.Get("referer")
-
-	errorData.Message = m
-
-	return ctx.Status(400).Render("gerror", fiber.Map{
-		"page":  data,
-		"error": errorData,
-	}, "layouts/main")
-}
-
-func Send500(ctx *fiber.Ctx, err error, msg ...string) error {
-
-	var m string
-	if msg != nil {
-		m = msg[0]
-	}
-
-	var data PageData
-	var errorData errorData
-
-	data.Boards = webfinger.Boards
-	data.Themes = &config.Themes
-	data.ThemeCookie = GetThemeCookie(ctx)
-	data.Referer = ctx.Get("referer")
-
-	errorData.Message = m
-	errorData.Error = err
-
-	// The results of this call do not matter to us
-	ctx.Status(500).Render("500", fiber.Map{
-		"page":  data,
-		"error": errorData,
-	}, "layouts/main")
-
-	return err
-}
-
 var Send400 = StatusTemplate(400)
+var Send401 = StatusTemplate(401)
 var Send403 = StatusTemplate(403)
 var Send404 = StatusTemplate(404)
+var Send500 = StatusTemplate(500)

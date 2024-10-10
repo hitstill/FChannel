@@ -1,0 +1,11 @@
+<script async src="/static/js/prettify.js"></script>
+<div class="statusbox">
+    <h1>{{.status.Code}} {{.status.Meaning}}</h1>
+    {{if .status.Message}}<h2 style="white-space: pre-wrap;">{{ .status.Message}}</h2>{{end}}
+    {{if .status.Error}}<hr><pre class="prettyprint" style="text-wrap:auto;max-width:unset;max-height: 79vh;"><h3>=== Admin error output ===</h3>
+
+{{.status.Error}}</pre><hr>{{end}}
+    <p>
+      <a onclick="history.back()" href="{{ .page.Referer }}">Click here to return to the previous page.</a>
+    </p>
+  </div>

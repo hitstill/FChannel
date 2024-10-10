@@ -26,7 +26,7 @@ func GetThreadFeed(ctx *fiber.Ctx) error {
 	}
 
 	if !db.IsValidThread(thread) {
-		return route.Send404(ctx, "Thread does not exist")
+		return route.Send404(ctx, "Thread "+thread+"does not exist")
 	}
 	feedtype := ctx.Params("feedtype")
 

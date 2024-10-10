@@ -206,8 +206,8 @@ func ActorFollowers(ctx *fiber.Ctx) error {
 
 func MakeActorPost(ctx *fiber.Ctx) error {
 	// Empty captcha
-	if ctx.FormValue("captcha") == "" {
-		return route.Send403(ctx, "No captcha provided")
+	if len(ctx.FormValue("captcha")) == 0 {
+		return route.Send401(ctx, "Missing captcha")
 	}
 	
 	var ban db.Ban
@@ -245,6 +245,7 @@ func MakeActorPost(ctx *fiber.Ctx) error {
 	}
 
 	// Trying to reply to non-existant thread
+	//TODO: Handle DB error
 	if ctx.FormValue("inReplyTo") != "" && !db.IsValidThread(ctx.FormValue("inReplyTo")) {
 		return route.Send400(ctx, "\""+ctx.FormValue("inReplyTo")+"\" is not a valid thread on this server")
 	}
@@ -257,7 +258,7 @@ func MakeActorPost(ctx *fiber.Ctx) error {
 		// Only allow new threads on flash type boards with SWF or FLV files
 		if actor.BoardType == "flash" && len(util.EscapeString(ctx.FormValue("inReplyTo"))) == 0 && contentType != "application/x-shockwave-flash" && contentType != "video/x-flv" {
 			file.Close()
-			return route.Send400(ctx, "New threads on this board must be a SWF or Flash Video (FLV)")
+			return route.Send400(ctx, "New threads on this board must have a SWF or Flash Video file")
 		}
 	}
 
@@ -366,7 +367,7 @@ func MakeActorPost(ctx *fiber.Ctx) error {
 		actor, err := activitypub.GetActor(actorid)
 		// Reject replies with media when the OP from a textboard
 		if actor.BoardType == "text" && header != nil {
-			return route.Send400(ctx, "Thread is from a text-only board, file attachments are not allowed")
+			return route.Send400(ctx, "The thread you are replying to is from a text-only board, file attachments are not allowed")
 		}
 		if err == nil {
 			local, _ := actor.IsLocal()
@@ -431,9 +432,10 @@ func MakeActorPost(ctx *fiber.Ctx) error {
 	}
 
 	if resp.StatusCode == 403 {
-		return ctx.Render("403", fiber.Map{
-			"message": string(body),
-		})
+		//TODO: Better way to do this?
+		ctx.Response().Header.Set("Status", "403")
+		ctx.Set(fiber.HeaderContentType, fiber.MIMETextHTML)
+		return ctx.Send(body)
 	}
 
 	return ctx.Redirect(ctx.BaseURL()+"/"+ctx.FormValue("boardName"), 301)
@@ -466,7 +468,7 @@ func ActorPost(ctx *fiber.Ctx) error {
 	collection, err := obj.GetCollectionFromPath()
 
 	if err != nil {
-		return ctx.Status(404).Render("404", fiber.Map{})
+		return route.Send404(ctx, "Thread not found")
 	}
 
 	var data route.PageData
@@ -599,7 +601,7 @@ func ActorPosts(ctx *fiber.Ctx) error {
 	actor, err := activitypub.GetActorByNameFromDB(ctx.Params("actor"))
 
 	if err != nil {
-		return ctx.Status(404).Render("404", fiber.Map{})
+		return route.Send404(ctx, "Board /"+ctx.Params("actor")+"/ not found")
 	}
 
 	if activitypub.AcceptActivity(ctx.Get("Accept")) {
@@ -743,7 +745,7 @@ func ActorList(ctx *fiber.Ctx) error {
 	actor, err := activitypub.GetActorByNameFromDB(ctx.Params("actor"))
 
 	if err != nil {
-		return ctx.Status(404).Render("404", fiber.Map{})
+		return route.Send404(ctx, "Board /"+ctx.Params("actor")+"/ not found")
 	}
 
 	collection, err := actor.GetCollectionType("Note")

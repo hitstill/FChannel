@@ -451,18 +451,6 @@ func GetPasswordFromSession(ctx *fiber.Ctx) (string, string) {
 	return "", ""
 }
 
-func GetModLevel(board string, code string) string {
-	var level string
-
-	query := `select type from boardaccess where board=$1 AND code=$2`
-	if err := config.DB.QueryRow(query, board, code).Scan(&level); err != nil {
-		config.Log.Println("Failed to get mod type")
-		return ""
-	}
-
-	return level
-}
-
 func MakeCaptchas(total int) error {
 	dbtotal, err := GetCaptchaTotal()
 

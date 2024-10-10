@@ -21,7 +21,7 @@ func NewsGet(ctx *fiber.Ctx) error {
 	ts, err := strconv.Atoi(timestamp)
 
 	if err != nil {
-		return ctx.Status(404).Render("404", fiber.Map{})
+		return route.Send400(ctx, ctx.Path()[6:]+" is not a valid timestamp")
 	}
 
 	actor, err := activitypub.GetActorFromDB(config.Domain)
@@ -44,7 +44,7 @@ func NewsGet(ctx *fiber.Ctx) error {
 
 	data.NewsItems[0], err = db.GetNewsItem(ts)
 	if err != nil {
-		return util.MakeError(err, "NewsGet")
+		return route.Send404(ctx, "News not found")
 	}
 
 	data.Title = actor.PreferredUsername + ": " + data.NewsItems[0].Title
@@ -128,7 +128,7 @@ func NewsDelete(ctx *fiber.Ctx) error {
 	actor, err := activitypub.GetActorFromDB(config.Domain)
 
 	if has := actor.HasValidation(ctx); !has {
-		return nil
+		return route.Send403(ctx, "You are not authorized to delete news")
 	}
 
 	timestamp := ctx.Path()[13+len(config.Key):]
@@ -136,11 +136,11 @@ func NewsDelete(ctx *fiber.Ctx) error {
 	tsint, err := strconv.Atoi(timestamp)
 
 	if err != nil {
-		return ctx.Status(404).Render("404", fiber.Map{})
+		return route.Send400(ctx, ctx.Path()[13+len(config.Key):]+" is not a valid timestamp")
 	}
 
 	if err := db.DeleteNewsItem(tsint); err != nil {
-		return util.MakeError(err, "NewsDelete")
+		return route.Send500(ctx, "News does not exist or database failed to process request", util.MakeError(err, "NewsDelete"))
 	}
 
 	return ctx.Redirect("/news/", http.StatusSeeOther)

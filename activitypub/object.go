@@ -202,7 +202,8 @@ func (obj ObjectBase) DeleteAttachmentFromFile() error {
 	}
 
 	href = strings.Replace(href, config.Domain+"/", "", 1)
-	if href != "static/notfound.png" {
+	//TODO: Create a deleted placeholder image 
+	if href != "static/deleted.png" {
 		if _, err := os.Stat(href); err != nil {
 			return nil
 		}
@@ -235,7 +236,7 @@ func (obj ObjectBase) DeletePreviewFromFile() error {
 	}
 
 	href = strings.Replace(href, config.Domain+"/", "", 1)
-	if href != "static/notfound.png" {
+	if href != "static/deleted.png" {
 		if _, err := os.Stat(href); err != nil {
 			return nil
 		}
@@ -558,7 +559,7 @@ func (obj ObjectBase) GetFromPath() (ObjectBase, error) {
 	}
 
 	if prev.Id != "" {
-		post.Preview, err = post.Preview.GetPreview()
+		post.Preview, err = prev.GetPreview()
 		if err != nil {
 			return post, util.MakeError(err, "GetFromPath")
 		}
@@ -817,7 +818,7 @@ func (obj ObjectBase) IsLocal() (bool, error) {
 
 	query := `select id from activitystream where id=$1`
 	if err := config.DB.QueryRow(query, obj.Id).Scan(&nID); err != nil {
-		return false, nil
+		return false, err
 	}
 
 	return true, nil
