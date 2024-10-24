@@ -608,7 +608,7 @@ func ParseLinkComments(board activitypub.Actor, op string, content string, threa
 		// else get it from the database
 		if thread.Id == link {
 			quoteTitle = ParseLinkTitle(board.Outbox, op, thread.Content)
-		} else {
+		} else if thread.Replies != nil {
 			for _, e := range thread.Replies.OrderedItems {
 				if e.Id == parsedLink {
 					quoteTitle = ParseLinkTitle(board.Outbox, op, e.Content)
