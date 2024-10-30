@@ -137,3 +137,7 @@ div.pagelist {
   padding-top: 0;
   text-align: center;
 }
+
+.button {
+  cursor: pointer;
+}

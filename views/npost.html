@@ -2,12 +2,11 @@
 
 <hr>
 {{ if eq .page.Board.BoardType "text" }}
-<h2 style="text-align: center;margin-top: 0.2em;margin-bottom: 0.2em;">Text mode</h2>
+<h2 style="text-align: center;margin-top: 0.2em;margin-bottom: 0.2em;">Text only</h2>
 <hr>
 {{ end }}
 
 <ul id="navlinks">
-  <li>[<a href="/{{ .page.Board.Name }}">Return</a>]</li>
   {{ template "partials/post_nav" .page }}
   <li>[<a href="#bottom" id="top">Bottom</a>]</li>
   {{ if gt (len .page.Posts) 0 }}
@@ -35,7 +34,6 @@
   <tr>
     <td>
       <ul id="navlinks">
-        <li>[<a href="/{{ .page.Board.Name }}">Return</a>]</li>
         {{ template "partials/post_nav" .page }}
         <li>[<a href="#top" id="bottom">Top</a>]</li>
         <li><input id="autoreload-checkbox" type="checkbox" onclick="autoTimer()"> Auto refresh <span

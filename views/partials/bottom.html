@@ -6,7 +6,7 @@
 <div id="reply-box" class="popup-box" style="display: none;">
   <div id="reply-header">
     <span id="reply-header-text">...</span>
-    <div id="reply-close" style="display: inline-block; float: right;"><a href="javascript:closeReply()">[X]</a></div>
+    <div id="reply-close" style="display: inline-block; float: right;"><span style="display:block" class="button cross" onclick="closeReply()"></span></div>
   </div>
   <form onsubmit="setdeletionPassword(this);sessionStorage.setItem('element-closed-reply', true)"  id="reply-post" action="/post" method="post" enctype="multipart/form-data">
     <input id="reply-name" name="name" type="text" placeholder="Name" maxlength="100">
@@ -48,7 +48,7 @@
 </div>
 
 <div id="report-box" class="popup-box" style="display: none;">
-  <div id="report-header" style="text-align: center; display: inline-block; z-index: 0; cursor: move;"></div><div id="report-close" style="display: inline-block; float: right;"><a href="javascript:closeReport()">[X]</a></div>
+  <div id="report-header" style="text-align: center; display: inline-block; z-index: 0; cursor: move;"></div><div id="report-close" style="display: inline-block; float: right;"><span class="button cross" onclick="closeReport()"></span></div>
   <form onsubmit="sessionStorage.setItem('element-closed-report', true)" id="report-post" action="/report" method="post">
     <label for="comment">Reason:</label><br>
     <textarea id="report-comment" name="comment" rows="12" cols="54" style="width: 396px;" maxlength="100" oninput="sessionStorage.setItem('element-report-comment', document.getElementById('report-comment').value)"></textarea>

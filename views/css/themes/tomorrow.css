@@ -458,3 +458,9 @@ div.pagelist div.cataloglink {
 	border: 4px solid #c5c8c6;
 	background-color: #282A2E;
 }
+
+.cross {
+	background-image: url(/static/cross.png);
+	width: 18px;
+	height: 18px;
+}

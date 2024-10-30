@@ -13,7 +13,7 @@
           <tr>
             <td><label for="name">Name:</label></td>
             <td><input type="text" id="name" name="name" placeholder="Anonymous" maxlength="100">
-                <a id="stopTablePost" onclick="stopNewPost()">[X]</a>
+              <span class="button cross" id="stopTablePost" onclick="stopNewPost()"></span>
             </td>
           </tr>
           <tr>
@@ -63,7 +63,7 @@
       <input type="hidden" id="sendTo" name="sendTo" value="{{ $board.To }}">
       <input type="hidden" id="boardName" name="boardName" value="{{ $board.Name }}">
       <input type="hidden" id="captchaCode" name="captchaCode" value="{{ $board.CaptchaCode }}">
-      <input type="hidden" id="returnTo" name="returnTo" value="{{ .ReturnTo }}">
+      <input type="hidden" id="returnTo" name="returnTo" value="{{ .page.ReturnTo }}">
     </form>
   </div>
 </div>
@@ -79,15 +79,19 @@
 
 
 <hr>
+{{ if eq .page.Board.BoardType "text" }}
+<h2 style="text-align: center;margin-top: 0.2em;margin-bottom: 0.2em;">Text only</h2>
+<hr>
+{{ end }}
+
 <ul id="navlinks">
-  <li>[<a href="/{{ .page.Board.Name }}">Return</a>]</li>
   {{ template "partials/post_nav" .page }}
   <li>[<a href="#bottom" id="top">Bottom</a>]</li>
   {{ if gt (len .page.Posts) 0 }}
   {{ if eq (index .page.Posts 0).Type "Note" }}
-  <li style="float: right;">[<a href="./feed.json?limit=100">JSON</a>]</li> 
-  <li style="float: right;">[<a href="./feed.atom?limit=100">Atom</a>]&nbsp;</li> 
-  <li style="float: right;">[<a href="./feed.rss?limit=100">RSS</a>]&nbsp;</li>
+  <li style="float: right;">[<a href="{{ $board.Name }}/feed.json?limit=100">JSON</a>]&nbsp;</li> 
+  <li style="float: right;">[<a href="{{ $board.Name }}/feed.atom?limit=100">Atom</a>]&nbsp;</li> 
+  <li style="float: right;">[<a href="{{ $board.Name }}/feed.rss?limit=100">RSS</a>]</li>
   {{ end }}
   {{ end }}
 </ul>
@@ -124,10 +128,10 @@
     {{ end }}
 		<td>{{ shortURL $board.Actor.Outbox $e.Id }}</td>
 		<td><span class="name{{if eq .TripCode "#Admin"}} capcodeAdmin{{end}}{{if eq .TripCode "#Mod"}} capcodeMod{{end}}{{if eq .TripCode "#Janitor"}} capcodeJanitor{{end}}"><b>{{ .Alias | parseEmail }}{{ if .AttributedTo }}{{ .AttributedTo }}{{ else }}Anonymous{{ end }}{{ if .Alias }}</a>{{ end }}</b></span><span class="tripcode{{if eq .TripCode "#Admin"}} capcodeAdmin{{end}}{{if eq .TripCode "#Mod"}} capcodeMod{{end}}{{if eq .TripCode "#Janitor"}} capcodeJanitor{{end}}"> {{ .TripCode }} </span>{{ .Alias | parseIDandFlag }}</td>
-    {{ if ne $board.BoardType "text" }}<td>{{if (index .Attachment 0).Name}}[<a href="{{ proxy (index .Attachment 0).Href}}" download="{{ (index .Attachment 0).Name }}">{{ shortImg (index .Attachment 0).Name  }}</a>]{{ end }}</td>
-		<td>{{ if eq (index .Attachment 0).MediaType "application/x-shockwave-flash" }}[<a href="#" onclick="swfpopup(this, 'list')">Embed</a>] {{ end }}</td>{{ end }}
+    {{ if ne $board.BoardType "text" }}<td>{{ if (gt (len .Attachment) 0) }}{{if (index .Attachment 0).Name}}[<a href="{{ proxy (index .Attachment 0).Href}}" download="{{ (index .Attachment 0).Name }}">{{ shortImg (index .Attachment 0).Name  }}</a>]{{ end }}{{ end }}</td>
+		<td>{{ if (gt (len .Attachment) 0) }}{{ if eq (index .Attachment 0).MediaType "application/x-shockwave-flash" }}[<a href="#" onclick="swfpopup(this, 'list')">Embed</a>] {{ end }}{{ end }}</td>{{ end }}
 		<td class="subject" style="overflow: hidden; word-wrap: break-word; text-overflow: ellipsis; padding-left: 5px;"><b>{{ .Name }}</b></td>
-		{{ if ne $board.BoardType "text" }}<td>{{ convertSize (index .Attachment 0).Size  }}</td>{{ end }}
+		{{ if ne $board.BoardType "text" }}<td>{{ if (gt (len .Attachment) 0) }}{{ convertSize (index .Attachment 0).Size  }}{{ end }}</td>{{ end }}
 		<td class="timestamp" data-utc="{{ .Published | timeToUnix }}">{{ .Published | timeToReadableLong }}</td>
 		<td>{{if .Replies}}{{.Replies.TotalItems}}{{else}}0{{end}}</td>
     <td style="text-align: center;">[<a href="/{{ $board.Actor.Name }}/{{ shortURL $board.Actor.Outbox $e.Id }}">View</a>]</td>
@@ -140,10 +144,10 @@
     {{ end }}
     <td>{{ shortURL $board.Actor.Outbox $e.Id }}</td>
 		<td><span class="name{{if eq .TripCode "#Admin"}} capcodeAdmin{{end}}{{if eq .TripCode "#Mod"}} capcodeMod{{end}}{{if eq .TripCode "#Janitor"}} capcodeJanitor{{end}}"><b>{{ .Alias | parseEmail }}{{ if .AttributedTo }}{{ .AttributedTo }}{{ else }}Anonymous{{ end }}{{ if .Alias }}</a>{{ end }}</b></span><span class="tripcode{{if eq .TripCode "#Admin"}} capcodeAdmin{{end}}{{if eq .TripCode "#Mod"}} capcodeMod{{end}}{{if eq .TripCode "#Janitor"}} capcodeJanitor{{end}}"> {{ .TripCode }} </span>{{ .Alias | parseIDandFlag }}</td>
-    {{ if ne $board.BoardType "text" }}<td>{{if (index .Attachment 0).Name}}[<a href="{{ proxy (index .Attachment 0).Href}}" download="{{ (index .Attachment 0).Name }}">{{ shortImg (index .Attachment 0).Name  }}</a>]{{ end }}</td>
-		<td>{{ if eq (index .Attachment 0).MediaType "application/x-shockwave-flash" }}[<a href="#" onclick="swfpopup(this, 'list')">Embed</a>]{{ end }}</td>{{ end }}
+    {{ if ne $board.BoardType "text" }}<td>{{ if (gt (len .Attachment) 0) }}{{if (index .Attachment 0).Name}}[<a href="{{ proxy (index .Attachment 0).Href}}" download="{{ (index .Attachment 0).Name }}">{{ shortImg (index .Attachment 0).Name  }}</a>]{{ end }}{{ end }}</td>
+		<td>{{ if (gt (len .Attachment) 0) }}{{ if eq (index .Attachment 0).MediaType "application/x-shockwave-flash" }}[<a href="#" onclick="swfpopup(this, 'list')">Embed</a>]{{ end }}{{ end }}</td>{{ end }}
 		<td class="subject" style="overflow: hidden; word-wrap: break-word; text-overflow: ellipsis; padding-left: 5px;"><b>{{ .Name }}</b></td>
-		{{ if ne $board.BoardType "text" }}<td>{{ convertSize (index .Attachment 0).Size  }}</td> {{ end }}
+		{{ if ne $board.BoardType "text" }}<td>{{ if (gt (len .Attachment) 0) }}{{ convertSize (index .Attachment 0).Size  }}{{ end }}</td> {{ end }}
 		<td class="timestamp" data-utc="{{ .Published | timeToUnix }}">{{ .Published | timeToReadableLong }}</td>
 		<td>{{if .Replies}}{{.Replies.TotalItems}}{{else}}0{{end}}</td>
     <td style="text-align: center;">[<a href="/{{ $board.Actor.Name }}/{{ shortURL $board.Actor.Outbox $e.Id }}">View</a>]</td>
@@ -155,7 +159,6 @@
 
 <hr>
 <ul id="navlinks">
-  <li>[<a href="/{{ .page.Board.Name }}">Return</a>]</li>
   {{ template "partials/post_nav" .page }}
   <li>[<a href="#top" id="bottom">Top</a>]</li>
   <li style="float: right;">[<a href="{{ $board.Name }}/feed.json?limit=100">JSON</a>]&nbsp;</li> 

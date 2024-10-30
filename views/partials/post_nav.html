@@ -1,3 +1,6 @@
+{{ if or (ne .ReturnTo "feed") (.Board.InReplyTo) }}
+<li>[<a href="/{{ .Board.Name }}">Return</a>]</li>
+{{ end }}
 {{ if and (ne .ReturnTo "catalog") (ne .Board.BoardType "text") (ne .Board.BoardType "flash") }}
 <li>[<a href="/{{ .Board.Name }}/catalog">Catalog</a>]</li>
 {{ end }}

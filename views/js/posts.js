@@ -75,7 +75,7 @@ function startNewPost() {
         drawform.style = "";
     }
     document.getElementById("newpost").style = "";
-    document.getElementById("stopTablePost").style = "cursor: pointer; display:unset;";
+    document.getElementById("stopTablePost").style = "display:unset;";
     sessionStorage.setItem("newpostState", true);
 }
 

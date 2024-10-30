@@ -421,10 +421,17 @@ func (actor Actor) GetCollectionType(nType string) (Collection, error) {
 	var nColl Collection
 	var result []ObjectBase
 
-	query := `select x.id, x.name, x.alias, x.content, x.type, x.published, x.updated, x.attributedto, x.attachment, x.preview, x.actor, x.tripcode, x.sensitive from (select id, name, alias, content, type, published, updated, attributedto, attachment, preview, actor, tripcode, sensitive from activitystream where actor=$1 and id in (select id from replies where inreplyto='') and type=$2 union select id, name, alias, content, type, published, updated, attributedto, attachment, preview, actor, tripcode, sensitive from activitystream where actor in (select following from following where id=$1) and id in (select id from replies where inreplyto='') and type=$2 union select id, name, alias, content, type, published, updated, attributedto, attachment, preview, actor, tripcode, sensitive from cacheactivitystream where actor in (select following from following where id=$1) and id in (select id from replies where inreplyto='') and type=$2) as x order by x.updated desc`
+	query := `select x.id, x.name, x.alias, x.content, x.type, x.published, x.updated, x.attributedto, x.attachment, x.preview, x.actor, x.tripcode, x.sensitive from (select id, name, alias, content, type, published, updated, attributedto, attachment, preview, actor, tripcode, sensitive from activitystream where actor=$1 and id in (select id from replies where inreplyto='') and type=$2 and id not in (select activity_id from sticky where actor_id=$1) union select id, name, alias, content, type, published, updated, attributedto, attachment, preview, actor, tripcode, sensitive from activitystream where actor in (select following from following where id=$1) and id in (select id from replies where inreplyto='') and type=$2 and id not in (select activity_id from sticky where actor_id=$1) union select id, name, alias, content, type, published, updated, attributedto, attachment, preview, actor, tripcode, sensitive from cacheactivitystream where actor in (select following from following where id=$1) and id in (select id from replies where inreplyto='') and type=$2 and id not in (select activity_id from sticky where actor_id=$1)) as x order by x.updated desc`
 	rows, err := config.DB.Query(query, actor.Id, nType)
 	if err != nil {
 		return nColl, util.MakeError(err, "GetCollectionType")
+	}
+
+	if nType == "Note" {
+		stickies, _ := actor.GetStickies()
+		for _, e := range stickies.OrderedItems {
+			result = append(result, e)
+		}
 	}
 
 	defer rows.Close()
@@ -439,6 +446,8 @@ func (actor Actor) GetCollectionType(nType string) (Collection, error) {
 		if err := rows.Scan(&post.Id, &post.Name, &post.Alias, &post.Content, &post.Type, &post.Published, &post.Updated, &post.AttributedTo, &attch.Id, &prev.Id, &actor.Id, &post.TripCode, &post.Sensitive); err != nil {
 			return nColl, util.MakeError(err, "GetCollectionType")
 		}
+
+		post.Locked, _ = post.IsLocked()
 
 		post.Actor = actor.Id
 
@@ -1367,12 +1376,12 @@ func (actor Actor) GetRecentThreads() (Collection, error) {
 			}
 		}
 
-			if prev.Id != "" {
-				post.Preview, err = prev.GetPreview()
-				if err != nil {
-					return nColl, util.MakeError(err, "GetRecentThreads")
-				}
+		if prev.Id != "" {
+			post.Preview, err = prev.GetPreview()
+			if err != nil {
+				return nColl, util.MakeError(err, "GetRecentThreads")
 			}
+		}
 
 		result = append(result, post)
 	}
@@ -1384,13 +1393,13 @@ func (actor Actor) GetRecentThreads() (Collection, error) {
 	return nColl, nil
 }
 
-func (actor Actor) GetBoardType() (string) {
+func (actor Actor) GetBoardType() string {
 	//TODO: unused!
 	var boardtype string
 
 	query := `select boardtype from actor where id=$1`
 	if err := config.DB.QueryRow(query, actor.Id).Scan(&boardtype); err != nil {
-		boardtype = "image";
+		boardtype = "image"
 	}
 
 	return boardtype
