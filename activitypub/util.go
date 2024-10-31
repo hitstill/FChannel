@@ -217,32 +217,12 @@ func GetObjectFromJson(obj []byte) (ObjectBase, error) {
 	return nObj, nil
 }
 
-func GetObjectsWithoutPreviewsCallback(callback func(id string, href string, mediatype string, name string, size int, published time.Time) error) error {
-	var id string
-	var href string
-	var mediatype string
-	var name string
-	var size int
-	var published time.Time
-
-	query := `select id, href, mediatype, name, size, published from activitystream where id in (select attachment from activitystream where attachment!='' and preview='')`
-	if err := config.DB.QueryRow(query).Scan(&id, &href, &mediatype, &name, &size, &published); err != nil {
-		return util.MakeError(err, "GetObjectsWithoutPreviewsCallback")
-	}
-
-	if err := callback(id, href, mediatype, name, size, published); err != nil {
-		return util.MakeError(err, "GetObjectsWithoutPreviewsCallback")
-	}
-
-	return nil
-}
-
 func HasContextFromJson(context []byte) (bool, error) {
 	var generic interface{}
 
 	err := json.Unmarshal(context, &generic)
 	if err != nil {
-		return false, util.MakeError(err, "GetObjectsWithoutPreviewsCallback")
+		return false, util.MakeError(err, "HasContextFromJson")
 	}
 
 	hasContext := false
@@ -265,7 +245,7 @@ func HasContextFromJson(context []byte) (bool, error) {
 		}
 	}
 
-	return hasContext, util.MakeError(err, "GetObjectsWithoutPreviewsCallback")
+	return hasContext, util.MakeError(err, "HasContextFromJson")
 }
 
 func GetActorByNameFromDB(name string) (Actor, error) {
