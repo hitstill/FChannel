@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"html/template"
-	"io/ioutil"
 	"os"
 	"regexp"
 	"strings"
@@ -63,7 +62,7 @@ func Close() error {
 }
 
 func RunDatabaseSchema() error {
-	query, err := ioutil.ReadFile("databaseschema.psql")
+	query, err := os.ReadFile("databaseschema.psql")
 	if err != nil {
 		return util.MakeError(err, "RunDatabaseSchema")
 	}

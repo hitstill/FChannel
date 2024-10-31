@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"regexp"
 	"sort"
@@ -43,7 +43,7 @@ func AdminVerify(ctx *fiber.Ctx) error {
 
 	defer resp.Body.Close()
 
-	rBody, _ := ioutil.ReadAll(resp.Body)
+	rBody, _ := io.ReadAll(resp.Body)
 
 	body := string(rBody)
 

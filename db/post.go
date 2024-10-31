@@ -8,7 +8,7 @@ import (
 	_ "image/gif"
 	_ "image/jpeg"
 	_ "image/png"
-	"io/ioutil"
+	"io"
 	"mime/multipart"
 	"os"
 	"os/exec"
@@ -279,7 +279,7 @@ func ObjectFromForm(ctx *fiber.Ctx, obj activitypub.ObjectBase) (activitypub.Obj
 
 		defer tempFile.Close()
 
-		fileBytes, _ := ioutil.ReadAll(file)
+		fileBytes, _ := io.ReadAll(file)
 		tempFile.Write(fileBytes)
 
 		re := regexp.MustCompile(`image/(jpe?g|png|webp)`)

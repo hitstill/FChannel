@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"mime/multipart"
 	"os"
 	"path"
@@ -248,7 +247,7 @@ func CreatedNeededDirectories() error {
 }
 
 func LoadThemes() error {
-	themes, err := ioutil.ReadDir("./views/css/themes")
+	themes, err := os.ReadDir("./views/css/themes")
 
 	if err != nil {
 		MakeError(err, "LoadThemes")
