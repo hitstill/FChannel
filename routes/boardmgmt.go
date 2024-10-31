@@ -481,7 +481,8 @@ func ReportPost(ctx *fiber.Ctx) error {
 	}
 
 	var ban db.Ban
-	ban.IP, ban.Reason, ban.Date, ban.Expires, _ = db.IsIPBanned(ctx.IP())
+	//TODO: Bad and ugly
+	ban.IP, _, _, _, _ = db.IsIPBanned(ctx.IP())
 	if len(ban.IP) > 1 {
 		return ctx.Redirect(ctx.BaseURL()+"/banned", 301)
 	}
@@ -585,7 +586,8 @@ func ReportPost(ctx *fiber.Ctx) error {
 func ReportGet(ctx *fiber.Ctx) error {
 	actor, _ := activitypub.GetActor(ctx.Query("actor"))
 	var ban db.Ban
-	ban.IP, ban.Reason, ban.Date, ban.Expires, _ = db.IsIPBanned(ctx.IP())
+	//TODO: Bad and ugly
+	ban.IP, _, _, _, _ = db.IsIPBanned(ctx.IP())
 	if len(ban.IP) > 1 {
 		return ctx.Redirect(ctx.BaseURL()+"/banned", 301)
 	}

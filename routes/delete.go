@@ -37,7 +37,7 @@ func MultiDelete(ctx *fiber.Ctx) error {
 	var err error
 	var ban db.Ban
 
-	ban.IP, ban.Reason, ban.Date, ban.Expires, _ = db.IsIPBanned(ctx.IP())
+	ban.IP, _, _, _, _ = db.IsIPBanned(ctx.IP())
 	if len(ban.IP) > 1 {
 		return ctx.Redirect(ctx.BaseURL()+"/banned", 301)
 	}

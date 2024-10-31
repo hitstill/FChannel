@@ -121,7 +121,7 @@ func TripCode(pass string) string {
 
 	enc := oldcrypt.Crypt(pass, string(salt[:]))
 
-	return enc[len(enc)-10 : len(enc)]
+	return enc[len(enc)-10:]
 }
 
 func TripCodeConvert(str string) string {
@@ -146,7 +146,7 @@ func TripCodeSecure(pass string) (string, error) {
 		return "", MakeError(err, "TripCodeSecure")
 	}
 
-	return enc[len(enc)-10 : len(enc)], nil
+	return enc[len(enc)-10:], nil
 }
 
 func TripPhrase(pass string) (string, error) {

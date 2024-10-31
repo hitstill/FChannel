@@ -126,7 +126,7 @@ func (obj ObjectBase) CreatePreview() *NestedObjectBase {
 
 	var cmd *exec.Cmd
 	switch obj.MediaType {
-	case "image/gif": 
+	case "image/gif":
 		cmd = exec.Command("convert", "."+objFile, "-coalesce", "-scale", "250x250>", "+dither", "-remap", "."+objFile+"[0]", "-layers", "Optimize", "-strip", "."+href)
 	default:
 		cmd = exec.Command("convert", "."+objFile, "-resize", "250x250>", "-strip", "."+href)
@@ -202,7 +202,7 @@ func (obj ObjectBase) DeleteAttachmentFromFile() error {
 	}
 
 	href = strings.Replace(href, config.Domain+"/", "", 1)
-	//TODO: Create a deleted placeholder image 
+	//TODO: Create a deleted placeholder image
 	if href != "static/deleted.png" {
 		if _, err := os.Stat(href); err != nil {
 			return nil
@@ -656,8 +656,8 @@ func (obj ObjectBase) GetReplies() (*CollectionBase, error) {
 
 	return &CollectionBase{
 		OrderedItems: result,
-		TotalItems: postCount,
-		TotalImgs: attachCount,
+		TotalItems:   postCount,
+		TotalImgs:    attachCount,
 	}, nil
 }
 
@@ -725,8 +725,8 @@ func (obj ObjectBase) GetRepliesLimit(limit int) (*CollectionBase, error) {
 
 	return &CollectionBase{
 		OrderedItems: result,
-		TotalItems: postCount,
-		TotalImgs: attachCount,
+		TotalItems:   postCount,
+		TotalImgs:    attachCount,
 	}, nil
 }
 
@@ -786,8 +786,8 @@ func (obj ObjectBase) GetRepliesReplies() (*CollectionBase, error) {
 
 	return &CollectionBase{
 		OrderedItems: result,
-		TotalItems: postCount,
-		TotalImgs: attachCount,
+		TotalItems:   postCount,
+		TotalImgs:    attachCount,
 	}, nil
 }
 
@@ -1385,7 +1385,7 @@ func (obj ObjectBase) WriteCache() (ObjectBase, error) {
 			obj.Preview.WritePreviewCache()
 		}
 
-		for i, _ := range obj.Attachment {
+		for i := range obj.Attachment {
 			obj.Attachment[i].WriteAttachmentCache()
 			obj.WriteCacheWithAttachment(obj.Attachment[i])
 		}

@@ -125,7 +125,7 @@ func ParseOutboxRequest(ctx *fiber.Ctx, actor activitypub.Actor) error {
 				}
 
 				contentType, _ := util.GetFileContentType(f)
-				if actor.Type == "flash" && len(util.EscapeString(ctx.FormValue("inReplyTo"))) == 0 && (contentType != "application/x-shockwave-flash" || contentType != "video/x-flv") {
+				if actor.Type == "flash" && len(util.EscapeString(ctx.FormValue("inReplyTo"))) == 0 && (contentType != "application/x-shockwave-flash" && contentType != "video/x-flv") {
 					return Send400(ctx, "New threads on this board must have a SWF or Flash Video file")
 				}
 
@@ -254,7 +254,6 @@ func ParseOutboxRequest(ctx *fiber.Ctx, actor activitypub.Actor) error {
 			case "Create":
 				ctx.Response().Header.Set("Status", "403")
 				_, err = ctx.Write([]byte(""))
-				break
 
 			case "Follow":
 				validActor := (activity.Object.Actor != "")
@@ -287,18 +286,15 @@ func ParseOutboxRequest(ctx *fiber.Ctx, actor activitypub.Actor) error {
 				if err != nil {
 					return util.MakeError(err, "ParseOutboxRequest")
 				}
-				break
 
 			case "Delete":
 				config.Log.Println("This is a delete")
 				ctx.Response().Header.Set("Status", "403")
 				_, err = ctx.Write([]byte("could not process activity"))
-				break
 
 			case "Note":
 				ctx.Response().Header.Set("Status", "403")
 				_, err = ctx.Write([]byte("could not process activity"))
-				break
 
 			case "New":
 				name := activity.Object.Alias
@@ -337,7 +333,6 @@ func ParseOutboxRequest(ctx *fiber.Ctx, actor activitypub.Actor) error {
 
 				ctx.Response().Header.Set("Status", "403")
 				_, err = ctx.Write([]byte(""))
-				break
 
 			default:
 				ctx.Response().Header.Set("status", "403")
@@ -551,7 +546,7 @@ func TemplateFunctions(engine *html.Engine) {
 	engine.AddFunc("parseEmail", func(input string) template.HTML {
 		var html string
 		if len(input) > 1 {
-			email := regexp.MustCompile("email:.+@.+\\..+")
+			email := regexp.MustCompile(`email:.+@.+\..+`)
 			if email.MatchString(input) {
 				addr := strings.TrimPrefix(input, "email:")
 				html += "<a href='mailto:" + addr + "' class='userEmail'>"

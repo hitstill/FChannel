@@ -222,9 +222,7 @@ func (actor Actor) GetCatalogCollection() (Collection, error) {
 
 	stickies, _ := actor.GetStickies()
 
-	for _, e := range stickies.OrderedItems {
-		result = append(result, e)
-	}
+	result = append(result, stickies.OrderedItems...)
 
 	defer rows.Close()
 	for rows.Next() {
@@ -291,9 +289,7 @@ func (actor Actor) GetCollectionPage(page int) (Collection, error) {
 		stickies, _ := actor.GetStickies()
 		limit = limit - stickies.TotalItems
 
-		for _, e := range stickies.OrderedItems {
-			result = append(result, e)
-		}
+		result = append(result, stickies.OrderedItems...)
 	}
 
 	offset := page * limit
@@ -429,9 +425,7 @@ func (actor Actor) GetCollectionType(nType string) (Collection, error) {
 
 	if nType == "Note" {
 		stickies, _ := actor.GetStickies()
-		for _, e := range stickies.OrderedItems {
-			result = append(result, e)
-		}
+		result = append(result, stickies.OrderedItems...)
 	}
 
 	defer rows.Close()
@@ -592,7 +586,7 @@ func (actor Actor) GetFollowFromName(name string) ([]string, error) {
 		return followingActors, util.MakeError(err, "GetFollowFromName")
 	}
 
-	re := regexp.MustCompile("\\w+?$")
+	re := regexp.MustCompile(`\w+?$`)
 
 	for _, e := range follow.Items {
 		if re.FindString(e.Id) == name {
@@ -1031,23 +1025,18 @@ func (actor Actor) VerifyHeaderSignature(ctx *fiber.Ctx) bool {
 			method = strings.ToLower(ctx.Method())
 			path = ctx.Path()
 			sig += "(request-target): " + method + " " + path + "" + nl
-			break
 		case "host":
 			host = ctx.Hostname()
 			sig += "host: " + host + "" + nl
-			break
 		case "date":
 			date = ctx.Get("date")
 			sig += "date: " + date + "" + nl
-			break
 		case "digest":
 			digest = ctx.Get("digest")
 			sig += "digest: " + digest + "" + nl
-			break
 		case "content-length":
 			contentLength = ctx.Get("content-length")
 			sig += "content-length: " + contentLength + "" + nl
-			break
 		}
 	}
 

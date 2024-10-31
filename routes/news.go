@@ -125,6 +125,9 @@ func NewsPost(ctx *fiber.Ctx) error {
 
 func NewsDelete(ctx *fiber.Ctx) error {
 	actor, err := activitypub.GetActorFromDB(config.Domain)
+	if err != nil {
+		Send500(ctx, "Failed to delete news", err)
+	}
 
 	if has := actor.HasValidation(ctx); !has {
 		return Send403(ctx, "You are not authorized to delete news")
