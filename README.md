@@ -109,10 +109,5 @@ server {
 
 `Please consider submitting a pull request if you set up a FChannel instance with Caddy with instructions on how to do so`
 
-### Docker
-
-A Dockerfile is provided, and an example `docker-compose.yml` exists to base your Docker setup on.
-You should use the `config-init.docker` file to configure it and it will work more or less out of the box with it, you should just need some minor configuration changes to test it out.
-
 Remember, you may need to look at [the section on local testing](#local-testing)
 to use 100% of FChannel's features.
