@@ -1,3 +1,9 @@
+## Migrating from FChannel0/FChannel-Server, or a commit older than 31st October 2024
+Please read [doc/migration.md](doc/migration.md) to see any warnings and manual intervention required  
+**This fork is currently unstable, more manual intervention may be required in the near future.**  
+**Please use tag [0.2.0](/../../commit/0a4928a30b1294bd5320160a8cdb51104cfdeb31) or check [doc/migration.md](doc/migration.md) if running from master**
+
+
 # About
 
 FChannel is a

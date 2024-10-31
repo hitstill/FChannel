@@ -3,6 +3,7 @@ package config
 import (
 	"bufio"
 	"database/sql"
+	"errors"
 	"log"
 	"os"
 	"strconv"
@@ -51,12 +52,26 @@ var DB *sql.DB
 var Version string
 var Debug = true //TODO: read this from config file
 
-// TODO Change this to some other config format like YAML
+// TODO: Change this to some other config format like YAML
 // to save into a struct and only read once
 func GetConfigValue(value string, ifnone string) string {
-	file, err := os.Open("config/config-init")
+	file, err := os.Open("fchan.cfg")
 
 	if err != nil {
+		//TODO: Really poor temporary detection
+		//      Remove this sometime in the future
+		//      This could probably be moved automatically
+		if errors.Is(err, os.ErrNotExist) {
+			if _, err := os.Stat("config/config-init"); err == nil {
+				Log.Println("!!!!!!! ATTENTION !!!!!!!")
+				Log.Println("!!!!!!!  ACHTUNG !!!!!!!!")
+				Log.Println("Config file 'fchan.cfg' does not exist!")
+				Log.Println("Detected old config file, please move 'config/config-init' to 'fchan.cfg'")
+				Log.Println("!!!!!!!!!!!!!!!!")
+				Log.Println("!!!!!!!!!!!!!!!!")
+				os.Exit(2)
+			}
+		}
 		Log.Println(err)
 		return ifnone
 	}
