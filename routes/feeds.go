@@ -8,8 +8,6 @@ import (
 	"github.com/anomalous69/fchannel/activitypub"
 	"github.com/anomalous69/fchannel/config"
 	"github.com/anomalous69/fchannel/db"
-	"github.com/anomalous69/fchannel/post"
-	"github.com/anomalous69/fchannel/route"
 	"github.com/anomalous69/fchannel/util"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gorilla/feeds"
@@ -18,15 +16,15 @@ import (
 func GetThreadFeed(ctx *fiber.Ctx) error {
 	actor, err := activitypub.GetActorFromDB(config.Domain + "/" + ctx.Params("actor"))
 	if err != nil {
-		return route.Send404(ctx, "Board /"+ctx.Params("actor")+"/ does not exist")
+		return Send404(ctx, "Board /"+ctx.Params("actor")+"/ does not exist")
 	}
 	thread, err := db.GetPostIDFromNum(ctx.Params("post"))
 	if err != nil {
-		return route.Send404(ctx, "Thread "+thread+"does not exist")
+		return Send404(ctx, "Thread "+thread+"does not exist")
 	}
 
 	if !db.IsValidThread(thread) {
-		return route.Send404(ctx, "Thread "+thread+"does not exist")
+		return Send404(ctx, "Thread "+thread+"does not exist")
 	}
 	feedtype := ctx.Params("feedtype")
 
@@ -79,8 +77,8 @@ func GetThreadFeed(ctx *fiber.Ctx) error {
 		}
 
 		if len(Content) > 0 {
-			Content = post.ParseCommentCode(Content)
-			Content = post.CloseUnclosedTags(Content)
+			Content = db.ParseCommentCode(Content)
+			Content = db.CloseUnclosedTags(Content)
 		}
 
 		if len(Preview) > 0 {
@@ -140,7 +138,7 @@ func GetThreadFeed(ctx *fiber.Ctx) error {
 func GetBoardFeed(ctx *fiber.Ctx) error {
 	actor, err := activitypub.GetActorFromDB(config.Domain + "/" + ctx.Params("actor"))
 	if err != nil {
-		return route.Send404(ctx, "Board /"+ctx.Params("actor")+"/ does not exist")
+		return Send404(ctx, "Board /"+ctx.Params("actor")+"/ does not exist")
 	}
 	feedtype := ctx.Params("feedtype")
 
@@ -207,8 +205,8 @@ func GetBoardFeed(ctx *fiber.Ctx) error {
 			for i, _ := range match {
 				Content = strings.Replace(Content, match[i][3], util.ShortURL(actor.Outbox, match[i][0]), 1)
 			}*/
-			Content = post.ParseCommentCode(Content)
-			Content = post.CloseUnclosedTags(Content)
+			Content = db.ParseCommentCode(Content)
+			Content = db.CloseUnclosedTags(Content)
 		}
 
 		if len(Preview) > 0 {

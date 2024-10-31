@@ -15,10 +15,7 @@ import (
 	"github.com/anomalous69/fchannel/activitypub"
 	"github.com/anomalous69/fchannel/config"
 	"github.com/anomalous69/fchannel/db"
-	"github.com/anomalous69/fchannel/post"
-	"github.com/anomalous69/fchannel/route"
 	"github.com/anomalous69/fchannel/util"
-	"github.com/anomalous69/fchannel/webfinger"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -68,7 +65,6 @@ func ActorInbox(ctx *fiber.Ctx) error {
 			}
 		}
 
-		break
 	case "Delete":
 		for _, e := range activity.To {
 			actor, err := activitypub.GetActorFromDB(e)
@@ -96,7 +92,6 @@ func ActorInbox(ctx *fiber.Ctx) error {
 				break
 			}
 		}
-		break
 
 	case "Follow":
 		for _, e := range activity.To {
@@ -164,7 +159,6 @@ func ActorInbox(ctx *fiber.Ctx) error {
 				return response.MakeRequestInbox()
 			}
 		}
-		break
 
 	case "Reject":
 		if activity.Object.Object.Type == "Follow" {
@@ -173,7 +167,6 @@ func ActorInbox(ctx *fiber.Ctx) error {
 				return util.MakeError(err, "ActorInbox")
 			}
 		}
-		break
 	}
 
 	return nil
@@ -181,7 +174,7 @@ func ActorInbox(ctx *fiber.Ctx) error {
 
 func PostActorOutbox(ctx *fiber.Ctx) error {
 	//var activity activitypub.Activity
-	actor, err := webfinger.GetActorFromPath(ctx.Path(), "/")
+	actor, err := activitypub.GetActorFromPath(ctx.Path(), "/")
 	if err != nil {
 		return util.MakeError(err, "ActorOutbox")
 	}
@@ -191,7 +184,7 @@ func PostActorOutbox(ctx *fiber.Ctx) error {
 		return nil
 	}
 
-	return route.ParseOutboxRequest(ctx, actor)
+	return ParseOutboxRequest(ctx, actor)
 }
 
 func ActorFollowing(ctx *fiber.Ctx) error {
@@ -207,11 +200,12 @@ func ActorFollowers(ctx *fiber.Ctx) error {
 func MakeActorPost(ctx *fiber.Ctx) error {
 	// Empty captcha
 	if len(ctx.FormValue("captcha")) == 0 {
-		return route.Send401(ctx, "Missing captcha")
+		return Send401(ctx, "Missing captcha")
 	}
-	
+
 	var ban db.Ban
-	ban.IP, ban.Reason, ban.Date, ban.Expires, _ = db.IsIPBanned(ctx.IP())
+	//TODO: Bad and ugly
+	ban.IP, _, _, _, _ = db.IsIPBanned(ctx.IP())
 	if len(ban.IP) > 1 {
 		return ctx.Redirect(ctx.BaseURL()+"/banned", 301)
 	}
@@ -220,34 +214,34 @@ func MakeActorPost(ctx *fiber.Ctx) error {
 
 	// Missing attachment on non-textboard
 	actor, _ := activitypub.GetActorByNameFromDB(ctx.FormValue("boardName"))
-	if len(ctx.FormValue("inReplyTo")) == 0 && header == nil && actor.BoardType != "text"  {
-			return route.Send400(ctx, "File is required for new threads")
+	if len(ctx.FormValue("inReplyTo")) == 0 && header == nil && actor.BoardType != "text" {
+		return Send400(ctx, "File is required for new threads")
 	}
 
 	if actor.BoardType == "text" {
 		// Textboard: Tried to post with attachment
 		if header != nil {
-			return route.Send400(ctx, "Posting files is disabled on this board")
+			return Send400(ctx, "Posting files is disabled on this board")
 		}
 		// Textboard: New thread, empty subject
 		if len(ctx.FormValue("inReplyTo")) == 0 && len(ctx.FormValue("subject")) == 0 {
-			return route.Send400(ctx, "Subject is required for new textboard thread")
+			return Send400(ctx, "Subject is required for new textboard thread")
 		}
 		// Textboard: Empty comment
 		if len(ctx.FormValue("comment")) == 0 {
-			return route.Send400(ctx, "Comment is required for textboard reply")
+			return Send400(ctx, "Comment is required for textboard reply")
 		}
 	}
 
 	// Missing both file and comment
 	if header == nil && len(ctx.FormValue("comment")) == 0 {
-		return route.Send400(ctx, "Comment or File is required for new posts")
+		return Send400(ctx, "Comment or File is required for new posts")
 	}
 
 	// Trying to reply to non-existant thread
 	//TODO: Handle DB error
 	if ctx.FormValue("inReplyTo") != "" && !db.IsValidThread(ctx.FormValue("inReplyTo")) {
-		return route.Send400(ctx, "\""+ctx.FormValue("inReplyTo")+"\" is not a valid thread on this server")
+		return Send400(ctx, "\""+ctx.FormValue("inReplyTo")+"\" is not a valid thread on this server")
 	}
 
 	var file multipart.File
@@ -258,18 +252,18 @@ func MakeActorPost(ctx *fiber.Ctx) error {
 		// Only allow new threads on flash type boards with SWF or FLV files
 		if actor.BoardType == "flash" && len(util.EscapeString(ctx.FormValue("inReplyTo"))) == 0 && contentType != "application/x-shockwave-flash" && contentType != "video/x-flv" {
 			file.Close()
-			return route.Send400(ctx, "New threads on this board must have a SWF or Flash Video file")
+			return Send400(ctx, "New threads on this board must have a SWF or Flash Video file")
 		}
 	}
 
 	// Attachment filename too long
 	if file != nil && len(header.Filename) > 256 {
-		return route.Send400(ctx, "Filename too long, maximum length is 256 characters")
+		return Send400(ctx, "Filename too long, maximum length is 256 characters")
 	}
 
 	// Attachment filesize larger than config max size
 	if file != nil && header.Size > (int64(config.MaxAttachmentSize)<<20) {
-		return route.Send400(ctx, "File too large, maximum file size is "+util.ConvertSize(int64(config.MaxAttachmentSize)))
+		return Send400(ctx, "File too large, maximum file size is "+util.ConvertSize(int64(config.MaxAttachmentSize)))
 	}
 
 	// Redirect to instance index when post matches blacklist regex
@@ -280,22 +274,22 @@ func MakeActorPost(ctx *fiber.Ctx) error {
 
 	// New thread empty subject or comment
 	if ctx.FormValue("inReplyTo") == "" && strings.TrimSpace(ctx.FormValue("comment")) == "" && ctx.FormValue("subject") == "" {
-		return route.Send400(ctx, "Subject or Comment is required for new threads")
+		return Send400(ctx, "Subject or Comment is required for new threads")
 	}
 
 	// Comment text too long
 	if len(ctx.FormValue("comment")) > 4500 {
-		return route.Send400(ctx, "Comment is longer than 4500 characters")
+		return Send400(ctx, "Comment is longer than 4500 characters")
 	}
 
 	// Too many newlines
 	if strings.Count(ctx.FormValue("comment"), "\r\n") > 50 || strings.Count(ctx.FormValue("comment"), "\n") > 50 || strings.Count(ctx.FormValue("comment"), "\r") > 50 {
-		return route.Send400(ctx, "Comment contains too many newlines")
+		return Send400(ctx, "Comment contains too many newlines")
 	}
 
 	// Name, Subject, or Options are too long
 	if len(ctx.FormValue("subject")) > 100 || len(ctx.FormValue("name")) > 100 || len(ctx.FormValue("options")) > 100 {
-		return route.Send400(ctx, "Name, Subject, or Options field(s) contain more than 100 characters")
+		return Send400(ctx, "Name, Subject, or Options field(s) contain more than 100 characters")
 	}
 
 	b := bytes.Buffer{}
@@ -316,7 +310,7 @@ func MakeActorPost(ctx *fiber.Ctx) error {
 		}
 	}
 
-	reply, _ := post.ParseCommentForReply(ctx.FormValue("comment"))
+	reply, _ := db.ParseCommentForReply(ctx.FormValue("comment"))
 
 	form, _ := ctx.MultipartForm()
 
@@ -331,7 +325,7 @@ func MakeActorPost(ctx *fiber.Ctx) error {
 				return util.MakeError(err, "ActorPost")
 			}
 		} else if key == "name" {
-			name, tripcode, _ := post.CreateNameTripCode(ctx)
+			name, tripcode, _ := util.CreateNameTripCode(ctx)
 
 			err := we.WriteField(key, name)
 			if err != nil {
@@ -367,7 +361,7 @@ func MakeActorPost(ctx *fiber.Ctx) error {
 		actor, err := activitypub.GetActor(actorid)
 		// Reject replies with media when the OP from a textboard
 		if actor.BoardType == "text" && header != nil {
-			return route.Send400(ctx, "The thread you are replying to is from a text-only board, file attachments are not allowed")
+			return Send400(ctx, "The thread you are replying to is from a text-only board, file attachments are not allowed")
 		}
 		if err == nil {
 			local, _ := actor.IsLocal()
@@ -385,7 +379,7 @@ func MakeActorPost(ctx *fiber.Ctx) error {
 	}
 	//actorid := strings.TrimSuffix(re.FindString(ctx.FormValue("inReplyTo")), "/")
 	//sendTo = actorid + "/outbox"
-	//actor, _ := webfinger.GetActorFromPath(actorid, "/")
+	//actor, _ := activitypub.GetActorFromPath(actorid, "/")
 	//sendTo = actor.Outbox
 	//}
 	//}
@@ -412,7 +406,7 @@ func MakeActorPost(ctx *fiber.Ctx) error {
 		var postid string
 		var obj activitypub.ObjectBase
 
-		obj = post.ParseOptions(ctx, obj)
+		obj = db.ParseOptions(ctx, obj)
 		re := regexp.MustCompile(`\S*\|`)
 		postid = re.ReplaceAllString(string(body), "${1}")
 		if len(postid) > 0 {
@@ -450,11 +444,11 @@ func ActorPost(ctx *fiber.Ctx) error {
 
 	// this is a activitpub json request return json instead of html page
 	if activitypub.AcceptActivity(ctx.Get("Accept")) {
-		route.GetActorPost(ctx, ctx.Path())
+		GetActorPost(ctx, ctx.Path())
 		return nil
 	}
 
-	re := regexp.MustCompile("\\w+$")
+	re := regexp.MustCompile(`\w+$`)
 	postId := re.FindString(ctx.Path())
 
 	inReplyTo, _ := db.GetPostIDFromNum(postId)
@@ -468,10 +462,10 @@ func ActorPost(ctx *fiber.Ctx) error {
 	collection, err := obj.GetCollectionFromPath()
 
 	if err != nil {
-		return route.Send404(ctx, "Thread not found")
+		return Send404(ctx, "Thread not found")
 	}
 
-	var data route.PageData
+	var data PageData
 
 	if collection.Actor.Id != "" {
 		data.Board.Post.Actor = collection.Actor.Id
@@ -503,7 +497,7 @@ func ActorPost(ctx *fiber.Ctx) error {
 		return util.MakeError(err, "PostGet")
 	}
 	data.Board.Captcha = config.Domain + "/" + capt
-	data.Board.CaptchaCode = post.GetCaptchaCode(data.Board.Captcha)
+	data.Board.CaptchaCode = db.GetCaptchaCode(data.Board.Captcha)
 
 	data.Instance, err = activitypub.GetActorFromDB(config.Domain)
 	if err != nil {
@@ -511,7 +505,7 @@ func ActorPost(ctx *fiber.Ctx) error {
 	}
 
 	data.Key = config.Key
-	data.Boards = webfinger.Boards
+	data.Boards = activitypub.Boards
 
 	data.Title = "/" + data.Board.Name + "/ - " + data.PostId
 
@@ -525,7 +519,7 @@ func ActorPost(ctx *fiber.Ctx) error {
 	}
 
 	data.Themes = &config.Themes
-	data.ThemeCookie = route.GetThemeCookie(ctx)
+	data.ThemeCookie = GetThemeCookie(ctx)
 
 	data.ServerVersion = config.Version
 
@@ -548,7 +542,7 @@ func ActorCatalog(ctx *fiber.Ctx) error {
 		return util.MakeError(err, "ActorCatalog")
 	}
 
-	var data route.PageData
+	var data PageData
 	data.Board.Name = actor.Name
 	data.Board.PrefName = actor.PreferredUsername
 	data.Board.InReplyTo = ""
@@ -576,11 +570,11 @@ func ActorCatalog(ctx *fiber.Ctx) error {
 	}
 
 	data.Board.Captcha = config.Domain + "/" + capt
-	data.Board.CaptchaCode = post.GetCaptchaCode(data.Board.Captcha)
+	data.Board.CaptchaCode = db.GetCaptchaCode(data.Board.Captcha)
 
 	data.Title = "/" + data.Board.Name + "/ - Catalog"
 
-	data.Boards = webfinger.Boards
+	data.Boards = activitypub.Boards
 	data.Posts = collection.OrderedItems
 
 	data.Meta.Description = data.Board.Summary
@@ -588,7 +582,7 @@ func ActorCatalog(ctx *fiber.Ctx) error {
 	data.Meta.Title = data.Title
 
 	data.Themes = &config.Themes
-	data.ThemeCookie = route.GetThemeCookie(ctx)
+	data.ThemeCookie = GetThemeCookie(ctx)
 
 	data.ServerVersion = config.Version
 
@@ -601,7 +595,7 @@ func ActorPosts(ctx *fiber.Ctx) error {
 	actor, err := activitypub.GetActorByNameFromDB(ctx.Params("actor"))
 
 	if err != nil {
-		return route.Send404(ctx, "Board /"+ctx.Params("actor")+"/ not found")
+		return Send404(ctx, "Board /"+ctx.Params("actor")+"/ not found")
 	}
 
 	if activitypub.AcceptActivity(ctx.Get("Accept")) {
@@ -633,7 +627,7 @@ func ActorPosts(ctx *fiber.Ctx) error {
 		pages = append(pages, int(i))
 	}
 
-	var data route.PageData
+	var data PageData
 	data.Board.Name = actor.Name
 	data.Board.PrefName = actor.PreferredUsername
 	data.Board.Summary = actor.Summary
@@ -655,13 +649,13 @@ func ActorPosts(ctx *fiber.Ctx) error {
 		return util.MakeError(err, "OutboxGet")
 	}
 	data.Board.Captcha = config.Domain + "/" + capt
-	data.Board.CaptchaCode = post.GetCaptchaCode(data.Board.Captcha)
+	data.Board.CaptchaCode = db.GetCaptchaCode(data.Board.Captcha)
 
 	data.Title = "/" + actor.Name + "/ - " + actor.PreferredUsername
 
 	data.Key = config.Key
 
-	data.Boards = webfinger.Boards
+	data.Boards = activitypub.Boards
 	data.Posts = collection.OrderedItems
 
 	data.Pages = pages
@@ -672,7 +666,7 @@ func ActorPosts(ctx *fiber.Ctx) error {
 	data.Meta.Title = data.Title
 
 	data.Themes = &config.Themes
-	data.ThemeCookie = route.GetThemeCookie(ctx)
+	data.ThemeCookie = GetThemeCookie(ctx)
 
 	data.ServerVersion = config.Version
 
@@ -696,7 +690,7 @@ func ActorArchive(ctx *fiber.Ctx) error {
 		return util.MakeError(err, "ActorArchive")
 	}
 
-	var returnData route.PageData
+	var returnData PageData
 	returnData.Board.Name = actor.Name
 	returnData.Board.PrefName = actor.PreferredUsername
 	returnData.Board.InReplyTo = ""
@@ -713,17 +707,20 @@ func ActorArchive(ctx *fiber.Ctx) error {
 	returnData.Board.Post.Actor = actor.Id
 
 	returnData.Instance, err = activitypub.GetActorFromDB(config.Domain)
+	if err != nil {
+		Send500(ctx, "Failed to get archive", err)
+	}
 
 	capt, err := util.GetRandomCaptcha()
 	if err != nil {
 		return util.MakeError(err, "ActorArchive")
 	}
 	returnData.Board.Captcha = config.Domain + "/" + capt
-	returnData.Board.CaptchaCode = post.GetCaptchaCode(returnData.Board.Captcha)
+	returnData.Board.CaptchaCode = db.GetCaptchaCode(returnData.Board.Captcha)
 
 	returnData.Title = "/" + actor.Name + "/ - Archive"
 
-	returnData.Boards = webfinger.Boards
+	returnData.Boards = activitypub.Boards
 
 	returnData.Posts = collection.OrderedItems
 
@@ -732,7 +729,7 @@ func ActorArchive(ctx *fiber.Ctx) error {
 	returnData.Meta.Title = returnData.Title
 
 	returnData.Themes = &config.Themes
-	returnData.ThemeCookie = route.GetThemeCookie(ctx)
+	returnData.ThemeCookie = GetThemeCookie(ctx)
 
 	returnData.ServerVersion = config.Version
 
@@ -745,7 +742,7 @@ func ActorList(ctx *fiber.Ctx) error {
 	actor, err := activitypub.GetActorByNameFromDB(ctx.Params("actor"))
 
 	if err != nil {
-		return route.Send404(ctx, "Board /"+ctx.Params("actor")+"/ not found")
+		return Send404(ctx, "Board /"+ctx.Params("actor")+"/ not found")
 	}
 
 	collection, err := actor.GetCollectionType("Note")
@@ -753,7 +750,7 @@ func ActorList(ctx *fiber.Ctx) error {
 		return util.MakeError(err, "OutboxGet")
 	}
 
-	var data route.PageData
+	var data PageData
 	data.Board.Name = actor.Name
 	data.Board.PrefName = actor.PreferredUsername
 	data.Board.InReplyTo = ""
@@ -773,12 +770,12 @@ func ActorList(ctx *fiber.Ctx) error {
 		return util.MakeError(err, "OutboxGet")
 	}
 	data.Board.Captcha = config.Domain + "/" + capt
-	data.Board.CaptchaCode = post.GetCaptchaCode(data.Board.Captcha)
+	data.Board.CaptchaCode = db.GetCaptchaCode(data.Board.Captcha)
 
 	data.Title = "/" + actor.Name + "/ - Thread list"
 	data.Key = config.Key
 
-	data.Boards = webfinger.Boards
+	data.Boards = activitypub.Boards
 	data.Posts = collection.OrderedItems
 
 	data.Meta.Description = data.Board.Summary
@@ -786,7 +783,7 @@ func ActorList(ctx *fiber.Ctx) error {
 	data.Meta.Title = data.Title
 
 	data.Themes = &config.Themes
-	data.ThemeCookie = route.GetThemeCookie(ctx)
+	data.ThemeCookie = GetThemeCookie(ctx)
 
 	data.ServerVersion = config.Version
 
@@ -796,7 +793,7 @@ func ActorList(ctx *fiber.Ctx) error {
 }
 
 func GetActorOutbox(ctx *fiber.Ctx) error {
-	actor, _ := webfinger.GetActorFromPath(ctx.Path(), "/")
+	actor, _ := activitypub.GetActorFromPath(ctx.Path(), "/")
 
 	collection, _ := actor.GetCollection()
 	collection.AtContext.Context = "https://www.w3.org/ns/activitystreams"

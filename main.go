@@ -10,10 +10,8 @@ import (
 	"github.com/anomalous69/fchannel/activitypub"
 	"github.com/anomalous69/fchannel/config"
 	"github.com/anomalous69/fchannel/db"
-	"github.com/anomalous69/fchannel/route"
-	"github.com/anomalous69/fchannel/route/routes"
+	"github.com/anomalous69/fchannel/routes"
 	"github.com/anomalous69/fchannel/util"
-	"github.com/anomalous69/fchannel/webfinger"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/encryptcookie"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -42,7 +40,7 @@ func main() {
 	// Routing and templates
 	template := html.New("./views", ".html")
 
-	route.TemplateFunctions(template)
+	routes.TemplateFunctions(template)
 
 	app := fiber.New(fiber.Config{
 		AppName:      "FChannel (" + config.Version + ")",
@@ -178,11 +176,11 @@ func Init() {
 		config.Log.Println(err)
 	}
 
-	if webfinger.FollowingBoards, err = actor.GetFollowing(); err != nil {
+	if activitypub.FollowingBoards, err = actor.GetFollowing(); err != nil {
 		config.Log.Println(err)
 	}
 
-	if webfinger.Boards, err = webfinger.GetBoardCollection(); err != nil {
+	if activitypub.Boards, err = activitypub.GetBoardCollection(); err != nil {
 		config.Log.Println(err)
 	}
 
@@ -196,7 +194,7 @@ func Init() {
 		config.Log.Println(err)
 	}
 
-	go webfinger.StartupArchive()
+	go activitypub.StartupArchive()
 
 	go util.MakeCaptchas(100)
 

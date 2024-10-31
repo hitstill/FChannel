@@ -13,9 +13,7 @@ import (
 	"github.com/anomalous69/fchannel/activitypub"
 	"github.com/anomalous69/fchannel/config"
 	"github.com/anomalous69/fchannel/db"
-	"github.com/anomalous69/fchannel/route"
 	"github.com/anomalous69/fchannel/util"
-	"github.com/anomalous69/fchannel/webfinger"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -87,7 +85,7 @@ func AdminAuth(ctx *fiber.Ctx) error {
 
 func AdminIndex(ctx *fiber.Ctx) error {
 	id, _ := util.GetPasswordFromSession(ctx)
-	actor, _ := webfinger.GetActorFromPath(ctx.Path(), "/"+config.Key+"/")
+	actor, _ := activitypub.GetActorFromPath(ctx.Path(), "/"+config.Key+"/")
 
 	if actor.Id == "" {
 		actor, _ = activitypub.GetActorByNameFromDB(config.Domain)
@@ -118,7 +116,7 @@ func AdminIndex(ctx *fiber.Ctx) error {
 		followers = append(followers, e.Id)
 	}
 
-	var adminData route.AdminPage
+	var adminData AdminPage
 	adminData.Following = following
 	adminData.Followers = followers
 
@@ -145,7 +143,7 @@ func AdminIndex(ctx *fiber.Ctx) error {
 	adminData.Board.ModCred, _ = util.GetPasswordFromSession(ctx)
 	adminData.Title = actor.Name + " Admin page"
 
-	adminData.Boards = webfinger.Boards
+	adminData.Boards = activitypub.Boards
 
 	adminData.Board.Post.Actor = actor.Id
 
@@ -158,7 +156,7 @@ func AdminIndex(ctx *fiber.Ctx) error {
 	adminData.Meta.Title = adminData.Title
 
 	adminData.Themes = &config.Themes
-	adminData.ThemeCookie = route.GetThemeCookie(ctx)
+	adminData.ThemeCookie = GetThemeCookie(ctx)
 
 	adminData.ServerVersion = config.Version
 
@@ -189,7 +187,7 @@ func AdminFollow(ctx *fiber.Ctx) error {
 	}
 
 	var redirect string
-	actor, _ = webfinger.GetActorFromPath(ctx.Path(), "/"+config.Key+"/")
+	actor, _ = activitypub.GetActorFromPath(ctx.Path(), "/"+config.Key+"/")
 
 	if actor.Name != "main" {
 		redirect = actor.Name
@@ -223,8 +221,8 @@ func AdminAddBoard(ctx *fiber.Ctx) error {
 	board.Restricted = restrict
 	board.BoardType = ctx.FormValue("boardtype")
 	if board.BoardType != "image" && board.BoardType != "text" && board.BoardType != "flash" {
-		return route.Send400(ctx, "Board type \"" + board.BoardType + "\" is invalid" )
-	} 
+		return Send400(ctx, "Board type \""+board.BoardType+"\" is invalid")
+	}
 
 	newActorActivity.AtContext.Context = "https://www.w3.org/ns/activitystreams"
 	newActorActivity.Type = "New"
@@ -247,10 +245,10 @@ func AdminAddBoard(ctx *fiber.Ctx) error {
 }
 
 func AdminActorIndex(ctx *fiber.Ctx) error {
-	var data route.AdminPage
+	var data AdminPage
 
 	id, pass := util.GetPasswordFromSession(ctx)
-	actor, _ := webfinger.GetActorFromPath(ctx.Path(), "/"+config.Key+"/")
+	actor, _ := activitypub.GetActorFromPath(ctx.Path(), "/"+config.Key+"/")
 
 	if actor.Id == "" {
 		actor, _ = activitypub.GetActorByNameFromDB(config.Domain)
@@ -298,7 +296,7 @@ func AdminActorIndex(ctx *fiber.Ctx) error {
 	data.Domain = config.Domain
 	data.IsLocal, _ = actor.IsLocal()
 	data.Title = "Manage /" + actor.Name + "/"
-	data.Boards = webfinger.Boards
+	data.Boards = activitypub.Boards
 	data.Board.Name = actor.Name
 	data.Board.Actor = actor
 	data.Key = config.Key
@@ -340,7 +338,7 @@ func AdminActorIndex(ctx *fiber.Ctx) error {
 
 func AdminAddJanny(ctx *fiber.Ctx) error {
 	id, pass := util.GetPasswordFromSession(ctx)
-	actor, _ := webfinger.GetActorFromPath(ctx.Path(), "/"+config.Key+"/")
+	actor, _ := activitypub.GetActorFromPath(ctx.Path(), "/"+config.Key+"/")
 
 	if actor.Id == "" {
 		actor, _ = activitypub.GetActorByNameFromDB(config.Domain)
@@ -362,7 +360,7 @@ func AdminAddJanny(ctx *fiber.Ctx) error {
 	}
 
 	var redirect string
-	actor, _ = webfinger.GetActorFromPath(ctx.Path(), "/"+config.Key+"/")
+	actor, _ = activitypub.GetActorFromPath(ctx.Path(), "/"+config.Key+"/")
 
 	if actor.Name != "main" {
 		redirect = actor.Name
@@ -373,7 +371,7 @@ func AdminAddJanny(ctx *fiber.Ctx) error {
 
 func AdminEditSummary(ctx *fiber.Ctx) error {
 	id, pass := util.GetPasswordFromSession(ctx)
-	actor, _ := webfinger.GetActorFromPath(ctx.Path(), "/"+config.Key+"/")
+	actor, _ := activitypub.GetActorFromPath(ctx.Path(), "/"+config.Key+"/")
 
 	if actor.Id == "" {
 		actor, _ = activitypub.GetActorByNameFromDB(config.Domain)
@@ -403,7 +401,7 @@ func AdminEditSummary(ctx *fiber.Ctx) error {
 
 func AdminSetBoardType(ctx *fiber.Ctx) error {
 	id, pass := util.GetPasswordFromSession(ctx)
-	actor, _ := webfinger.GetActorFromPath(ctx.Path(), "/"+config.Key+"/")
+	actor, _ := activitypub.GetActorFromPath(ctx.Path(), "/"+config.Key+"/")
 
 	if actor.Id == "" {
 		actor, _ = activitypub.GetActorByNameFromDB(config.Domain)
@@ -419,24 +417,24 @@ func AdminSetBoardType(ctx *fiber.Ctx) error {
 
 	if boardtype == "image" || boardtype == "text" || boardtype == "flash" {
 
-	query := `update actor set boardtype=$1 where id=$2`
-	if _, err := config.DB.Exec(query, boardtype, actor.Id); err != nil {
-		return util.MakeError(err, "AdminEditSummary")
-	}
+		query := `update actor set boardtype=$1 where id=$2`
+		if _, err := config.DB.Exec(query, boardtype, actor.Id); err != nil {
+			return util.MakeError(err, "AdminEditSummary")
+		}
 
-	var redirect string
-	if actor.Name != "main" {
-		redirect = actor.Name
-	}
+		var redirect string
+		if actor.Name != "main" {
+			redirect = actor.Name
+		}
 
-	return ctx.Redirect("/"+config.Key+"/"+redirect, http.StatusSeeOther)
+		return ctx.Redirect("/"+config.Key+"/"+redirect, http.StatusSeeOther)
 	}
-	return route.Send400(ctx, "Board type \"" + boardtype + "\" is invalid" )
+	return Send400(ctx, "Board type \""+boardtype+"\" is invalid")
 }
 
 func AdminDeleteJanny(ctx *fiber.Ctx) error {
 	id, pass := util.GetPasswordFromSession(ctx)
-	actor, _ := webfinger.GetActorFromPath(ctx.Path(), "/"+config.Key+"/")
+	actor, _ := activitypub.GetActorFromPath(ctx.Path(), "/"+config.Key+"/")
 
 	if actor.Id == "" {
 		actor, _ = activitypub.GetActorByNameFromDB(config.Domain)

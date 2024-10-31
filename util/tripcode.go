@@ -1,4 +1,4 @@
-package post
+package util
 
 import (
 	"bytes"
@@ -8,7 +8,6 @@ import (
 	"os/exec"
 
 	"github.com/anomalous69/fchannel/config"
-	"github.com/anomalous69/fchannel/util"
 	"github.com/gofiber/fiber/v2"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/simia-tech/crypt"
@@ -40,7 +39,7 @@ func CreateNameTripCode(ctx *fiber.Ctx) (string, string, error) {
 
 		phrase, err := TripPhrase(chunck)
 
-		return tripPhrase.ReplaceAllString(input, ""), phrase, util.MakeError(err, "CreateNameTripCode")
+		return tripPhrase.ReplaceAllString(input, ""), phrase, MakeError(err, "CreateNameTripCode")
 	}
 
 	tripSecure := regexp.MustCompile("##(.+)?")
@@ -54,14 +53,14 @@ func CreateNameTripCode(ctx *fiber.Ctx) (string, string, error) {
 		admin := ce.MatchString(chunck)
 		mod := cemod.MatchString(chunck)
 		janitor := cejanitor.MatchString(chunck)
-		board, modcred := util.GetPasswordFromSession(ctx)
+		board, modcred := GetPasswordFromSession(ctx)
 
-		if hasAuth, modlevel := util.HasAuth(modcred, board); hasAuth {
+		if hasAuth, modlevel := HasAuth(modcred, board); hasAuth {
 			if chunck == "" { // If tripcode field is just ## then select correct modlevel for "user"
 				return tripSecure.ReplaceAllString(input, ""), "#" + cases.Title(language.Und).String(modlevel), nil
 			} // Allow admins to post as mods and janitors, allow mods to post as janitors
-			  // If a mod accidently posts with ##admin, or a janitor with ##admin or ##mod, fallback to their correct modlevel
-			  // Auth will be replaced with a proper Username & Password system soon, so this will work for now.
+			// If a mod accidently posts with ##admin, or a janitor with ##admin or ##mod, fallback to their correct modlevel
+			// Auth will be replaced with a proper Username & Password system soon, so this will work for now.
 			if (admin) && (modlevel == "admin") {
 				return tripSecure.ReplaceAllString(input, ""), "#Admin", nil
 			} else if (mod || admin) && (modlevel == "admin" || modlevel == "mod") {
@@ -73,7 +72,7 @@ func CreateNameTripCode(ctx *fiber.Ctx) (string, string, error) {
 
 		hash, err := TripCodeSecure(chunck)
 
-		return tripSecure.ReplaceAllString(input, ""), "!!" + hash, util.MakeError(err, "CreateNameTripCode")
+		return tripSecure.ReplaceAllString(input, ""), "!!" + hash, MakeError(err, "CreateNameTripCode")
 	}
 
 	trip := regexp.MustCompile("#(.+)?")
@@ -87,9 +86,9 @@ func CreateNameTripCode(ctx *fiber.Ctx) (string, string, error) {
 		admin := ce.MatchString(chunck)
 		mod := cemod.MatchString(chunck)
 		janitor := cejanitor.MatchString(chunck)
-		board, modcred := util.GetPasswordFromSession(ctx)
+		board, modcred := GetPasswordFromSession(ctx)
 
-		if hasAuth, _ := util.HasAuth(modcred, board); hasAuth {
+		if hasAuth, _ := HasAuth(modcred, board); hasAuth {
 			if admin {
 				return trip.ReplaceAllString(input, ""), "#Admin", nil
 			} else if mod {
@@ -144,7 +143,7 @@ func TripCodeSecure(pass string) (string, error) {
 	enc, err := crypt.Crypt(pass, "$1$"+config.Salt)
 
 	if err != nil {
-		return "", util.MakeError(err, "TripCodeSecure")
+		return "", MakeError(err, "TripCodeSecure")
 	}
 
 	return enc[len(enc)-10 : len(enc)], nil
@@ -155,7 +154,7 @@ func TripPhrase(pass string) (string, error) {
 	//User input in os.exec :(
 	phrase, err := exec.Command("perl", "util/tripphrase/tripphrase.pl", config.Salt+pass).Output()
 	if err != nil {
-		return "", util.MakeError(err, "TripPhrase")
+		return "", MakeError(err, "TripPhrase")
 	}
 
 	return string(phrase), nil

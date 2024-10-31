@@ -1,4 +1,4 @@
-package route
+package routes
 
 import (
 	"crypto/md5"
@@ -20,8 +20,6 @@ import (
 	"github.com/anomalous69/fchannel/activitypub"
 	"github.com/anomalous69/fchannel/config"
 	"github.com/anomalous69/fchannel/db"
-	"github.com/anomalous69/fchannel/post"
-	"github.com/anomalous69/fchannel/webfinger"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/template/html"
 	country "github.com/mikekonan/go-countries"
@@ -112,15 +110,15 @@ func ParseOutboxRequest(ctx *fiber.Ctx, actor activitypub.Actor) error {
 			return Send500(ctx, "Failed to post", util.MakeError(err, "ParseOutboxRequest"))
 		}
 
-		valid, err := post.CheckCaptcha(ctx.FormValue("captcha"))
+		valid, err := db.CheckCaptcha(ctx.FormValue("captcha"))
 		if err == nil && hasCaptcha && valid {
 			header, _ := ctx.FormFile("file")
 			if header != nil {
 				f, _ := header.Open()
 				defer f.Close()
-				if header.Size > (int64(config.MaxAttachmentSize)<<20) {
+				if header.Size > (int64(config.MaxAttachmentSize) << 20) {
 					return Send400(ctx, "File too large, maximum file size is "+util.ConvertSize(int64(config.MaxAttachmentSize)))
-				} else if isBanned, err := post.IsMediaBanned(f); err == nil && isBanned {
+				} else if isBanned, err := db.IsMediaBanned(f); err == nil && isBanned {
 					return Send403(ctx, "Attached file is banned")
 				} else if err != nil {
 					return Send500(ctx, "Failed to post", util.MakeError(err, "ParseOutboxRequest"))
@@ -131,13 +129,13 @@ func ParseOutboxRequest(ctx *fiber.Ctx, actor activitypub.Actor) error {
 					return Send400(ctx, "New threads on this board must have a SWF or Flash Video file")
 				}
 
-				if !post.SupportedMIMEType(contentType) {
+				if !util.SupportedMIMEType(contentType) {
 					return Send400(ctx, "File type ("+contentType+") not supported on this board")
 				}
 			}
 
 			var nObj = activitypub.CreateObject("Note")
-			nObj, err := post.ObjectFromForm(ctx, nObj)
+			nObj, err := db.ObjectFromForm(ctx, nObj)
 			if err != nil {
 				return Send500(ctx, "Failed to post", util.MakeError(err, "ParseOutboxRequest"))
 			}
@@ -278,13 +276,13 @@ func ParseOutboxRequest(ctx *fiber.Ctx, actor activitypub.Actor) error {
 				}
 
 				actor, _ := activitypub.GetActorFromDB(config.Domain)
-				webfinger.FollowingBoards, err = actor.GetFollowing()
+				activitypub.FollowingBoards, err = actor.GetFollowing()
 
 				if err != nil {
 					return util.MakeError(err, "ParseOutboxRequest")
 				}
 
-				webfinger.Boards, err = webfinger.GetBoardCollection()
+				activitypub.Boards, err = activitypub.GetBoardCollection()
 
 				if err != nil {
 					return util.MakeError(err, "ParseOutboxRequest")
@@ -320,7 +318,7 @@ func ParseOutboxRequest(ctx *fiber.Ctx, actor activitypub.Actor) error {
 					var removed bool = false
 
 					item.Id = actor.Id
-					for _, e := range webfinger.FollowingBoards {
+					for _, e := range activitypub.FollowingBoards {
 						if e.Id != item.Id {
 							board = append(board, e)
 						} else {
@@ -332,8 +330,8 @@ func ParseOutboxRequest(ctx *fiber.Ctx, actor activitypub.Actor) error {
 						board = append(board, item)
 					}
 
-					webfinger.FollowingBoards = board
-					webfinger.Boards, err = webfinger.GetBoardCollection()
+					activitypub.FollowingBoards = board
+					activitypub.Boards, err = activitypub.GetBoardCollection()
 					return util.MakeError(err, "ParseOutboxRequest")
 				}
 
@@ -416,11 +414,11 @@ func TemplateFunctions(engine *html.Engine) {
 	// previously short
 	engine.AddFunc("shortURL", util.ShortURL)
 
-	engine.AddFunc("parseAttachment", post.ParseAttachment)
+	engine.AddFunc("parseAttachment", db.ParseAttachment)
 
-	engine.AddFunc("parseContent", post.ParseContent)
+	engine.AddFunc("parseContent", db.ParseContent)
 
-	engine.AddFunc("formatContent", post.FormatContent)
+	engine.AddFunc("formatContent", db.FormatContent)
 
 	engine.AddFunc("shortImg", util.ShortImg)
 
@@ -430,7 +428,7 @@ func TemplateFunctions(engine *html.Engine) {
 
 	engine.AddFunc("parseReplyLink", func(actorId string, op string, id string, content string) template.HTML {
 		actor, _ := activitypub.FingerActor(actorId)
-		title := strings.ReplaceAll(post.ParseLinkTitle(actor.Id+"/", op, content), `/\&lt;`, ">")
+		title := strings.ReplaceAll(db.ParseLinkTitle(actor.Id+"/", op, content), `/\&lt;`, ">")
 		link := "<a href=\"/" + actor.Name + "/" + util.ShortURL(actor.Outbox, op) + "#" + util.ShortURL(actor.Outbox, id) + "\" title=\"" + title + "\" class=\"replyLink\">&gt;&gt;" + util.ShortURL(actor.Outbox, id) + "</a>"
 		return template.HTML(link)
 	})
@@ -468,7 +466,7 @@ func TemplateFunctions(engine *html.Engine) {
 	})
 
 	engine.AddFunc("parseLinkTitle", func(board string, op string, content string) string {
-		nContent := post.ParseLinkTitle(board, op, content)
+		nContent := db.ParseLinkTitle(board, op, content)
 		nContent = strings.ReplaceAll(nContent, `/\&lt;`, ">")
 
 		return nContent
@@ -658,7 +656,7 @@ func StatusTemplate(num int) func(ctx *fiber.Ctx, msg string, err ...error) erro
 		if len(msg) > 0 {
 			m = msg
 		} else {
-			switch num{
+			switch num {
 			case 400:
 				m = "Your request could not be processed due to errors."
 			case 403:
@@ -673,7 +671,7 @@ func StatusTemplate(num int) func(ctx *fiber.Ctx, msg string, err ...error) erro
 		var data PageData
 		var statusData StatusData
 
-		data.Boards = webfinger.Boards
+		data.Boards = activitypub.Boards
 		data.Themes = &config.Themes
 		data.ThemeCookie = GetThemeCookie(ctx)
 		data.Referer = ctx.Get("referer")
@@ -691,7 +689,7 @@ func StatusTemplate(num int) func(ctx *fiber.Ctx, msg string, err ...error) erro
 		data.Title = strconv.Itoa(num) + " " + statusData.Meaning
 
 		return ctx.Status(num).Render("status", fiber.Map{
-			"page":  data,
+			"page":   data,
 			"status": statusData,
 		}, "layouts/main")
 	}

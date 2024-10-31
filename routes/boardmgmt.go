@@ -17,12 +17,10 @@ import (
 
 	"github.com/anomalous69/fchannel/activitypub"
 	"github.com/anomalous69/fchannel/config"
-	"github.com/anomalous69/fchannel/route"
-	"github.com/anomalous69/fchannel/webfinger"
+
 	"github.com/corona10/goimagehash"
 
 	"github.com/anomalous69/fchannel/db"
-	"github.com/anomalous69/fchannel/post"
 	"github.com/anomalous69/fchannel/util"
 	"github.com/gofiber/fiber/v2"
 )
@@ -36,29 +34,29 @@ func BoardBanMedia(ctx *fiber.Ctx) error {
 	_, auth := util.GetPasswordFromSession(ctx)
 
 	if postID == "" || auth == "" {
-		return route.Send401(ctx, "You are not authenticated")
+		return Send401(ctx, "You are not authenticated")
 	}
 
 	var col activitypub.Collection
 	activity := activitypub.Activity{Id: postID}
 
 	if col, err = activity.GetCollection(); err != nil {
-		return route.Send400(ctx, "Post does not exist or server encountered issue with database", util.MakeError(err, "BoardBanMedia"))
+		return Send400(ctx, "Post does not exist or server encountered issue with database", util.MakeError(err, "BoardBanMedia"))
 	}
 
 	if len(col.OrderedItems) == 0 {
-		return route.Send400(ctx, "Could not ban media, post not found")
+		return Send400(ctx, "Could not ban media, post not found")
 	}
 
 	if len(col.OrderedItems[0].Attachment) == 0 {
-		return route.Send400(ctx, "Could not ban media, post has no attachment")
+		return Send400(ctx, "Could not ban media, post has no attachment")
 	}
 
 	var actor activitypub.Actor
 	actor.Id = col.OrderedItems[0].Actor
 
 	if has, _ := util.HasAuth(auth, actor.Id); !has {
-		return route.Send403(ctx, "You are not authorized to ban media on board /"+ctx.Query("board")+"/")
+		return Send403(ctx, "You are not authorized to ban media on board /"+ctx.Query("board")+"/")
 	}
 
 	re := regexp.MustCompile(config.Domain)
@@ -67,42 +65,42 @@ func BoardBanMedia(ctx *fiber.Ctx) error {
 	f, err := os.Open("." + file)
 
 	if err != nil {
-		return route.Send500(ctx, "Failed to ban media (file does not exist or server is unable to read)", util.MakeError(err, "BoardBanMedia"))
+		return Send500(ctx, "Failed to ban media (file does not exist or server is unable to read)", util.MakeError(err, "BoardBanMedia"))
 	}
 
 	defer f.Close()
 
 	//TODO: Fall back to old method if anything fails
 	mimetype, _ := util.GetFileContentType(f)
-	config.Log.Println("mimetype: " +  mimetype)
+	config.Log.Println("mimetype: " + mimetype)
 	if mimetype == "image/jpeg" || mimetype == "image/png" || mimetype == "image/gif" {
 		image, _, err := image.Decode(f)
 		if err != nil {
-			return route.Send500(ctx, "Failed to ban media (server failed to decode image)", util.MakeError(err, "BoardBanMedia"))
+			return Send500(ctx, "Failed to ban media (server failed to decode image)", util.MakeError(err, "BoardBanMedia"))
 		}
-		
+
 		phash, err := goimagehash.PerceptionHash(image)
 		if err != nil {
-			return route.Send500(ctx, "Failed to ban media (server failed to hash image)", util.MakeError(err, "BoardBanMedia"))
+			return Send500(ctx, "Failed to ban media (server failed to hash image)", util.MakeError(err, "BoardBanMedia"))
 		}
 
 		config.Log.Println("Banning hash: ", uint64(phash.GetHash()))
-		
+
 		query := `insert into bannedimages (phash) values ($1)`
 		if _, err := config.DB.Exec(query, uint64(phash.GetHash())); err != nil {
-			return route.Send500(ctx, "Failed to ban media (server failed to insert into database)", util.MakeError(err, "BoardBanMedia"))
+			return Send500(ctx, "Failed to ban media (server failed to insert into database)", util.MakeError(err, "BoardBanMedia"))
 		}
 	} else {
-	bytes := make([]byte, 2048)
+		bytes := make([]byte, 2048)
 
-	if _, err = f.Read(bytes); err != nil {
-		return route.Send500(ctx, "Failed to ban media (server failed to read file)", util.MakeError(err, "BoardBanMedia"))
-	}
+		if _, err = f.Read(bytes); err != nil {
+			return Send500(ctx, "Failed to ban media (server failed to read file)", util.MakeError(err, "BoardBanMedia"))
+		}
 
-	if banned, err := post.IsMediaBanned(f); err == nil && !banned {
-		query := `insert into bannedmedia (hash) values ($1)`
-		if _, err := config.DB.Exec(query, util.HashBytes(bytes)); err != nil {
-			return route.Send500(ctx, "Failed to ban media", util.MakeError(err, "BoardBanMedia"))
+		if banned, err := db.IsMediaBanned(f); err == nil && !banned {
+			query := `insert into bannedmedia (hash) values ($1)`
+			if _, err := config.DB.Exec(query, util.HashBytes(bytes)); err != nil {
+				return Send500(ctx, "Failed to ban media", util.MakeError(err, "BoardBanMedia"))
 			}
 		}
 	}
@@ -115,22 +113,22 @@ func BoardBanMedia(ctx *fiber.Ctx) error {
 
 	if isOP, _ = obj.CheckIfOP(); !isOP {
 		if err := obj.Tombstone(); err != nil {
-			return route.Send500(ctx, "Failed to ban media", util.MakeError(err, "BoardBanMedia"))
+			return Send500(ctx, "Failed to ban media", util.MakeError(err, "BoardBanMedia"))
 		}
 	} else {
 		if err := obj.TombstoneReplies(); err != nil {
-			return route.Send500(ctx, "Failed to ban media", util.MakeError(err, "BoardBanMedia"))
+			return Send500(ctx, "Failed to ban media", util.MakeError(err, "BoardBanMedia"))
 		}
 	}
 
 	if local, _ = obj.IsLocal(); local {
 		if err := obj.DeleteRequest(); err != nil {
-			return route.Send500(ctx, "Failed to ban media", util.MakeError(err, "BoardBanMedia"))
+			return Send500(ctx, "Failed to ban media", util.MakeError(err, "BoardBanMedia"))
 		}
 	}
 
 	if err := actor.UnArchiveLast(); err != nil {
-		return route.Send500(ctx, "Failed to ban media", util.MakeError(err, "BoardBanMedia"))
+		return Send500(ctx, "Failed to ban media", util.MakeError(err, "BoardBanMedia"))
 	}
 
 	var OP string
@@ -158,14 +156,14 @@ func BoardDelete(ctx *fiber.Ctx) error {
 	_, auth := util.GetPasswordFromSession(ctx)
 
 	if postID == "" || auth == "" {
-		return route.Send401(ctx, "You are not authenticated")
+		return Send401(ctx, "You are not authenticated")
 	}
 
 	var col activitypub.Collection
 	activity := activitypub.Activity{Id: postID}
 
 	if col, err = activity.GetCollection(); err != nil {
-		return route.Send400(ctx, "Post does not exist or server encountered issue with database", util.MakeError(err, "BoardDelete"))
+		return Send400(ctx, "Post does not exist or server encountered issue with database", util.MakeError(err, "BoardDelete"))
 	}
 
 	var OP string
@@ -175,7 +173,7 @@ func BoardDelete(ctx *fiber.Ctx) error {
 		actor, err = activitypub.GetActorByNameFromDB(board)
 
 		if err != nil {
-			return route.Send400(ctx, "Board does not exist or server encountered issue with database", util.MakeError(err, "BoardDelete"))
+			return Send400(ctx, "Board does not exist or server encountered issue with database", util.MakeError(err, "BoardDelete"))
 		}
 	} else {
 		if len(col.OrderedItems[0].InReplyTo) > 0 {
@@ -188,7 +186,7 @@ func BoardDelete(ctx *fiber.Ctx) error {
 	}
 
 	if has, _ := util.HasAuth(auth, actor.Id); !has {
-		return route.Send403(ctx, "You are not authorized to ban media on board /"+ctx.Query("board")+"/")
+		return Send403(ctx, "You are not authorized to ban media on board /"+ctx.Query("board")+"/")
 	}
 
 	var isOP bool
@@ -196,11 +194,11 @@ func BoardDelete(ctx *fiber.Ctx) error {
 
 	if isOP, _ = obj.CheckIfOP(); !isOP {
 		if err := obj.Tombstone(); err != nil {
-			return route.Send500(ctx, "Failed to ban poster", util.MakeError(err, "BoardDelete"))
+			return Send500(ctx, "Failed to ban poster", util.MakeError(err, "BoardDelete"))
 		}
 	} else {
 		if err := obj.TombstoneReplies(); err != nil {
-			return route.Send500(ctx, "Failed to ban poster", util.MakeError(err, "BoardDelete"))
+			return Send500(ctx, "Failed to ban poster", util.MakeError(err, "BoardDelete"))
 		}
 	}
 
@@ -208,12 +206,12 @@ func BoardDelete(ctx *fiber.Ctx) error {
 
 	if local, _ = obj.IsLocal(); local {
 		if err := obj.DeleteRequest(); err != nil {
-			return route.Send500(ctx, "Failed to ban poster", util.MakeError(err, "BoardDelete"))
+			return Send500(ctx, "Failed to ban poster", util.MakeError(err, "BoardDelete"))
 		}
 	}
 
 	if err := actor.UnArchiveLast(); err != nil {
-		return route.Send500(ctx, "Failed to ban poster", util.MakeError(err, "BoardDelete"))
+		return Send500(ctx, "Failed to ban poster", util.MakeError(err, "BoardDelete"))
 	}
 
 	if ctx.Query("manage") == "t" {
@@ -240,14 +238,14 @@ func BoardDeleteAttach(ctx *fiber.Ctx) error {
 	_, auth := util.GetPasswordFromSession(ctx)
 
 	if postID == "" || auth == "" {
-		return route.Send401(ctx, "You are not authenticated")
+		return Send401(ctx, "You are not authenticated")
 	}
 
 	var col activitypub.Collection
 	activity := activitypub.Activity{Id: postID}
 
 	if col, err = activity.GetCollection(); err != nil {
-		return route.Send400(ctx, "Post does not exist or server encountered issue with database", util.MakeError(err, "BoardDeleteAttach"))
+		return Send400(ctx, "Post does not exist or server encountered issue with database", util.MakeError(err, "BoardDeleteAttach"))
 	}
 
 	var OP string
@@ -257,7 +255,7 @@ func BoardDeleteAttach(ctx *fiber.Ctx) error {
 		actor, err = activitypub.GetActorByNameFromDB(board)
 
 		if err != nil {
-			return route.Send400(ctx, "Board does not exist or server encountered issue with database", util.MakeError(err, "BoardDeleteAttach"))
+			return Send400(ctx, "Board does not exist or server encountered issue with database", util.MakeError(err, "BoardDeleteAttach"))
 		}
 	} else {
 		if len(col.OrderedItems[0].InReplyTo) > 0 {
@@ -270,25 +268,25 @@ func BoardDeleteAttach(ctx *fiber.Ctx) error {
 	}
 
 	if has, _ := util.HasAuth(auth, actor.Id); !has {
-		return route.Send403(ctx, "You are not authorized to delete media on board /"+ctx.Query("board")+"/")
+		return Send403(ctx, "You are not authorized to delete media on board /"+ctx.Query("board")+"/")
 	}
 
 	obj := activitypub.ObjectBase{Id: postID}
 
 	if err := obj.DeleteAttachmentFromFile(); err != nil {
-		return route.Send500(ctx, "Failed to delete attachment", util.MakeError(err, "BoardDeleteAttach"))
+		return Send500(ctx, "Failed to delete attachment", util.MakeError(err, "BoardDeleteAttach"))
 	}
 
 	if err := obj.TombstoneAttachment(); err != nil {
-		return route.Send500(ctx, "Failed to delete attachment", util.MakeError(err, "BoardDeleteAttach"))
+		return Send500(ctx, "Failed to delete attachment", util.MakeError(err, "BoardDeleteAttach"))
 	}
 
 	if err := obj.DeletePreviewFromFile(); err != nil {
-		return route.Send500(ctx, "Failed to delete attachment", util.MakeError(err, "BoardDeleteAttach"))
+		return Send500(ctx, "Failed to delete attachment", util.MakeError(err, "BoardDeleteAttach"))
 	}
 
 	if err := obj.TombstonePreview(); err != nil {
-		return route.Send500(ctx, "Failed to delete attachment", util.MakeError(err, "BoardDeleteAttach"))
+		return Send500(ctx, "Failed to delete attachment", util.MakeError(err, "BoardDeleteAttach"))
 	}
 
 	if ctx.Query("manage") == "t" {
@@ -311,14 +309,14 @@ func BoardMarkSensitive(ctx *fiber.Ctx) error {
 	_, auth := util.GetPasswordFromSession(ctx)
 
 	if postID == "" || auth == "" {
-		return route.Send401(ctx, "You are not authenticated")
+		return Send401(ctx, "You are not authenticated")
 	}
 
 	var col activitypub.Collection
 	activity := activitypub.Activity{Id: postID}
 
 	if col, err = activity.GetCollection(); err != nil {
-		return route.Send400(ctx, "Post does not exist or server encountered issue with database", util.MakeError(err, "BoardMarkSensitive"))
+		return Send400(ctx, "Post does not exist or server encountered issue with database", util.MakeError(err, "BoardMarkSensitive"))
 	}
 
 	var OP string
@@ -328,7 +326,7 @@ func BoardMarkSensitive(ctx *fiber.Ctx) error {
 		actor, err = activitypub.GetActorByNameFromDB(board)
 
 		if err != nil {
-			return route.Send400(ctx, "Board does not exist or server encountered issue with database", util.MakeError(err, "BoardMarkSensitive"))
+			return Send400(ctx, "Board does not exist or server encountered issue with database", util.MakeError(err, "BoardMarkSensitive"))
 		}
 	} else {
 		if len(col.OrderedItems[0].InReplyTo) > 0 {
@@ -341,13 +339,13 @@ func BoardMarkSensitive(ctx *fiber.Ctx) error {
 	}
 
 	if has, _ := util.HasAuth(auth, actor.Id); !has {
-		return route.Send403(ctx, "You are not authorized to ban media on board /"+ctx.Query("board")+"/")
+		return Send403(ctx, "You are not authorized to ban media on board /"+ctx.Query("board")+"/")
 	}
 
 	obj := activitypub.ObjectBase{Id: postID}
 
 	if err = obj.MarkSensitive(true); err != nil {
-		return route.Send500(ctx, "Failed to mark post as sensitive", util.MakeError(err, "BoardMarkSensitive"))
+		return Send500(ctx, "Failed to mark post as sensitive", util.MakeError(err, "BoardMarkSensitive"))
 	}
 
 	if isOP, _ := obj.CheckIfOP(); !isOP && OP != "" {
@@ -379,7 +377,7 @@ func BoardPopArchive(ctx *fiber.Ctx) error {
 	}
 
 	if has := actor.HasValidation(ctx); !has {
-		return route.Send403(ctx, "You are not authorized to pop archives")
+		return Send403(ctx, "You are not authorized to pop archives")
 	}
 
 	id := ctx.Query("id")
@@ -388,7 +386,7 @@ func BoardPopArchive(ctx *fiber.Ctx) error {
 	var obj = activitypub.ObjectBase{Id: id}
 
 	if err := obj.SetRepliesType("Note"); err != nil {
-		return route.Send500(ctx, "Failed to pop archive", util.MakeError(err, "BoardPopArchive"))
+		return Send500(ctx, "Failed to pop archive", util.MakeError(err, "BoardPopArchive"))
 	}
 
 	return ctx.Redirect("/"+board+"/archive", http.StatusSeeOther)
@@ -428,18 +426,18 @@ func BoardBlacklist(ctx *fiber.Ctx) error {
 	actor, err := activitypub.GetActorFromDB(config.Domain)
 
 	if err != nil {
-		return route.Send400(ctx, "Board does not exist or server encountered issue with database", util.MakeError(err, "BoardBlacklist"))
+		return Send400(ctx, "Board does not exist or server encountered issue with database", util.MakeError(err, "BoardBlacklist"))
 	}
 
 	if has := actor.HasValidation(ctx); !has {
-		return route.Send403(ctx, "You are not authorized to modify regex blacklist")
+		return Send403(ctx, "You are not authorized to modify regex blacklist")
 	}
 
 	if ctx.Method() == "GET" {
 		if id := ctx.Query("remove"); id != "" {
 			i, _ := strconv.Atoi(id)
 			if err := util.DeleteRegexBlacklist(i); err != nil {
-				return route.Send400(ctx, "Failed to add regex to blacklist", util.MakeError(err, "BoardBlacklist"))
+				return Send400(ctx, "Failed to add regex to blacklist", util.MakeError(err, "BoardBlacklist"))
 			}
 		}
 	} else {
@@ -495,13 +493,13 @@ func ReportPost(ctx *fiber.Ctx) error {
 	if close == "1" { //TODO: Check this, HasAuth returns string which is put in "err"
 		if auth, err := util.HasAuth(auth, actor.Id); !auth {
 			config.Log.Println(err)
-			return route.Send404(ctx, "") //TODO: FILL IN
+			return Send404(ctx, "") //TODO: FILL IN
 		}
 
 		if local, _ := obj.IsLocal(); !local {
 			if err := db.CloseLocalReport(obj.Id, board); err != nil {
 				config.Log.Println(err)
-				return route.Send404(ctx, "", err) //TODO: FILL IN
+				return Send404(ctx, "", err) //TODO: FILL IN
 			}
 
 			return ctx.Redirect("/"+config.Key+"/"+board, http.StatusSeeOther)
@@ -509,7 +507,7 @@ func ReportPost(ctx *fiber.Ctx) error {
 
 		if err := obj.DeleteReported(); err != nil {
 			config.Log.Println(err)
-			return route.Send404(ctx, "", err) //TODO: FILL IN
+			return Send404(ctx, "", err) //TODO: FILL IN
 		}
 
 		return ctx.Redirect("/"+config.Key+"/"+board, http.StatusSeeOther)
@@ -518,7 +516,7 @@ func ReportPost(ctx *fiber.Ctx) error {
 	if local, _ := obj.IsLocal(); !local {
 		if err := db.CreateLocalReport(id, board, reason); err != nil {
 			config.Log.Println(err)
-			return route.Send404(ctx, "", err) //TODO: FILL IN
+			return Send404(ctx, "", err) //TODO: FILL IN
 		}
 
 		return ctx.Redirect("/"+board+"/"+util.RemoteShort(obj.Id), http.StatusSeeOther)
@@ -527,28 +525,30 @@ func ReportPost(ctx *fiber.Ctx) error {
 	var captcha = ctx.FormValue("captchaCode") + ":" + ctx.FormValue("captcha")
 
 	if len(reason) > 100 {
-		return route.Send400(ctx, "Report comment limit is 100 characters")
+		return Send400(ctx, "Report comment limit is 100 characters")
 	}
 
 	if len(strings.TrimSpace(reason)) == 0 {
-		return route.Send400(ctx, "No report reason was provided")
+		return Send400(ctx, "No report reason was provided")
 	}
 
-	if ok, _ := post.CheckCaptcha(captcha); !ok && close != "1" {
-		return route.Send403(ctx, "Invalid captcha")
+	if ok, _ := db.CheckCaptcha(captcha); !ok && close != "1" {
+		return Send403(ctx, "Invalid captcha")
 	}
 
 	if err := db.CreateLocalReport(obj.Id, board, reason); err != nil {
 		config.Log.Println(err)
-		return route.Send404(ctx, "") //TODO: FILL IN
+		return Send404(ctx, "") //TODO: FILL IN
 	}
 
 	if len(config.NtfyURL) > 0 {
-		req, _ := http.NewRequest("POST", config.NtfyURL, 
-		strings.NewReader(id + "\nReason: " + reason))
+		req, _ := http.NewRequest("POST", config.NtfyURL,
+			strings.NewReader(id+"\nReason: "+reason))
 		req.Header.Set("Click", "ntfy://"+config.NtfyURL) // Opens ntfy app, also prevents message copy to clipboard on tap.
 		req.Header.Set("Actions", "view, View post, "+id+", clear=true")
-		if len(config.NtfyAuth) > 0 { req.Header.Set("Authorization", config.NtfyAuth)}
+		if len(config.NtfyAuth) > 0 {
+			req.Header.Set("Authorization", config.NtfyAuth)
+		}
 		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
 			config.Log.Printf("Error sending report to ntfy server: %s", err)
@@ -590,7 +590,7 @@ func ReportGet(ctx *fiber.Ctx) error {
 		return ctx.Redirect(ctx.BaseURL()+"/banned", 301)
 	}
 
-	var data route.PageData
+	var data PageData
 	data.Board.Actor = actor
 	data.Board.Name = actor.Name
 	data.Board.PrefName = actor.PreferredUsername
@@ -607,7 +607,7 @@ func ReportGet(ctx *fiber.Ctx) error {
 	}
 
 	data.Board.Captcha = config.Domain + "/" + capt
-	data.Board.CaptchaCode = post.GetCaptchaCode(data.Board.Captcha)
+	data.Board.CaptchaCode = db.GetCaptchaCode(data.Board.Captcha)
 
 	data.Meta.Description = data.Board.Summary
 	data.Meta.Url = data.Board.Actor.Id
@@ -616,14 +616,14 @@ func ReportGet(ctx *fiber.Ctx) error {
 	data.Instance, err = activitypub.GetActorFromDB(config.Domain)
 
 	data.Themes = &config.Themes
-	data.ThemeCookie = route.GetThemeCookie(ctx)
+	data.ThemeCookie = GetThemeCookie(ctx)
 
 	data.ServerVersion = config.Version
 
 	data.Key = config.Key
 	data.Board.ModCred, _ = util.GetPasswordFromSession(ctx)
 	data.Board.Domain = config.Domain
-	data.Boards = webfinger.Boards
+	data.Boards = activitypub.Boards
 
 	data.Referer = config.Domain + "/" + actor.Name
 	if strings.Contains(ctx.Get("referer"), config.Domain+"/"+actor.Name) && !strings.Contains(ctx.Get("referer"), "make-report") {
@@ -754,7 +754,7 @@ func BanGet(ctx *fiber.Ctx) error {
 	// TODO: More information like other IP's banned in this range
 	// TODO: Range bans + IPv6 prefix support
 
-	var data route.PageData
+	var data PageData
 	data.Board.Actor = actor
 	data.Board.Name = actor.Name
 	data.Board.PrefName = actor.PreferredUsername
@@ -771,16 +771,16 @@ func BanGet(ctx *fiber.Ctx) error {
 	data.Instance, _ = activitypub.GetActorFromDB(config.Domain)
 
 	data.Themes = &config.Themes
-	data.ThemeCookie = route.GetThemeCookie(ctx)
+	data.ThemeCookie = GetThemeCookie(ctx)
 
 	data.ServerVersion = config.Version
 
 	data.Key = config.Key
 	data.Board.ModCred, _ = util.GetPasswordFromSession(ctx)
 	data.Board.Domain = config.Domain
-	data.Boards = webfinger.Boards
+	data.Boards = activitypub.Boards
 
-	var baninfo route.BanInfo
+	var baninfo BanInfo
 	baninfo.Bans, _ = db.GetAllBansForIP(ip)
 
 	data.Referer = config.Domain + "/" + actor.Name

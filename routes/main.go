@@ -4,9 +4,7 @@ import (
 	"github.com/anomalous69/fchannel/activitypub"
 	"github.com/anomalous69/fchannel/config"
 	"github.com/anomalous69/fchannel/db"
-	"github.com/anomalous69/fchannel/route"
 	"github.com/anomalous69/fchannel/util"
-	"github.com/anomalous69/fchannel/webfinger"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -22,7 +20,7 @@ func Index(ctx *fiber.Ctx) error {
 		return nil
 	}
 
-	var data route.PageData
+	var data PageData
 
 	data.NewsItems, err = db.GetNews(3)
 	if err != nil {
@@ -37,7 +35,7 @@ func Index(ctx *fiber.Ctx) error {
 
 	data.Title = "Welcome to " + actor.PreferredUsername
 	data.PreferredUsername = actor.PreferredUsername
-	data.Boards = webfinger.Boards
+	data.Boards = activitypub.Boards
 	data.Posts = collection.OrderedItems
 	data.Board.Name = ""
 	data.Key = config.Key
@@ -59,7 +57,7 @@ func Index(ctx *fiber.Ctx) error {
 	data.Meta.Title = data.Title
 
 	data.Themes = &config.Themes
-	data.ThemeCookie = route.GetThemeCookie(ctx)
+	data.ThemeCookie = GetThemeCookie(ctx)
 
 	data.ServerVersion = config.Version
 
@@ -74,7 +72,7 @@ func Inbox(ctx *fiber.Ctx) error {
 }
 
 func Outbox(ctx *fiber.Ctx) error {
-	actor, err := webfinger.GetActorFromPath(ctx.Path(), "/")
+	actor, err := activitypub.GetActorFromPath(ctx.Path(), "/")
 
 	if err != nil {
 		return util.MakeError(err, "Outbox")
@@ -85,7 +83,7 @@ func Outbox(ctx *fiber.Ctx) error {
 		return nil
 	}
 
-	return route.ParseOutboxRequest(ctx, actor)
+	return ParseOutboxRequest(ctx, actor)
 }
 
 func Following(ctx *fiber.Ctx) error {

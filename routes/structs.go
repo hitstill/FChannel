@@ -1,20 +1,19 @@
-package route
+package routes
 
 import (
 	"github.com/anomalous69/fchannel/activitypub"
 	"github.com/anomalous69/fchannel/db"
 	"github.com/anomalous69/fchannel/util"
-	"github.com/anomalous69/fchannel/webfinger"
 )
 
 type PageData struct {
 	Title             string
 	PreferredUsername string
-	Board             webfinger.Board
+	Board             activitypub.Board
 	Pages             []int
 	CurrentPage       int
 	TotalPage         int
-	Boards            []webfinger.Board
+	Boards            []activitypub.Board
 	Posts             []activitypub.ObjectBase
 	Key               string
 	PostId            string
@@ -35,17 +34,17 @@ type PageData struct {
 
 type AdminPage struct {
 	Title         string
-	Board         webfinger.Board
+	Board         activitypub.Board
 	Key           string
 	Actor         string
-	Boards        []webfinger.Board
+	Boards        []activitypub.Board
 	Following     []string
 	Followers     []string
 	Domain        string
 	IsLocal       bool
 	PostBlacklist []util.PostBlacklist
 	AutoSubscribe bool
-	BoardType	  string
+	BoardType     string
 	RecentPosts   []activitypub.ObjectBase
 	Instance      activitypub.Actor
 	Meta          Meta
@@ -68,7 +67,7 @@ type BanInfo struct {
 }
 
 type StatusData struct {
-	Code int
+	Code    int
 	Meaning string
 	Message string
 	Error   []error

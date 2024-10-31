@@ -1,4 +1,5 @@
 module github.com/anomalous69/fchannel
+
 go 1.19
 
 require (

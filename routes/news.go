@@ -9,9 +9,8 @@ import (
 	"github.com/anomalous69/fchannel/activitypub"
 	"github.com/anomalous69/fchannel/config"
 	"github.com/anomalous69/fchannel/db"
-	"github.com/anomalous69/fchannel/route"
+
 	"github.com/anomalous69/fchannel/util"
-	"github.com/anomalous69/fchannel/webfinger"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gorilla/feeds"
 )
@@ -21,7 +20,7 @@ func NewsGet(ctx *fiber.Ctx) error {
 	ts, err := strconv.Atoi(timestamp)
 
 	if err != nil {
-		return route.Send400(ctx, ctx.Path()[6:]+" is not a valid timestamp")
+		return Send400(ctx, ctx.Path()[6:]+" is not a valid timestamp")
 	}
 
 	actor, err := activitypub.GetActorFromDB(config.Domain)
@@ -30,9 +29,9 @@ func NewsGet(ctx *fiber.Ctx) error {
 		return util.MakeError(err, "NewsGet")
 	}
 
-	var data route.PageData
+	var data PageData
 	data.PreferredUsername = actor.PreferredUsername
-	data.Boards = webfinger.Boards
+	data.Boards = activitypub.Boards
 	data.Board.Name = ""
 	data.Key = config.Key
 	data.Board.Domain = config.Domain
@@ -44,7 +43,7 @@ func NewsGet(ctx *fiber.Ctx) error {
 
 	data.NewsItems[0], err = db.GetNewsItem(ts)
 	if err != nil {
-		return route.Send404(ctx, "News not found")
+		return Send404(ctx, "News not found")
 	}
 
 	data.Title = actor.PreferredUsername + ": " + data.NewsItems[0].Title
@@ -54,7 +53,7 @@ func NewsGet(ctx *fiber.Ctx) error {
 	data.Meta.Title = data.Title
 
 	data.Themes = &config.Themes
-	data.ThemeCookie = route.GetThemeCookie(ctx)
+	data.ThemeCookie = GetThemeCookie(ctx)
 
 	data.ServerVersion = config.Version
 
@@ -67,10 +66,10 @@ func NewsGetAll(ctx *fiber.Ctx) error {
 		return util.MakeError(err, "NewsGetAll")
 	}
 
-	var data route.PageData
+	var data PageData
 	data.PreferredUsername = actor.PreferredUsername
 	data.Title = actor.PreferredUsername + " News"
-	data.Boards = webfinger.Boards
+	data.Boards = activitypub.Boards
 	data.Board.Name = ""
 	data.Key = config.Key
 	data.Board.Domain = config.Domain
@@ -94,7 +93,7 @@ func NewsGetAll(ctx *fiber.Ctx) error {
 	data.Meta.Title = data.Title
 
 	data.Themes = &config.Themes
-	data.ThemeCookie = route.GetThemeCookie(ctx)
+	data.ThemeCookie = GetThemeCookie(ctx)
 
 	data.ServerVersion = config.Version
 
@@ -128,7 +127,7 @@ func NewsDelete(ctx *fiber.Ctx) error {
 	actor, err := activitypub.GetActorFromDB(config.Domain)
 
 	if has := actor.HasValidation(ctx); !has {
-		return route.Send403(ctx, "You are not authorized to delete news")
+		return Send403(ctx, "You are not authorized to delete news")
 	}
 
 	timestamp := ctx.Path()[13+len(config.Key):]
@@ -136,11 +135,11 @@ func NewsDelete(ctx *fiber.Ctx) error {
 	tsint, err := strconv.Atoi(timestamp)
 
 	if err != nil {
-		return route.Send400(ctx, ctx.Path()[13+len(config.Key):]+" is not a valid timestamp")
+		return Send400(ctx, ctx.Path()[13+len(config.Key):]+" is not a valid timestamp")
 	}
 
 	if err := db.DeleteNewsItem(tsint); err != nil {
-		return route.Send500(ctx, "News does not exist or database failed to process request", util.MakeError(err, "NewsDelete"))
+		return Send500(ctx, "News does not exist or database failed to process request", util.MakeError(err, "NewsDelete"))
 	}
 
 	return ctx.Redirect("/news/", http.StatusSeeOther)

@@ -1,4 +1,4 @@
-package post
+package db
 
 import (
 	"database/sql"
@@ -18,7 +18,6 @@ import (
 
 	"github.com/anomalous69/fchannel/activitypub"
 	"github.com/anomalous69/fchannel/config"
-	"github.com/anomalous69/fchannel/db"
 	"github.com/anomalous69/fchannel/util"
 	"github.com/gofiber/fiber/v2"
 
@@ -52,7 +51,7 @@ func ParseCommentForReplies(comment string, op string) ([]activitypub.ObjectBase
 		str = strings.Replace(str, "http://", "", 1)
 		str = strings.Replace(str, "https://", "", 1)
 		str = config.TP + "" + str
-		_, isReply, err := db.IsReplyToOP(op, str)
+		_, isReply, err := IsReplyToOP(op, str)
 
 		if err != nil {
 			return nil, util.MakeError(err, "ParseCommentForReplies")
@@ -255,17 +254,7 @@ func IsMediaBanned(f multipart.File) (bool, error) {
 	hash := util.HashBytes(fileBytes)
 	f.Seek(0, 0)
 
-	return db.IsHashBanned(hash)
-}
-
-func SupportedMIMEType(mime string) bool {
-	for _, e := range config.SupportedFiles {
-		if e == mime {
-			return true
-		}
-	}
-
-	return false
+	return IsHashBanned(hash)
 }
 
 func ObjectFromForm(ctx *fiber.Ctx, obj activitypub.ObjectBase) (activitypub.ObjectBase, error) {
@@ -344,7 +333,7 @@ func ObjectFromForm(ctx *fiber.Ctx, obj activitypub.ObjectBase) (activitypub.Obj
 		if !strings.Contains(match[i][0], "https") {
 			curid := strings.Replace(match[i][0], ">>", "", -1)
 			curid = regexp.MustCompile(`\S*-`).ReplaceAllString(curid, "")
-			replyid, err := db.GetPostIDFromNum(curid)
+			replyid, err := GetPostIDFromNum(curid)
 			if err == nil {
 				obj.Content = strings.ReplaceAll(obj.Content, match[i][0], ">>"+replyid)
 			}
@@ -629,20 +618,20 @@ func ParseLinkComments(board activitypub.Actor, op string, content string, threa
 			}
 		}
 
-		if replyID, isReply, err := db.IsReplyToOP(op, parsedLink); err == nil && isReply || err == nil && parsedLink == op {
+		if replyID, isReply, err := IsReplyToOP(op, parsedLink); err == nil && isReply || err == nil && parsedLink == op {
 			id := util.ShortURL(board.Outbox, replyID)
 
 			content = strings.Replace(content, match[i][0], "<a class=\"reply\" title=\""+quoteTitle+"\" href=\"/"+board.Name+"/"+util.ShortURL(board.Outbox, op)+"#"+id+"\">&gt;&gt;"+id+""+isOP+"</a>", -1)
 		} else {
 			//this is a cross post
 
-			parsedOP, err := db.GetReplyOP(parsedLink)
+			parsedOP, err := GetReplyOP(parsedLink)
 			if err == nil && len(parsedOP) > 0 {
 				link = parsedOP + "#" + util.ShortURL(parsedOP, parsedLink)
 			} else {
 				// If we want to keep user on same instance then use current actor, or redirect them to the /main/ actor
 				//link, _ = db.GetPostIDFromNum(parsedLink)
-				if db.IsTombstone(parsedLink) {
+				if IsTombstone(parsedLink) {
 					return strings.Replace(content, match[i][0], "<a class=\"reply deadlink\">&gt;&gt;"+util.ShortURL(board.Outbox, parsedLink)+"</a>", -1), nil
 				}
 

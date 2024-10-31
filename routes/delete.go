@@ -11,7 +11,7 @@ import (
 	"github.com/anomalous69/fchannel/activitypub"
 	"github.com/anomalous69/fchannel/config"
 	"github.com/anomalous69/fchannel/db"
-	"github.com/anomalous69/fchannel/route"
+
 	"github.com/anomalous69/fchannel/util"
 	"github.com/gofiber/fiber/v2"
 )
@@ -48,11 +48,11 @@ func MultiDelete(ctx *fiber.Ctx) error {
 	pwd := ctx.FormValue("pwd")
 
 	if len(pwd) < 1 {
-		return route.Send400(ctx, "No deletion password was provided")
+		return Send400(ctx, "No deletion password was provided")
 	}
 	data, err := ParseFormData(ctx)
 	if err != nil {
-		return route.Send400(ctx, "")
+		return Send400(ctx, "")
 	}
 
 	var failed []string
@@ -73,7 +73,7 @@ func MultiDelete(ctx *fiber.Ctx) error {
 	}
 	query := `select id, posted from identify WHERE id = ANY($1) AND password = crypt($2, password)`
 	if rows, err = config.DB.Query(query, posts, pwd); err != nil {
-		return route.Send500(ctx, "Failed to delete "+noun, util.MakeError(err, "MultiDelete"))
+		return Send500(ctx, "Failed to delete "+noun, util.MakeError(err, "MultiDelete"))
 	}
 	valid_posts := map[string]time.Time{}
 
@@ -89,7 +89,7 @@ func MultiDelete(ctx *fiber.Ctx) error {
 	}
 
 	if len(valid_posts) == 0 {
-		return route.Send400(ctx, "Incorrect password or not from this instance, no "+noun+" were deleted")
+		return Send400(ctx, "Incorrect password or not from this instance, no "+noun+" were deleted")
 	}
 
 	for id, posted := range valid_posts {
@@ -114,7 +114,6 @@ func MultiDelete(ctx *fiber.Ctx) error {
 				failed = append(failed, fmt.Sprintf("%s was already deleted", id))
 				continue
 			}
-
 
 			local, err = obj.IsLocal()
 			if err != nil || !local {
@@ -147,7 +146,7 @@ func MultiDelete(ctx *fiber.Ctx) error {
 					failed = append(failed, fmt.Sprintf("%s failed due to server error", id))
 					continue
 				}
-				
+
 				if err := obj.TombstonePreview(); err != nil {
 					config.Log.Println(util.MakeError(err, "MultiDelete"))
 					failed = append(failed, fmt.Sprintf("%s failed due to server error", id))
@@ -205,7 +204,7 @@ func MultiDelete(ctx *fiber.Ctx) error {
 				fmt.Fprintf(&msg, "\n%s", success)
 			}
 		}
-		return route.Send403(ctx, util.StripTransferProtocol(msg.String()))
+		return Send403(ctx, util.StripTransferProtocol(msg.String()))
 	}
 	//TODO: Maybe add a banner to page to indicate to user if action was successful
 	return ctx.RedirectBack("/")

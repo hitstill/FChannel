@@ -4,9 +4,8 @@ import (
 	"github.com/anomalous69/fchannel/activitypub"
 	"github.com/anomalous69/fchannel/config"
 	"github.com/anomalous69/fchannel/db"
-	"github.com/anomalous69/fchannel/route"
+
 	"github.com/anomalous69/fchannel/util"
-	"github.com/anomalous69/fchannel/webfinger"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -19,9 +18,9 @@ func BannedGet(ctx *fiber.Ctx) error {
 		return util.MakeError(err, "BannedGet")
 	}
 
-	var data route.PageData
+	var data PageData
 	data.PreferredUsername = actor.PreferredUsername
-	data.Boards = webfinger.Boards
+	data.Boards = activitypub.Boards
 	data.Board.Name = ""
 	data.Key = config.Key
 	data.Board.Domain = config.Domain
@@ -35,7 +34,7 @@ func BannedGet(ctx *fiber.Ctx) error {
 	data.Meta.Title = data.Title
 
 	data.Themes = &config.Themes
-	data.ThemeCookie = route.GetThemeCookie(ctx)
+	data.ThemeCookie = GetThemeCookie(ctx)
 
 	data.ServerVersion = config.Version
 
