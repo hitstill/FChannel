@@ -81,9 +81,11 @@ func (actor Actor) ArchivePosts() error {
 		}
 
 		for _, e := range col.OrderedItems {
-			for _, k := range e.Replies.OrderedItems {
-				if err := k.UpdateType("Archive"); err != nil {
-					return util.MakeError(err, "ArchivePosts")
+			if e.Replies != nil {
+				for _, k := range e.Replies.OrderedItems {
+					if err := k.UpdateType("Archive"); err != nil {
+						return util.MakeError(err, "ArchivePosts")
+					}
 				}
 			}
 

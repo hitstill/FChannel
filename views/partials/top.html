@@ -57,6 +57,8 @@
 					</td>
 					</tr>
           {{ end }}
+          {{if gt (len .Board.Captcha) 0}}
+          <input type="hidden" id="captchaCode" name="captchaCode" value="{{ .Board.CaptchaCode }}">
           <tr>
             <td><label for="captcha">Captcha:</label></td>
             <td>
@@ -66,12 +68,12 @@
               <input type="text" id="captcha" name="captcha" autocomplete="off">
             </td>
           </tr>
+          {{ end }}
       </table>
 
       <input type="hidden" id="inReplyTo" name="inReplyTo" value="{{ .Board.InReplyTo }}">
       <input type="hidden" id="sendTo" name="sendTo" value="{{ .Board.To }}">
       <input type="hidden" id="boardName" name="boardName" value="{{ .Board.Name }}">
-      <input type="hidden" id="captchaCode" name="captchaCode" value="{{ .Board.CaptchaCode }}">
       <input type="hidden" id="returnTo" name="returnTo" value="{{ .ReturnTo }}">
     </form>
   </div>
@@ -134,6 +136,8 @@
 					</td>
 					</tr>
           {{ end }}
+          {{if gt (len .Board.Captcha) 0}}
+          <input type="hidden" id="captchaCode" name="captchaCode" value="{{ .Board.CaptchaCode }}">
           <tr>
             <td><label for="captcha">Captcha:</label></td>
             <td>
@@ -143,12 +147,12 @@
               <input type="text" id="captcha" name="captcha" autocomplete="off">
             </td>
           </tr>
+          {{ end }}
       </table>
 
       <input type="hidden" id="inReplyTo" name="inReplyTo" value="{{ .Board.InReplyTo }}">
       <input type="hidden" id="sendTo" name="sendTo" value="{{ .Board.To }}">
       <input type="hidden" id="boardName" name="boardName" value="{{ .Board.Name }}">
-      <input type="hidden" id="captchaCode" name="captchaCode" value="{{ .Board.CaptchaCode }}">
       <input type="hidden" id="returnTo" name="returnTo" value="{{ .ReturnTo }}">    </form>
   </div>
   {{ else }}

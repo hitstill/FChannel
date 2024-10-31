@@ -1,10 +1,7 @@
 package routes
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
-	"io"
 	"net/http"
 	"regexp"
 	"sort"
@@ -21,66 +18,23 @@ func AdminVerify(ctx *fiber.Ctx) error {
 	identifier := ctx.FormValue("id")
 	code := ctx.FormValue("code")
 
-	var verify util.Verify
-	verify.Identifier = identifier
-	verify.Code = code
-
-	j, _ := json.Marshal(&verify)
-
-	req, err := http.NewRequest("POST", config.Domain+"/"+config.Key+"/auth", bytes.NewBuffer(j))
+	v, err := util.GetVerificationByCode(code)
 
 	if err != nil {
-		return util.MakeError(err, "AdminVerify")
+		return Send403(ctx, "Invalid code or identifier", err)
 	}
 
-	req.Header.Set("Content-Type", config.ActivityStreams)
-
-	resp, err := util.RouteProxy(req)
-
-	if err != nil {
-		return util.MakeError(err, "AdminVerify")
-	}
-
-	defer resp.Body.Close()
-
-	rBody, _ := io.ReadAll(resp.Body)
-
-	body := string(rBody)
-
-	if resp.StatusCode != 200 {
-		return ctx.Redirect("/", http.StatusPermanentRedirect)
+	if v.Identifier != identifier {
+		return Send500(ctx, "Incorrect identifier for code")
 	}
 
 	ctx.Cookie(&fiber.Cookie{
 		Name:    "session_token",
-		Value:   body + "|" + verify.Code,
+		Value:   v.Board + "|" + v.Code,
 		Expires: time.Now().UTC().Add(730 * time.Hour),
 	})
 
 	return ctx.Redirect("/", http.StatusSeeOther)
-}
-
-// TODO remove this route it is mostly unneeded
-func AdminAuth(ctx *fiber.Ctx) error {
-	var verify util.Verify
-
-	err := json.Unmarshal(ctx.Body(), &verify)
-
-	if err != nil {
-		return util.MakeError(err, "AdminAuth")
-	}
-
-	v, _ := util.GetVerificationByCode(verify.Code)
-
-	if v.Identifier == verify.Identifier {
-		_, err := ctx.Write([]byte(v.Board))
-		return util.MakeError(err, "AdminAuth")
-	}
-
-	ctx.Response().Header.SetStatusCode(http.StatusBadRequest)
-	_, err = ctx.Write([]byte(""))
-
-	return util.MakeError(err, "AdminAuth")
 }
 
 func AdminIndex(ctx *fiber.Ctx) error {

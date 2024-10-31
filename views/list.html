@@ -48,6 +48,8 @@
                 <br><input type="checkbox" name="sensitive">Mark sensitive</td>
          </tr>
          {{ end }}
+         {{if gt (len $board.Captcha) 0}}
+         <input type="hidden" id="captchaCode" name="captchaCode" value="{{ $board.CaptchaCode }}">
           <tr>
             <td><label for="captcha">Captcha:</label></td>
             <td>
@@ -57,12 +59,12 @@
               <input type="text" id="captcha" name="captcha" autocomplete="off">
             </td>
           </tr>
+        {{ end }}
       </table>
 
       <input type="hidden" id="inReplyTo" name="inReplyTo" value="{{ $board.InReplyTo }}">
       <input type="hidden" id="sendTo" name="sendTo" value="{{ $board.To }}">
       <input type="hidden" id="boardName" name="boardName" value="{{ $board.Name }}">
-      <input type="hidden" id="captchaCode" name="captchaCode" value="{{ $board.CaptchaCode }}">
       <input type="hidden" id="returnTo" name="returnTo" value="{{ .page.ReturnTo }}">
     </form>
   </div>
