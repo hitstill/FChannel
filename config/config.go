@@ -1,34 +1,31 @@
 package config
 
 import (
-	"database/sql"
 	"strconv"
 
 	"github.com/spf13/viper"
 )
 
-type config struct{}
-
-var Port = ":" + GetConfigValue("instanceport", "3000")
-var TP = GetConfigValue("instancetp", "")
-var Domain = TP + "" + GetConfigValue("instance", "")
-var InstanceName = GetConfigValue("instancename", "")
-var InstanceSummary = GetConfigValue("instancesummary", "")
-var SiteEmail = GetConfigValue("emailaddress", "")
-var SiteEmailUsername = GetConfigValue("emailuser", "")
-var SiteEmailPassword = GetConfigValue("emailpass", "")
-var SiteEmailServer = GetConfigValue("emailserver", "")
-var SiteEmailPort = GetConfigValue("emailport", "")
-var SiteEmailNotifyTo = GetConfigValue("emailnotify", "")
-var NtfyURL = GetConfigValue("ntfyurl", "")
-var NtfyAuth = GetConfigValue("ntfyauth", "")
+var Port = ":" + GetConfigValue("instance.port", "3000")
+var TP = GetConfigValue("instance.tp", "")
+var Domain = TP + "" + GetConfigValue("instance.domain", "")
+var InstanceName = GetConfigValue("instance.name", "")
+var InstanceSummary = GetConfigValue("instance.summary", "")
+var Salt = GetConfigValue("instance.salt", "")
+var SiteEmail = GetConfigValue("email.address", "")
+var SiteEmailUsername = GetConfigValue("email.user", "")
+var SiteEmailPassword = GetConfigValue("email.pass", "")
+var SiteEmailServer = GetConfigValue("email.server", "")
+var SiteEmailPort = GetConfigValue("email.port", "")
+var SiteEmailNotifyTo = GetConfigValue("email.notify", "")
+var NtfyURL = GetConfigValue("ntfy.url", "")
+var NtfyAuth = GetConfigValue("ntfy.auth", "")
 var TorProxy = GetConfigValue("torproxy", "")
-var Salt = GetConfigValue("instancesalt", "")
-var DBHost = GetConfigValue("dbhost", "localhost")
-var DBPort, _ = strconv.Atoi(GetConfigValue("dbport", "5432"))
-var DBUser = GetConfigValue("dbuser", "postgres")
-var DBPassword = GetConfigValue("dbpass", "password")
-var DBName = GetConfigValue("dbname", "server")
+var DBHost = GetConfigValue("db.host", "localhost")
+var DBPort, _ = strconv.Atoi(GetConfigValue("db.port", "5432"))
+var DBUser = GetConfigValue("db.user", "postgres")
+var DBPassword = GetConfigValue("db.pass", "password")
+var DBName = GetConfigValue("db.name", "server")
 var CookieKey = GetConfigValue("cookiekey", "")
 var ActivityStreams = "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\""
 var AuthReq = []string{"captcha", "email", "passphrase"}
@@ -46,13 +43,12 @@ var TorExitList = GetConfigValue("torexitlist", "")
 var ProxyHeader = GetConfigValue("proxyheader", "")
 var CaptchaFont = GetConfigValue("captchafont", "") // TODO: should probably check user not passing anything weird to exec.Command
 var Themes []string
-var DB *sql.DB
-var Version string
-var Debug = true //TODO: read this from config file
 
-// TODO: Change this to some other config format like YAML
-// to save into a struct and only read once
+var Version string
+var Debug = viper.GetBool("debug")
+
 func GetConfigValue(value string, ifnone string) string {
+	viper.SetDefault(value, ifnone)
 	return viper.GetString(value)
 }
 

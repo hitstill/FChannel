@@ -1,5 +1,5 @@
 instance:
-    host: fchan.xyz
+    domain: fchan.xyz
     port: 3000
     name: FChan
     summary: FChan is a federated image board instance.
@@ -59,13 +59,13 @@ torproxy:
 modkey:
 
 # Seconds after posting before a post/file can be deleted
-minpostdelete:60
+minpostdelete: 60
 # Seconds after posting before a post/file can no longer be deleted
-maxpostdelete:1800
+maxpostdelete: 1800
 
 ## Max attachment file size in bytes 
 ## Default is 7MiB (7 * 1024 * 1024)
-maxfilesize:7340032
+maxfilesize: 7340032
 
 ## File path to MaxMind database Country database
 ## See: https://dev.maxmind.com/geoip/updating-databases
@@ -83,3 +83,5 @@ captchafont:
 ## Header sent from an upstream server (e.g. reverse proxy) which has the users actual IP
 ## The example NGINX config uses X-Real-IP
 #proxyheader: X-Real-IP
+
+debug: false
