@@ -75,7 +75,7 @@ func ReadConfig() error {
 
 func setDefaults() {
 	viper.SetDefault("debug", false)
-	viper.SetDefault("maxattachsize", 7340032)
+
 	viper.SetDefault("instance.port", 3000)
 
 	viper.SetDefault("db.port", 5432)
@@ -83,8 +83,10 @@ func setDefaults() {
 	viper.SetDefault("db.password", "postgres")
 	viper.SetDefault("db.host", "localhost")
 	viper.SetDefault("db.name", "fchan")
-	viper.SetDefault("minpostdelete", 60)
-	viper.SetDefault("maxpostdelete", 1800)
+
+	viper.SetDefault("posts.removable_not_before_seconds", 60)
+	viper.SetDefault("posts.removable_not_after_seconds", 1800)
+	viper.SetDefault("posts.max_attach_size", 7340032)
 
 	viper.SetDefault("email.port", 25)
 }
