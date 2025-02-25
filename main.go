@@ -155,6 +155,10 @@ func Init() {
 
 	rand.Seed(time.Now().UnixNano())
 
+	if err = config.ReadConfig(); err != nil {
+		config.Log.Println(err)
+	}
+
 	if err = util.CreatedNeededDirectories(); err != nil {
 		config.Log.Println(err)
 	}

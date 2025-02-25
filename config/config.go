@@ -1,14 +1,13 @@
 package config
 
 import (
-	"bufio"
 	"database/sql"
-	"errors"
-	"log"
-	"os"
 	"strconv"
-	"strings"
+
+	"github.com/spf13/viper"
 )
+
+type config struct{}
 
 var Port = ":" + GetConfigValue("instanceport", "3000")
 var TP = GetConfigValue("instancetp", "")
@@ -35,7 +34,6 @@ var ActivityStreams = "application/ld+json; profile=\"https://www.w3.org/ns/acti
 var AuthReq = []string{"captcha", "email", "passphrase"}
 var PostCountPerPage = 10
 var SupportedFiles = []string{"image/avif", "image/gif", "image/jpeg", "image/jxl", "image/png", "image/webp", "image/apng", "video/mp4", "video/ogg", "video/webm", "audio/mpeg", "audio/ogg", "audio/wav", "audio/wave", "audio/x-wav", "application/x-shockwave-flash"}
-var Log = log.New(os.Stdout, "", log.Ltime)
 var MediaHashs = make(map[string]string)
 var Key = GetConfigValue("modkey", "")
 var MinPostDelete = GetConfigValue("minpostdelete", "60")
@@ -55,37 +53,12 @@ var Debug = true //TODO: read this from config file
 // TODO: Change this to some other config format like YAML
 // to save into a struct and only read once
 func GetConfigValue(value string, ifnone string) string {
-	file, err := os.Open("fchan.cfg")
+	return viper.GetString(value)
+}
 
-	if err != nil {
-		//TODO: Really poor temporary detection
-		//      Remove this sometime in the future
-		//      This could probably be moved automatically
-		if errors.Is(err, os.ErrNotExist) {
-			if _, err := os.Stat("config/config-init"); err == nil {
-				Log.Println("!!!!!!! ATTENTION !!!!!!!")
-				Log.Println("!!!!!!!  ACHTUNG !!!!!!!!")
-				Log.Println("Config file 'fchan.cfg' does not exist!")
-				Log.Println("Detected old config file, please move 'config/config-init' to 'fchan.cfg'")
-				Log.Println("!!!!!!!!!!!!!!!!")
-				Log.Println("!!!!!!!!!!!!!!!!")
-				os.Exit(2)
-			}
-		}
-		Log.Println(err)
-		return ifnone
-	}
-
-	defer file.Close()
-
-	lines := bufio.NewScanner(file)
-
-	for lines.Scan() {
-		line := strings.SplitN(lines.Text(), ":", 2)
-		if line[0] == value {
-			return line[1]
-		}
-	}
-
-	return ifnone
+func ReadConfig() error {
+	viper.SetConfigName("fchan") // name of config file (without extension)
+	viper.SetConfigType("yaml")  // REQUIRED if the config file does not have the extension in the name
+	viper.AddConfigPath(".")     // optionally look for config in the working directory
+	return viper.ReadInConfig()  // Find and read the config file
 }
