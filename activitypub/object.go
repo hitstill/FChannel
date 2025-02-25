@@ -1557,7 +1557,7 @@ func (obj ObjectBase) SendEmailNotify() error {
 		"To: " + to + "\n" +
 		"Subject: IB Post\n" +
 		mime + "\n\n" + body
-	err := smtp.SendMail(fmt.Sprint("%v:%v", config.C.Email.Server, config.C.Email.Port),
+	err := smtp.SendMail(fmt.Sprintf("%s:%d", config.C.Email.Server, config.C.Email.Port),
 		smtp.PlainAuth(from, user, pass, config.C.Email.Server),
 		from, []string{to}, []byte(msg))
 
