@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math/rand"
 	"os/exec"
 	"regexp"
@@ -146,7 +147,7 @@ func main() {
 
 	db.PrintAdminAuth()
 
-	app.Listen(config.Port)
+	app.Listen(fmt.Sprintf(":%v", config.Port))
 }
 
 func Init() {

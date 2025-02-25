@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"net/url"
-	"strconv"
 	"strings"
 	"time"
 
@@ -42,8 +41,8 @@ func MultiDelete(ctx *fiber.Ctx) error {
 		return ctx.Redirect(ctx.BaseURL()+"/banned", 301)
 	}
 
-	minduration, _ := strconv.Atoi(config.MinPostDelete)
-	maxduration, _ := strconv.Atoi(config.MaxPostDelete)
+	minduration := config.MinPostDelete
+	maxduration := config.MaxPostDelete
 
 	pwd := ctx.FormValue("pwd")
 
