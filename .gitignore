@@ -1,8 +1,7 @@
 .*
 !.githooks
 *~
-/config/config-init
-/fchan.cfg
+/fchan.yaml
 /fchan
 /pem/
 /pgdata

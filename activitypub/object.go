@@ -116,7 +116,7 @@ func (obj ObjectBase) CreatePreview() *NestedObjectBase {
 
 	nPreview.Type = "Preview"
 	nPreview.Name = obj.Name
-	nPreview.Href = config.Domain + "" + href
+	nPreview.Href = config.C.Instance.Domain + "" + href
 	nPreview.MediaType = obj.MediaType
 	nPreview.Size = obj.Size
 	nPreview.Published = obj.Published
@@ -201,7 +201,7 @@ func (obj ObjectBase) DeleteAttachmentFromFile() error {
 		return nil
 	}
 
-	href = strings.Replace(href, config.Domain+"/", "", 1)
+	href = strings.Replace(href, config.C.Instance.Domain+"/", "", 1)
 	//TODO: Create a deleted placeholder image
 	if href != "static/deleted.png" {
 		if _, err := os.Stat(href); err != nil {
@@ -235,7 +235,7 @@ func (obj ObjectBase) DeletePreviewFromFile() error {
 		return nil
 	}
 
-	href = strings.Replace(href, config.Domain+"/", "", 1)
+	href = strings.Replace(href, config.C.Instance.Domain+"/", "", 1)
 	if href != "static/deleted.png" {
 		if _, err := os.Stat(href); err != nil {
 			return nil
@@ -971,12 +971,12 @@ func (obj ObjectBase) TombstoneAttachment() error {
 	datetime := time.Now().UTC().Format(time.RFC3339)
 
 	query := `update activitystream set type='Tombstone', mediatype='image/png', href=$1, name='', content='', attributedto='deleted', deleted=$2 where id in (select attachment from activitystream where id=$3)`
-	if _, err := config.DB.Exec(query, config.Domain+"/static/notfound.png", datetime, obj.Id); err != nil {
+	if _, err := config.DB.Exec(query, config.C.Instance.Domain+"/static/notfound.png", datetime, obj.Id); err != nil {
 		return util.MakeError(err, "_SetRepliesType")
 	}
 
 	query = `update cacheactivitystream set type='Tombstone', mediatype='image/png', href=$1, name='', content='', attributedto='deleted', deleted=$2 where id in (select attachment from cacheactivitystream where id=$3)`
-	_, err := config.DB.Exec(query, config.Domain+"/static/notfound.png", datetime, obj.Id)
+	_, err := config.DB.Exec(query, config.C.Instance.Domain+"/static/notfound.png", datetime, obj.Id)
 	return util.MakeError(err, "_SetRepliesType")
 }
 
@@ -1003,12 +1003,12 @@ func (obj ObjectBase) TombstonePreview() error {
 	datetime := time.Now().UTC().Format(time.RFC3339)
 
 	query := `update activitystream set type='Tombstone', mediatype='image/png', href=$1, name='', content='', attributedto='deleted', deleted=$2 where id in (select preview from activitystream where id=$3)`
-	if _, err := config.DB.Exec(query, config.Domain+"/static/notfound.png", datetime, obj.Id); err != nil {
+	if _, err := config.DB.Exec(query, config.C.Instance.Domain+"/static/notfound.png", datetime, obj.Id); err != nil {
 		return util.MakeError(err, "TombstonePreview")
 	}
 
 	query = `update cacheactivitystream set type='Tombstone', mediatype='image/png', href=$1, name='', content='', attributedto='deleted', deleted=$2 where id in (select preview from cacheactivitystream where id=$3)`
-	_, err := config.DB.Exec(query, config.Domain+"/static/notfound.png", datetime, obj.Id)
+	_, err := config.DB.Exec(query, config.C.Instance.Domain+"/static/notfound.png", datetime, obj.Id)
 	return util.MakeError(err, "TombstonePreview")
 }
 
@@ -1143,7 +1143,7 @@ func (obj ObjectBase) Write() (ObjectBase, error) {
 	obj.Id = fmt.Sprintf("%s/%s", obj.Actor, id)
 	// TODO: decide if ID's should be unique per instance
 	// TODO: evaluate collisions
-	if obj.Actor == config.Domain+"/bint" {
+	if obj.Actor == config.C.Instance.Domain+"/bint" {
 		re := regexp.MustCompile(`id:HiddenID`)
 		if !re.MatchString(obj.Alias) {
 			var threadid string
@@ -1526,11 +1526,11 @@ func (obj ObjectBase) SendEmailNotify() error {
 
 	actor, _ := GetActorFromDB(obj.Actor)
 
-	from := config.SiteEmail
-	user := config.SiteEmailUsername
-	pass := config.SiteEmailPassword
-	to := config.SiteEmailNotifyTo
-	posturl := config.Domain + "/" + actor.Name + "/" + util.ShortURL(actor.Outbox, obj.Id)
+	from := config.C.Email.Address
+	user := config.C.Email.User
+	pass := config.C.Email.Password
+	to := config.C.Email.NotifyTo
+	posturl := config.C.Instance.Domain + "/" + actor.Name + "/" + util.ShortURL(actor.Outbox, obj.Id)
 	// If preview exists assume type image and use that
 	// Else if no preview and Object.Attachment exists
 	// check if video/audio to use correct element
@@ -1553,12 +1553,12 @@ func (obj ObjectBase) SendEmailNotify() error {
 	mime := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";"
 	body := fmt.Sprintf("<html><body>New post: <a href='%s'>%s</a><br><br>%s<br><br><b>%s %s</b><br>%s<br><pre>%s</pre></body></html>", posturl, posturl, attachment, obj.AttributedTo, obj.TripCode, obj.Name, obj.Content)
 
-	msg := "From: " + config.InstanceName + " <" + from + ">\n" +
+	msg := "From: " + config.C.Instance.Name + " <" + from + ">\n" +
 		"To: " + to + "\n" +
 		"Subject: IB Post\n" +
 		mime + "\n\n" + body
-	err := smtp.SendMail(config.SiteEmailServer+":"+config.SiteEmailPort,
-		smtp.PlainAuth(from, user, pass, config.SiteEmailServer),
+	err := smtp.SendMail(fmt.Sprint("%v:%v", config.C.Email.Server, config.C.Email.Port),
+		smtp.PlainAuth(from, user, pass, config.C.Email.Server),
 		from, []string{to}, []byte(msg))
 
 	return util.MakeError(err, "SendEmailNotify")

@@ -20,15 +20,15 @@ instance:
 db:
     host: localhost
     port: 5432
-    name: server
+    database: server
     user: postgres
-    pass: password
+    password: password
 
 email:
     server:
     port:
     address:
-    pass:
+    password:
 
     ## comma seperated emails To
     notify:
@@ -41,6 +41,11 @@ ntfy:
     ## If using tokens set to: Bearer tk_restoftokenhere
     ## If using username and password use the output of: echo "Basic $(echo -n 'username_here:password_here' | base64)"
     auth:
+
+posts:
+    ## Max attachment file size in bytes 
+    ## Default is 7MiB (7 * 1024 * 1024)
+    max_attachment_size: 7340032
 
 ## enter proxy ip and port if you want to have tor connections supported
 ## for tor socks5://127.0.0.1:9050
@@ -56,16 +61,13 @@ torproxy:
 
 ## this is the key used to access moderation pages leave empty to randomly generate each restart
 ## share with other admin or jannies if you are having others to moderate
-modkey:
+mod_key:
 
 # Seconds after posting before a post/file can be deleted
 minpostdelete: 60
 # Seconds after posting before a post/file can no longer be deleted
 maxpostdelete: 1800
 
-## Max attachment file size in bytes 
-## Default is 7MiB (7 * 1024 * 1024)
-maxfilesize: 7340032
 
 ## File path to MaxMind database Country database
 ## See: https://dev.maxmind.com/geoip/updating-databases

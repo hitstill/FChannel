@@ -54,7 +54,7 @@ func CreateAttachmentObject(file multipart.File, header *multipart.FileHeader) (
 
 	image.Type = "Attachment"
 	image.Name = filename
-	image.Href = fmt.Sprintf("%s/public/%s%s", config.Domain, name, fileType)
+	image.Href = fmt.Sprintf("%s/public/%s%s", config.C.Instance.Domain, name, fileType)
 	image.MediaType = contentType
 	image.Size = size
 	image.Published = time.Now().UTC()
@@ -69,10 +69,10 @@ func CreateNewActor(board string, prefName string, summary string, authReq []str
 
 	var path string
 	if board == "" {
-		path = config.Domain
+		path = config.C.Instance.Domain
 		actor.Name = "main"
 	} else {
-		path = config.Domain + "/" + board
+		path = config.C.Instance.Domain + "/" + board
 		actor.Name = board
 	}
 

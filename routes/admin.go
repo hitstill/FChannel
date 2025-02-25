@@ -39,17 +39,17 @@ func AdminVerify(ctx *fiber.Ctx) error {
 
 func AdminIndex(ctx *fiber.Ctx) error {
 	id, _ := util.GetPasswordFromSession(ctx)
-	actor, _ := activitypub.GetActorFromPath(ctx.Path(), "/"+config.Key+"/")
+	actor, _ := activitypub.GetActorFromPath(ctx.Path(), "/"+config.C.ModKey+"/")
 
 	if actor.Id == "" {
-		actor, _ = activitypub.GetActorByNameFromDB(config.Domain)
+		actor, _ = activitypub.GetActorByNameFromDB(config.C.Instance.Domain)
 	}
 
-	if id == "" || (id != actor.Id && id != config.Domain) {
-		return ctx.Render("verify", fiber.Map{"key": config.Key})
+	if id == "" || (id != actor.Id && id != config.C.Instance.Domain) {
+		return ctx.Render("verify", fiber.Map{"key": config.C.ModKey})
 	}
 
-	actor, err := activitypub.GetActor(config.Domain)
+	actor, err := activitypub.GetActor(config.C.Instance.Domain)
 
 	if err != nil {
 		return util.MakeError(err, "AdminIndex")
@@ -92,8 +92,8 @@ func AdminIndex(ctx *fiber.Ctx) error {
 	}
 
 	adminData.Actor = actor.Id
-	adminData.Key = config.Key
-	adminData.Domain = config.Domain
+	adminData.Key = config.C.ModKey
+	adminData.Domain = config.C.Instance.Domain
 	adminData.Board.ModCred, _ = util.GetPasswordFromSession(ctx)
 	adminData.Title = actor.Name + " Admin page"
 
@@ -101,7 +101,7 @@ func AdminIndex(ctx *fiber.Ctx) error {
 
 	adminData.Board.Post.Actor = actor.Id
 
-	adminData.Instance, _ = activitypub.GetActorFromDB(config.Domain)
+	adminData.Instance, _ = activitypub.GetActorFromDB(config.C.Instance.Domain)
 
 	adminData.PostBlacklist, _ = util.GetRegexBlacklist()
 
@@ -129,7 +129,7 @@ func AdminFollow(ctx *fiber.Ctx) error {
 
 	objActor := activitypub.Actor{Id: followActivity.Object.Actor}
 
-	if isLocal, _ := objActor.IsLocal(); !isLocal && followActivity.Actor.Id == config.Domain {
+	if isLocal, _ := objActor.IsLocal(); !isLocal && followActivity.Actor.Id == config.C.Instance.Domain {
 		_, err := ctx.Write([]byte("main board can only follow local boards. Create a new board and then follow outside boards from it."))
 		return util.MakeError(err, "AdminIndex")
 	}
@@ -141,7 +141,7 @@ func AdminFollow(ctx *fiber.Ctx) error {
 	}
 
 	var redirect string
-	actor, _ = activitypub.GetActorFromPath(ctx.Path(), "/"+config.Key+"/")
+	actor, _ = activitypub.GetActorFromPath(ctx.Path(), "/"+config.C.ModKey+"/")
 
 	if actor.Name != "main" {
 		redirect = actor.Name
@@ -149,11 +149,11 @@ func AdminFollow(ctx *fiber.Ctx) error {
 
 	time.Sleep(time.Duration(500) * time.Millisecond)
 
-	return ctx.Redirect("/"+config.Key+"/"+redirect, http.StatusSeeOther)
+	return ctx.Redirect("/"+config.C.ModKey+"/"+redirect, http.StatusSeeOther)
 }
 
 func AdminAddBoard(ctx *fiber.Ctx) error {
-	actor, _ := activitypub.GetActorFromDB(config.Domain)
+	actor, _ := activitypub.GetActorFromDB(config.C.Instance.Domain)
 
 	if hasValidation := actor.HasValidation(ctx); !hasValidation {
 		return nil
@@ -195,24 +195,24 @@ func AdminAddBoard(ctx *fiber.Ctx) error {
 
 	time.Sleep(time.Duration(500) * time.Millisecond)
 
-	return ctx.Redirect("/"+config.Key, http.StatusSeeOther)
+	return ctx.Redirect("/"+config.C.ModKey, http.StatusSeeOther)
 }
 
 func AdminActorIndex(ctx *fiber.Ctx) error {
 	var data AdminPage
 
 	id, pass := util.GetPasswordFromSession(ctx)
-	actor, _ := activitypub.GetActorFromPath(ctx.Path(), "/"+config.Key+"/")
+	actor, _ := activitypub.GetActorFromPath(ctx.Path(), "/"+config.C.ModKey+"/")
 
 	if actor.Id == "" {
-		actor, _ = activitypub.GetActorByNameFromDB(config.Domain)
+		actor, _ = activitypub.GetActorByNameFromDB(config.C.Instance.Domain)
 	}
 
 	var hasAuth bool
 	hasAuth, data.Board.ModCred = util.HasAuth(pass, actor.Id)
 
-	if !hasAuth || (id != actor.Id && id != config.Domain) {
-		return ctx.Render("verify", fiber.Map{"key": config.Key})
+	if !hasAuth || (id != actor.Id && id != config.C.Instance.Domain) {
+		return ctx.Render("verify", fiber.Map{"key": config.C.ModKey})
 	}
 
 	reqActivity := activitypub.Activity{Id: actor.Following}
@@ -247,18 +247,18 @@ func AdminActorIndex(ctx *fiber.Ctx) error {
 		reported[k] = e
 	}
 
-	data.Domain = config.Domain
+	data.Domain = config.C.Instance.Domain
 	data.IsLocal, _ = actor.IsLocal()
 	data.Title = "Manage /" + actor.Name + "/"
 	data.Boards = activitypub.Boards
 	data.Board.Name = actor.Name
 	data.Board.Actor = actor
-	data.Key = config.Key
-	data.Board.TP = config.TP
+	data.Key = config.C.ModKey
+	data.Board.TP = config.C.Instance.Tp
 
 	data.Board.Post.Actor = actor.Id
 
-	data.Instance, _ = activitypub.GetActorFromDB(config.Domain)
+	data.Instance, _ = activitypub.GetActorFromDB(config.C.Instance.Domain)
 
 	data.AutoSubscribe, _ = actor.GetAutoSubscribe()
 	data.BoardType = actor.BoardType
@@ -292,15 +292,15 @@ func AdminActorIndex(ctx *fiber.Ctx) error {
 
 func AdminAddJanny(ctx *fiber.Ctx) error {
 	id, pass := util.GetPasswordFromSession(ctx)
-	actor, _ := activitypub.GetActorFromPath(ctx.Path(), "/"+config.Key+"/")
+	actor, _ := activitypub.GetActorFromPath(ctx.Path(), "/"+config.C.ModKey+"/")
 
 	if actor.Id == "" {
-		actor, _ = activitypub.GetActorByNameFromDB(config.Domain)
+		actor, _ = activitypub.GetActorByNameFromDB(config.C.Instance.Domain)
 	}
 
 	hasAuth, _type := util.HasAuth(pass, actor.Id)
 
-	if !hasAuth || _type != "admin" || (id != actor.Id && id != config.Domain) {
+	if !hasAuth || _type != "admin" || (id != actor.Id && id != config.C.Instance.Domain) {
 		return util.MakeError(errors.New("Error"), "AdminJanny")
 	}
 
@@ -314,26 +314,26 @@ func AdminAddJanny(ctx *fiber.Ctx) error {
 	}
 
 	var redirect string
-	actor, _ = activitypub.GetActorFromPath(ctx.Path(), "/"+config.Key+"/")
+	actor, _ = activitypub.GetActorFromPath(ctx.Path(), "/"+config.C.ModKey+"/")
 
 	if actor.Name != "main" {
 		redirect = actor.Name
 	}
 
-	return ctx.Redirect("/"+config.Key+"/"+redirect, http.StatusSeeOther)
+	return ctx.Redirect("/"+config.C.ModKey+"/"+redirect, http.StatusSeeOther)
 }
 
 func AdminEditSummary(ctx *fiber.Ctx) error {
 	id, pass := util.GetPasswordFromSession(ctx)
-	actor, _ := activitypub.GetActorFromPath(ctx.Path(), "/"+config.Key+"/")
+	actor, _ := activitypub.GetActorFromPath(ctx.Path(), "/"+config.C.ModKey+"/")
 
 	if actor.Id == "" {
-		actor, _ = activitypub.GetActorByNameFromDB(config.Domain)
+		actor, _ = activitypub.GetActorByNameFromDB(config.C.Instance.Domain)
 	}
 
 	hasAuth, _type := util.HasAuth(pass, actor.Id)
 
-	if !hasAuth || _type != "admin" || (id != actor.Id && id != config.Domain) {
+	if !hasAuth || _type != "admin" || (id != actor.Id && id != config.C.Instance.Domain) {
 		return util.MakeError(errors.New("Error"), "AdminEditSummary")
 	}
 
@@ -349,21 +349,21 @@ func AdminEditSummary(ctx *fiber.Ctx) error {
 		redirect = actor.Name
 	}
 
-	return ctx.Redirect("/"+config.Key+"/"+redirect, http.StatusSeeOther)
+	return ctx.Redirect("/"+config.C.ModKey+"/"+redirect, http.StatusSeeOther)
 
 }
 
 func AdminSetBoardType(ctx *fiber.Ctx) error {
 	id, pass := util.GetPasswordFromSession(ctx)
-	actor, _ := activitypub.GetActorFromPath(ctx.Path(), "/"+config.Key+"/")
+	actor, _ := activitypub.GetActorFromPath(ctx.Path(), "/"+config.C.ModKey+"/")
 
 	if actor.Id == "" {
-		actor, _ = activitypub.GetActorByNameFromDB(config.Domain)
+		actor, _ = activitypub.GetActorByNameFromDB(config.C.Instance.Domain)
 	}
 
 	hasAuth, _type := util.HasAuth(pass, actor.Id)
 
-	if !hasAuth || _type != "admin" || (id != actor.Id && id != config.Domain) {
+	if !hasAuth || _type != "admin" || (id != actor.Id && id != config.C.Instance.Domain) {
 		return util.MakeError(errors.New("Error"), "AdminEditSummary")
 	}
 
@@ -381,22 +381,22 @@ func AdminSetBoardType(ctx *fiber.Ctx) error {
 			redirect = actor.Name
 		}
 
-		return ctx.Redirect("/"+config.Key+"/"+redirect, http.StatusSeeOther)
+		return ctx.Redirect("/"+config.C.ModKey+"/"+redirect, http.StatusSeeOther)
 	}
 	return Send400(ctx, "Board type \""+boardtype+"\" is invalid")
 }
 
 func AdminDeleteJanny(ctx *fiber.Ctx) error {
 	id, pass := util.GetPasswordFromSession(ctx)
-	actor, _ := activitypub.GetActorFromPath(ctx.Path(), "/"+config.Key+"/")
+	actor, _ := activitypub.GetActorFromPath(ctx.Path(), "/"+config.C.ModKey+"/")
 
 	if actor.Id == "" {
-		actor, _ = activitypub.GetActorByNameFromDB(config.Domain)
+		actor, _ = activitypub.GetActorByNameFromDB(config.C.Instance.Domain)
 	}
 
 	hasAuth, _type := util.HasAuth(pass, actor.Id)
 
-	if !hasAuth || _type != "admin" || (id != actor.Id && id != config.Domain) {
+	if !hasAuth || _type != "admin" || (id != actor.Id && id != config.C.Instance.Domain) {
 		return util.MakeError(errors.New("Error"), "AdminJanny")
 	}
 
@@ -413,5 +413,5 @@ func AdminDeleteJanny(ctx *fiber.Ctx) error {
 		redirect = actor.Name
 	}
 
-	return ctx.Redirect("/"+config.Key+"/"+redirect, http.StatusSeeOther)
+	return ctx.Redirect("/"+config.C.ModKey+"/"+redirect, http.StatusSeeOther)
 }

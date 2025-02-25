@@ -19,7 +19,7 @@ import (
 )
 
 func ActorInbox(ctx *fiber.Ctx) error {
-	actor, _ := activitypub.GetActorFromDB(config.Domain + "/" + ctx.Params("actor"))
+	actor, _ := activitypub.GetActorFromDB(config.C.Instance.Domain + "/" + ctx.Params("actor"))
 	if actor.Name == "overboard" {
 		return ctx.SendStatus(404)
 	}
@@ -72,7 +72,7 @@ func ActorInbox(ctx *fiber.Ctx) error {
 				// return util.MakeError(err, "ActorInbox")
 			}
 
-			if actor.Id != "" && actor.Id != config.Domain {
+			if actor.Id != "" && actor.Id != config.C.Instance.Domain {
 				if activity.Object.Replies != nil {
 					for _, k := range activity.Object.Replies.OrderedItems {
 						if err := k.Tombstone(); err != nil {
@@ -186,12 +186,12 @@ func PostActorOutbox(ctx *fiber.Ctx) error {
 }
 
 func ActorFollowing(ctx *fiber.Ctx) error {
-	actor, _ := activitypub.GetActorFromDB(config.Domain + "/" + ctx.Params("actor"))
+	actor, _ := activitypub.GetActorFromDB(config.C.Instance.Domain + "/" + ctx.Params("actor"))
 	return actor.GetFollowingResp(ctx)
 }
 
 func ActorFollowers(ctx *fiber.Ctx) error {
-	actor, _ := activitypub.GetActorFromDB(config.Domain + "/" + ctx.Params("actor"))
+	actor, _ := activitypub.GetActorFromDB(config.C.Instance.Domain + "/" + ctx.Params("actor"))
 	return actor.GetFollowersResp(ctx)
 }
 
@@ -261,8 +261,8 @@ func MakeActorPost(ctx *fiber.Ctx) error {
 	}
 
 	// Attachment filesize larger than config max size
-	if file != nil && header.Size > (int64(config.MaxAttachmentSize)<<20) {
-		return Send400(ctx, "File too large, maximum file size is "+util.ConvertSize(int64(config.MaxAttachmentSize)))
+	if file != nil && header.Size > (int64(config.C.Posts.MaxAttachmentSize)<<20) {
+		return Send400(ctx, "File too large, maximum file size is "+util.ConvertSize(int64(config.C.Posts.MaxAttachmentSize)))
 	}
 
 	// Redirect to instance index when post matches blacklist regex
@@ -369,7 +369,7 @@ func MakeActorPost(ctx *fiber.Ctx) error {
 			}
 		} else {
 			query := `select id from following where following = $1 AND following != $2 LIMIT 1;`
-			if err := config.DB.QueryRow(query, actorid, config.Domain+"/overboard").Scan(&actorid); err == nil {
+			if err := config.DB.QueryRow(query, actorid, config.C.Instance.Domain+"/overboard").Scan(&actorid); err == nil {
 				if actor, err := activitypub.GetActor(actorid); err == nil {
 					sendTo = actor.Outbox
 				}
@@ -487,7 +487,7 @@ func ActorPost(ctx *fiber.Ctx) error {
 	data.Board.Actor = actor
 	data.Board.Summary = actor.Summary
 	data.Board.ModCred, _ = util.GetPasswordFromSession(ctx)
-	data.Board.Domain = config.Domain
+	data.Board.Domain = config.C.Instance.Domain
 	data.Board.Restricted = actor.Restricted
 	data.Board.BoardType = actor.BoardType
 	data.ReturnTo = "feed"
@@ -503,16 +503,16 @@ func ActorPost(ctx *fiber.Ctx) error {
 		if err != nil {
 			return Send500(ctx, "Failed to get random captcha", util.MakeError(err, "ActorPost"))
 		}
-		data.Board.Captcha = config.Domain + "/" + capt
+		data.Board.Captcha = config.C.Instance.Domain + "/" + capt
 		data.Board.CaptchaCode = db.GetCaptchaCode(data.Board.Captcha)
 	}
 
-	data.Instance, err = activitypub.GetActorFromDB(config.Domain)
+	data.Instance, err = activitypub.GetActorFromDB(config.C.Instance.Domain)
 	if err != nil {
 		return util.MakeError(err, "PostGet")
 	}
 
-	data.Key = config.Key
+	data.Key = config.C.ModKey
 	data.Boards = activitypub.Boards
 
 	data.Title = "/" + data.Board.Name + "/ - " + data.PostId
@@ -558,16 +558,16 @@ func ActorCatalog(ctx *fiber.Ctx) error {
 	data.Board.Actor = actor
 	data.Board.Summary = actor.Summary
 	data.Board.ModCred, _ = util.GetPasswordFromSession(ctx)
-	data.Board.Domain = config.Domain
+	data.Board.Domain = config.C.Instance.Domain
 	data.Board.Restricted = actor.Restricted
 	data.Board.BoardType = actor.BoardType
-	data.Key = config.Key
+	data.Key = config.C.ModKey
 	data.ReturnTo = "catalog"
 	data.PostType = "new"
 
 	data.Board.Post.Actor = actor.Id
 
-	data.Instance, err = activitypub.GetActorFromDB(config.Domain)
+	data.Instance, err = activitypub.GetActorFromDB(config.C.Instance.Domain)
 	if err != nil {
 		return util.MakeError(err, "CatalogGet")
 	}
@@ -578,7 +578,7 @@ func ActorCatalog(ctx *fiber.Ctx) error {
 		if err != nil {
 			return Send500(ctx, "Failed to get random captcha", util.MakeError(err, "ActorCatalog"))
 		}
-		data.Board.Captcha = config.Domain + "/" + capt
+		data.Board.Captcha = config.C.Instance.Domain + "/" + capt
 		data.Board.CaptchaCode = db.GetCaptchaCode(data.Board.Captcha)
 	}
 
@@ -645,7 +645,7 @@ func ActorPosts(ctx *fiber.Ctx) error {
 	data.Board.To = actor.Outbox
 	data.Board.Actor = actor
 	data.Board.ModCred, _ = util.GetPasswordFromSession(ctx)
-	data.Board.Domain = config.Domain
+	data.Board.Domain = config.C.Instance.Domain
 	data.Board.Restricted = actor.Restricted
 	data.Board.BoardType = actor.BoardType
 	data.CurrentPage = page
@@ -660,13 +660,13 @@ func ActorPosts(ctx *fiber.Ctx) error {
 		if err != nil {
 			return Send500(ctx, "Failed to get random captcha", util.MakeError(err, "ActorPosts"))
 		}
-		data.Board.Captcha = config.Domain + "/" + capt
+		data.Board.Captcha = config.C.Instance.Domain + "/" + capt
 		data.Board.CaptchaCode = db.GetCaptchaCode(data.Board.Captcha)
 	}
 
 	data.Title = "/" + actor.Name + "/ - " + actor.PreferredUsername
 
-	data.Key = config.Key
+	data.Key = config.C.ModKey
 
 	data.Boards = activitypub.Boards
 	data.Posts = collection.OrderedItems
@@ -711,15 +711,15 @@ func ActorArchive(ctx *fiber.Ctx) error {
 	returnData.Board.Actor = actor
 	returnData.Board.Summary = actor.Summary
 	returnData.Board.ModCred, _ = util.GetPasswordFromSession(ctx)
-	returnData.Board.Domain = config.Domain
+	returnData.Board.Domain = config.C.Instance.Domain
 	returnData.Board.Restricted = actor.Restricted
 	returnData.Board.BoardType = actor.BoardType
-	returnData.Key = config.Key
+	returnData.Key = config.C.ModKey
 	returnData.ReturnTo = "archive"
 
 	returnData.Board.Post.Actor = actor.Id
 
-	returnData.Instance, err = activitypub.GetActorFromDB(config.Domain)
+	returnData.Instance, err = activitypub.GetActorFromDB(config.C.Instance.Domain)
 	if err != nil {
 		Send500(ctx, "Failed to get archive", err)
 	}
@@ -729,7 +729,7 @@ func ActorArchive(ctx *fiber.Ctx) error {
 	if err != nil {
 		return util.MakeError(err, "ActorArchive")
 	}
-	returnData.Board.Captcha = config.Domain + "/" + capt
+	returnData.Board.Captcha = config.C.Instance.Domain + "/" + capt
 	returnData.Board.CaptchaCode = db.GetCaptchaCode(returnData.Board.Captcha)
 
 	returnData.Title = "/" + actor.Name + "/ - Archive"
@@ -771,7 +771,7 @@ func ActorList(ctx *fiber.Ctx) error {
 	data.Board.To = actor.Outbox
 	data.Board.Actor = actor
 	data.Board.ModCred, _ = util.GetPasswordFromSession(ctx)
-	data.Board.Domain = config.Domain
+	data.Board.Domain = config.C.Instance.Domain
 	data.Board.Restricted = actor.Restricted
 	data.Board.BoardType = actor.BoardType
 	data.ReturnTo = "list"
@@ -785,12 +785,12 @@ func ActorList(ctx *fiber.Ctx) error {
 		if err != nil {
 			return Send500(ctx, "Failed to get random captcha", util.MakeError(err, "ActorList"))
 		}
-		data.Board.Captcha = config.Domain + "/" + capt
+		data.Board.Captcha = config.C.Instance.Domain + "/" + capt
 		data.Board.CaptchaCode = db.GetCaptchaCode(data.Board.Captcha)
 	}
 
 	data.Title = "/" + actor.Name + "/ - Thread list"
-	data.Key = config.Key
+	data.Key = config.C.ModKey
 
 	data.Boards = activitypub.Boards
 	data.Posts = collection.OrderedItems

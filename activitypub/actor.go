@@ -73,7 +73,7 @@ accepting your posts from your board from this site. Good luck ;)`)
 }
 
 func (actor Actor) ArchivePosts() error {
-	if actor.Id != "" && actor.Id != config.Domain {
+	if actor.Id != "" && actor.Id != config.C.Instance.Domain {
 		col, err := actor.GetAllArchive(165)
 
 		if err != nil {
@@ -121,7 +121,7 @@ func (actor Actor) AutoFollow() error {
 			}
 		}
 
-		if !isFollowing && e.Id != config.Domain && e.Id != nActor.Id {
+		if !isFollowing && e.Id != config.C.Instance.Domain && e.Id != nActor.Id {
 			followActivity, err := nActor.MakeFollowActivity(e.Id)
 
 			if err != nil {
@@ -810,7 +810,7 @@ func (actor Actor) GetReportedTotal() (int, error) {
 func (actor Actor) HasValidation(ctx *fiber.Ctx) bool {
 	id, _ := util.GetPasswordFromSession(ctx)
 
-	if id == "" || (id != actor.Id && id != config.Domain) {
+	if id == "" || (id != actor.Id && id != config.C.Instance.Domain) {
 		return false
 	}
 
@@ -1091,7 +1091,7 @@ func (actor Actor) MakeFollowActivity(follow string) (Activity, error) {
 	var obj ObjectBase
 	var nactor Actor
 
-	if actor.Id == config.Domain {
+	if actor.Id == config.C.Instance.Domain {
 		nactor, err = GetActorFromDB(actor.Id)
 	} else {
 		nactor, err = FingerActor(actor.Id)

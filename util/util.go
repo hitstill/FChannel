@@ -23,9 +23,9 @@ func IsOnion(url string) bool {
 }
 
 func IsTorExit(ip string) bool {
-	exits, err := os.ReadFile(config.TorExitList)
+	exits, err := os.ReadFile(config.C.TorExitList)
 	if err != nil {
-		config.Log.Println("IsTorExit: Failed to read file \"" + config.TorExitList + ".")
+		config.Log.Println("IsTorExit: Failed to read file \"" + config.C.TorExitList + ".")
 		return false
 	}
 
@@ -196,7 +196,7 @@ func CreateUniqueID(actor string) (string, error) {
 	for {
 		newID = RandomID(8)
 		query := "select id from activitystream where id=$1"
-		args := fmt.Sprintf("%s/%s/%s", config.Domain, actor, newID)
+		args := fmt.Sprintf("%s/%s/%s", config.C.Instance.Domain, actor, newID)
 
 		if err := config.DB.QueryRow(query, args); err != nil {
 			break
@@ -289,7 +289,7 @@ func MakeError(err error, msg string) error {
 	if err != nil {
 		_, _, line, _ := runtime.Caller(1)
 		s := fmt.Sprintf("%s:%d : %s", msg, line, err.Error())
-		if config.Debug { // Catch and print pretty much all errors to log
+		if config.C.Debug { // Catch and print pretty much all errors to log
 			config.Log.Println(s)
 		}
 		return errors.New(s)

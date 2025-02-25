@@ -140,7 +140,7 @@ func TripCodeConvert(str string) string {
 
 func TripCodeSecure(pass string) (string, error) {
 	pass = TripCodeConvert(pass)
-	enc, err := crypt.Crypt(pass, "$1$"+config.Salt)
+	enc, err := crypt.Crypt(pass, "$1$"+config.C.Instance.Salt)
 
 	if err != nil {
 		return "", MakeError(err, "TripCodeSecure")
@@ -152,7 +152,7 @@ func TripCodeSecure(pass string) (string, error) {
 func TripPhrase(pass string) (string, error) {
 	pass = TripCodeConvert(pass)
 	//User input in os.exec :(
-	phrase, err := exec.Command("perl", "util/tripphrase/tripphrase.pl", config.Salt+pass).Output()
+	phrase, err := exec.Command("perl", "util/tripphrase/tripphrase.pl", config.C.Instance.Salt+pass).Output()
 	if err != nil {
 		return "", MakeError(err, "TripPhrase")
 	}

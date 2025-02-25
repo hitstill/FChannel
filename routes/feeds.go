@@ -14,7 +14,7 @@ import (
 )
 
 func GetThreadFeed(ctx *fiber.Ctx) error {
-	actor, err := activitypub.GetActorFromDB(config.Domain + "/" + ctx.Params("actor"))
+	actor, err := activitypub.GetActorFromDB(config.C.Instance.Domain + "/" + ctx.Params("actor"))
 	if err != nil {
 		return Send404(ctx, "Board /"+ctx.Params("actor")+"/ does not exist")
 	}
@@ -136,7 +136,7 @@ func GetThreadFeed(ctx *fiber.Ctx) error {
 }
 
 func GetBoardFeed(ctx *fiber.Ctx) error {
-	actor, err := activitypub.GetActorFromDB(config.Domain + "/" + ctx.Params("actor"))
+	actor, err := activitypub.GetActorFromDB(config.C.Instance.Domain + "/" + ctx.Params("actor"))
 	if err != nil {
 		return Send404(ctx, "Board /"+ctx.Params("actor")+"/ does not exist")
 	}

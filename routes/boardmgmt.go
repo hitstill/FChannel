@@ -59,7 +59,7 @@ func BoardBanMedia(ctx *fiber.Ctx) error {
 		return Send403(ctx, "You are not authorized to ban media on board /"+ctx.Query("board")+"/")
 	}
 
-	re := regexp.MustCompile(config.Domain)
+	re := regexp.MustCompile(config.C.Instance.Domain)
 	file := re.ReplaceAllString(col.OrderedItems[0].Attachment[0].Href, "")
 
 	f, err := os.Open("." + file)
@@ -215,7 +215,7 @@ func BoardDelete(ctx *fiber.Ctx) error {
 	}
 
 	if ctx.Query("manage") == "t" {
-		return ctx.Redirect("/"+config.Key+"/"+board, http.StatusSeeOther)
+		return ctx.Redirect("/"+config.C.ModKey+"/"+board, http.StatusSeeOther)
 	}
 
 	if !isOP {
@@ -290,7 +290,7 @@ func BoardDeleteAttach(ctx *fiber.Ctx) error {
 	}
 
 	if ctx.Query("manage") == "t" {
-		return ctx.Redirect("/"+config.Key+"/"+board, http.StatusSeeOther)
+		return ctx.Redirect("/"+config.C.ModKey+"/"+board, http.StatusSeeOther)
 	} else if local, _ := obj.IsLocal(); !local && OP != "" {
 		return ctx.Redirect("/"+board+"/"+util.RemoteShort(OP), http.StatusSeeOther)
 	} else if OP != "" {
@@ -370,7 +370,7 @@ func BoardAddToIndex(ctx *fiber.Ctx) error {
 }
 
 func BoardPopArchive(ctx *fiber.Ctx) error {
-	actor, err := activitypub.GetActorFromDB(config.Domain)
+	actor, err := activitypub.GetActorFromDB(config.C.Instance.Domain)
 
 	if err != nil {
 		return util.MakeError(err, "BoardPopArchive")
@@ -393,7 +393,7 @@ func BoardPopArchive(ctx *fiber.Ctx) error {
 }
 
 func BoardAutoSubscribe(ctx *fiber.Ctx) error {
-	actor, err := activitypub.GetActorFromDB(config.Domain)
+	actor, err := activitypub.GetActorFromDB(config.C.Instance.Domain)
 
 	if err != nil {
 		return util.MakeError(err, "BoardAutoSubscribe")
@@ -419,11 +419,11 @@ func BoardAutoSubscribe(ctx *fiber.Ctx) error {
 		}
 	}
 
-	return ctx.Redirect("/"+config.Key+"/"+board, http.StatusSeeOther)
+	return ctx.Redirect("/"+config.C.ModKey+"/"+board, http.StatusSeeOther)
 }
 
 func BoardBlacklist(ctx *fiber.Ctx) error {
-	actor, err := activitypub.GetActorFromDB(config.Domain)
+	actor, err := activitypub.GetActorFromDB(config.C.Instance.Domain)
 
 	if err != nil {
 		return Send400(ctx, "Board does not exist or server encountered issue with database", util.MakeError(err, "BoardBlacklist"))
@@ -461,7 +461,7 @@ func BoardBlacklist(ctx *fiber.Ctx) error {
 		}
 	}
 
-	return ctx.Redirect("/"+config.Key+"#regex", http.StatusSeeOther)
+	return ctx.Redirect("/"+config.C.ModKey+"#regex", http.StatusSeeOther)
 }
 
 func ReportPost(ctx *fiber.Ctx) error {
@@ -503,7 +503,7 @@ func ReportPost(ctx *fiber.Ctx) error {
 				return Send404(ctx, "", err) //TODO: FILL IN
 			}
 
-			return ctx.Redirect("/"+config.Key+"/"+board, http.StatusSeeOther)
+			return ctx.Redirect("/"+config.C.ModKey+"/"+board, http.StatusSeeOther)
 		}
 
 		if err := obj.DeleteReported(); err != nil {
@@ -511,7 +511,7 @@ func ReportPost(ctx *fiber.Ctx) error {
 			return Send404(ctx, "", err) //TODO: FILL IN
 		}
 
-		return ctx.Redirect("/"+config.Key+"/"+board, http.StatusSeeOther)
+		return ctx.Redirect("/"+config.C.ModKey+"/"+board, http.StatusSeeOther)
 	}
 
 	if local, _ := obj.IsLocal(); !local {
@@ -542,13 +542,13 @@ func ReportPost(ctx *fiber.Ctx) error {
 		return Send404(ctx, "") //TODO: FILL IN
 	}
 
-	if len(config.NtfyURL) > 0 {
-		req, _ := http.NewRequest("POST", config.NtfyURL,
+	if config.C.Ntfy.Url != "" {
+		req, _ := http.NewRequest("POST", config.C.Ntfy.Url,
 			strings.NewReader(id+"\nReason: "+reason))
-		req.Header.Set("Click", "ntfy://"+config.NtfyURL) // Opens ntfy app, also prevents message copy to clipboard on tap.
+		req.Header.Set("Click", "ntfy://"+config.C.Ntfy.Url) // Opens ntfy app, also prevents message copy to clipboard on tap.
 		req.Header.Set("Actions", "view, View post, "+id+", clear=true")
-		if len(config.NtfyAuth) > 0 {
-			req.Header.Set("Authorization", config.NtfyAuth)
+		if config.C.Ntfy.Auth != "" {
+			req.Header.Set("Authorization", config.C.Ntfy.Auth)
 		}
 		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
@@ -558,10 +558,10 @@ func ReportPost(ctx *fiber.Ctx) error {
 	}
 
 	if setup := util.IsEmailSetup(); setup {
-		from := config.SiteEmail
-		user := config.SiteEmailUsername
-		pass := config.SiteEmailPassword
-		to := config.SiteEmailNotifyTo
+		from := config.C.Email.Address
+		user := config.C.Email.User
+		pass := config.C.Email.Password
+		to := config.C.Email.NotifyTo
 		body := fmt.Sprintf("New report: %s\nReason: %s", id, reason)
 
 		msg := "From: Fchan <" + from + ">\n" +
@@ -569,8 +569,8 @@ func ReportPost(ctx *fiber.Ctx) error {
 			"Subject: IB Report\n\n" +
 			body
 
-		err := smtp.SendMail(config.SiteEmailServer+":"+config.SiteEmailPort,
-			smtp.PlainAuth(from, user, pass, config.SiteEmailServer),
+		err := smtp.SendMail(fmt.Sprintf("%v:%v", config.C.Email.Server, config.C.Email.Port),
+			smtp.PlainAuth(from, user, pass, config.C.Email.Server),
 			from, []string{to}, []byte(msg))
 
 		if err != nil {
@@ -608,27 +608,27 @@ func ReportGet(ctx *fiber.Ctx) error {
 		return util.MakeError(err, "OutboxGet")
 	}
 
-	data.Board.Captcha = config.Domain + "/" + capt
+	data.Board.Captcha = config.C.Instance.Domain + "/" + capt
 	data.Board.CaptchaCode = db.GetCaptchaCode(data.Board.Captcha)
 
 	data.Meta.Description = data.Board.Summary
 	data.Meta.Url = data.Board.Actor.Id
 	data.Meta.Title = data.Title
 
-	data.Instance, err = activitypub.GetActorFromDB(config.Domain)
+	data.Instance, err = activitypub.GetActorFromDB(config.C.Instance.Domain)
 
 	data.Themes = &config.Themes
 	data.ThemeCookie = GetThemeCookie(ctx)
 
 	data.ServerVersion = config.Version
 
-	data.Key = config.Key
+	data.Key = config.C.ModKey
 	data.Board.ModCred, _ = util.GetPasswordFromSession(ctx)
-	data.Board.Domain = config.Domain
+	data.Board.Domain = config.C.Instance.Domain
 	data.Boards = activitypub.Boards
 
-	data.Referer = config.Domain + "/" + actor.Name
-	if strings.Contains(ctx.Get("referer"), config.Domain+"/"+actor.Name) && !strings.Contains(ctx.Get("referer"), "make-report") {
+	data.Referer = config.C.Instance.Domain + "/" + actor.Name
+	if strings.Contains(ctx.Get("referer"), config.C.Instance.Domain+"/"+actor.Name) && !strings.Contains(ctx.Get("referer"), "make-report") {
 		data.Referer = ctx.Get("referer")
 	}
 
@@ -770,23 +770,23 @@ func BanGet(ctx *fiber.Ctx) error {
 	data.Meta.Url = data.Board.Actor.Id
 	data.Meta.Title = data.Title
 
-	data.Instance, _ = activitypub.GetActorFromDB(config.Domain)
+	data.Instance, _ = activitypub.GetActorFromDB(config.C.Instance.Domain)
 
 	data.Themes = &config.Themes
 	data.ThemeCookie = GetThemeCookie(ctx)
 
 	data.ServerVersion = config.Version
 
-	data.Key = config.Key
+	data.Key = config.C.ModKey
 	data.Board.ModCred, _ = util.GetPasswordFromSession(ctx)
-	data.Board.Domain = config.Domain
+	data.Board.Domain = config.C.Instance.Domain
 	data.Boards = activitypub.Boards
 
 	var baninfo BanInfo
 	baninfo.Bans, _ = db.GetAllBansForIP(ip)
 
-	data.Referer = config.Domain + "/" + actor.Name
-	if strings.Contains(ctx.Get("referer"), config.Domain+"/"+actor.Name) && !strings.Contains(ctx.Get("referer"), "ban") {
+	data.Referer = config.C.Instance.Domain + "/" + actor.Name
+	if strings.Contains(ctx.Get("referer"), config.C.Instance.Domain+"/"+actor.Name) && !strings.Contains(ctx.Get("referer"), "ban") {
 		data.Referer = ctx.Get("referer")
 	}
 

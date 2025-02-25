@@ -12,7 +12,7 @@ import (
 
 func BannedGet(ctx *fiber.Ctx) error {
 
-	actor, err := activitypub.GetActorFromDB(config.Domain)
+	actor, err := activitypub.GetActorFromDB(config.C.Instance.Domain)
 
 	if err != nil {
 		return util.MakeError(err, "BannedGet")
@@ -22,8 +22,8 @@ func BannedGet(ctx *fiber.Ctx) error {
 	data.PreferredUsername = actor.PreferredUsername
 	data.Boards = activitypub.Boards
 	data.Board.Name = ""
-	data.Key = config.Key
-	data.Board.Domain = config.Domain
+	data.Key = config.C.ModKey
+	data.Board.Domain = config.C.Instance.Domain
 	data.Board.ModCred, _ = util.GetPasswordFromSession(ctx)
 	data.Board.Actor = actor
 	data.Board.Post.Actor = actor.Id

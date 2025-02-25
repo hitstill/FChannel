@@ -29,14 +29,14 @@ type Ban struct {
 }
 
 func Connect() error {
-	host := config.DBHost
-	port := config.DBPort
-	user := config.DBUser
-	password := config.DBPassword
-	dbname := config.DBName
+	host := config.C.Db.Host
+	port := config.C.Db.Port
+	user := config.C.Db.User
+	password := config.C.Db.Password
+	dbname := config.C.Db.Database
 
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s "+
-		"dbname=%s sslmode=disable", host, port, user, password, dbname)
+	psqlInfo := fmt.Sprintf("host=%v port=%v user=%v password=%v "+
+		"dbname=%v sslmode=disable", host, port, user, password, dbname)
 
 	_db, err := sql.Open("pgx", psqlInfo)
 
@@ -94,7 +94,7 @@ func CreateNewBoard(actor activitypub.Actor) (activitypub.Actor, error) {
 			}
 		}
 
-		if actor.Id == config.Domain {
+		if actor.Id == config.C.Instance.Domain {
 			var verify util.Verify
 			verify.Type = "admin"
 			verify.Identifier = actor.Id
@@ -110,7 +110,7 @@ func CreateNewBoard(actor activitypub.Actor) (activitypub.Actor, error) {
 			var nObject activitypub.ObjectBase
 			var nActivity activitypub.Activity
 
-			nActor, err := activitypub.GetActorFromDB(config.Domain)
+			nActor, err := activitypub.GetActorFromDB(config.C.Instance.Domain)
 
 			if err != nil {
 				return actor, util.MakeError(err, "CreateNewBoardDB")
@@ -152,7 +152,7 @@ func RemovePreviewFromFile(id string) error {
 		return nil
 	}
 
-	href = strings.Replace(href, config.Domain+"/", "", 1)
+	href = strings.Replace(href, config.C.Instance.Domain+"/", "", 1)
 
 	if href != "static/notfound.png" {
 		if _, err := os.Stat(href); err != nil {
@@ -351,7 +351,7 @@ func CheckInactiveInstances() (map[string]string, error) {
 		instances[instance] = instance
 	}
 
-	re := regexp.MustCompile(config.Domain + `(.+)?`)
+	re := regexp.MustCompile(config.C.Instance.Domain + `(.+)?`)
 
 	for _, e := range instances {
 		actor, err := activitypub.GetActor(e)
@@ -379,7 +379,7 @@ func GetAdminAuth() (string, string, error) {
 	var identifier string
 
 	query := `select identifier, code from boardaccess where board=$1 and type='admin'`
-	if err := config.DB.QueryRow(query, config.Domain).Scan(&identifier, &code); err != nil {
+	if err := config.DB.QueryRow(query, config.C.Instance.Domain).Scan(&identifier, &code); err != nil {
 		return "", "", nil
 	}
 
@@ -443,14 +443,14 @@ func PrintAdminAuth() error {
 		return util.MakeError(err, "PrintAdminAuth")
 	}
 
-	config.Log.Println("Mod key: " + config.Key)
+	config.Log.Println("Mod key: " + config.C.ModKey)
 	config.Log.Println("Admin Login: " + identifier + ", Code: " + code)
 	return nil
 }
 
 func InitInstance() error {
-	if config.InstanceName != "" {
-		if _, err := CreateNewBoard(*activitypub.CreateNewActor("", config.InstanceName, config.InstanceSummary, config.AuthReq, false, "")); err != nil {
+	if config.C.Instance.Name != "" {
+		if _, err := CreateNewBoard(*activitypub.CreateNewActor("", config.C.Instance.Name, config.C.Instance.Summary, config.AuthReq, false, "")); err != nil {
 			return util.MakeError(err, "InitInstance")
 		}
 	}

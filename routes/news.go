@@ -23,7 +23,7 @@ func NewsGet(ctx *fiber.Ctx) error {
 		return Send400(ctx, ctx.Path()[6:]+" is not a valid timestamp")
 	}
 
-	actor, err := activitypub.GetActorFromDB(config.Domain)
+	actor, err := activitypub.GetActorFromDB(config.C.Instance.Domain)
 
 	if err != nil {
 		return util.MakeError(err, "NewsGet")
@@ -33,8 +33,8 @@ func NewsGet(ctx *fiber.Ctx) error {
 	data.PreferredUsername = actor.PreferredUsername
 	data.Boards = activitypub.Boards
 	data.Board.Name = ""
-	data.Key = config.Key
-	data.Board.Domain = config.Domain
+	data.Key = config.C.ModKey
+	data.Board.Domain = config.C.Instance.Domain
 	data.Board.ModCred, _ = util.GetPasswordFromSession(ctx)
 	data.Board.Actor = actor
 	data.Board.Post.Actor = actor.Id
@@ -61,7 +61,7 @@ func NewsGet(ctx *fiber.Ctx) error {
 }
 
 func NewsGetAll(ctx *fiber.Ctx) error {
-	actor, err := activitypub.GetActorFromDB(config.Domain)
+	actor, err := activitypub.GetActorFromDB(config.C.Instance.Domain)
 	if err != nil {
 		return util.MakeError(err, "NewsGetAll")
 	}
@@ -71,8 +71,8 @@ func NewsGetAll(ctx *fiber.Ctx) error {
 	data.Title = actor.PreferredUsername + " News"
 	data.Boards = activitypub.Boards
 	data.Board.Name = ""
-	data.Key = config.Key
-	data.Board.Domain = config.Domain
+	data.Key = config.C.ModKey
+	data.Board.Domain = config.C.Instance.Domain
 	data.Board.ModCred, _ = util.GetPasswordFromSession(ctx)
 	data.Board.Actor = actor
 	data.Board.Post.Actor = actor.Id
@@ -101,7 +101,7 @@ func NewsGetAll(ctx *fiber.Ctx) error {
 }
 
 func NewsPost(ctx *fiber.Ctx) error {
-	actor, err := activitypub.GetActorFromDB(config.Domain)
+	actor, err := activitypub.GetActorFromDB(config.C.Instance.Domain)
 
 	if err != nil {
 		return util.MakeError(err, "NewPost")
@@ -124,7 +124,7 @@ func NewsPost(ctx *fiber.Ctx) error {
 }
 
 func NewsDelete(ctx *fiber.Ctx) error {
-	actor, err := activitypub.GetActorFromDB(config.Domain)
+	actor, err := activitypub.GetActorFromDB(config.C.Instance.Domain)
 	if err != nil {
 		Send500(ctx, "Failed to delete news", err)
 	}
@@ -133,12 +133,12 @@ func NewsDelete(ctx *fiber.Ctx) error {
 		return Send403(ctx, "You are not authorized to delete news")
 	}
 
-	timestamp := ctx.Path()[13+len(config.Key):]
+	timestamp := ctx.Path()[13+len(config.C.ModKey):]
 
 	tsint, err := strconv.Atoi(timestamp)
 
 	if err != nil {
-		return Send400(ctx, ctx.Path()[13+len(config.Key):]+" is not a valid timestamp")
+		return Send400(ctx, ctx.Path()[13+len(config.C.ModKey):]+" is not a valid timestamp")
 	}
 
 	if err := db.DeleteNewsItem(tsint); err != nil {
@@ -150,14 +150,14 @@ func NewsDelete(ctx *fiber.Ctx) error {
 
 func GetNewsFeed(ctx *fiber.Ctx) error {
 	feedtype := ctx.Params("feedtype")
-	actor, err := activitypub.GetActorFromDB(config.Domain)
+	actor, err := activitypub.GetActorFromDB(config.C.Instance.Domain)
 	if err != nil {
 		return util.MakeError(err, "NewsGetAll")
 	}
 	now := time.Now()
 	feed := &feeds.Feed{
 		Title:   actor.PreferredUsername + " News",
-		Link:    &feeds.Link{Href: config.Domain + "/news"},
+		Link:    &feeds.Link{Href: config.C.Instance.Domain + "/news"},
 		Created: now,
 	}
 
@@ -168,9 +168,9 @@ func GetNewsFeed(ctx *fiber.Ctx) error {
 
 	for _, item := range news {
 		feedItem := &feeds.Item{
-			Id:          config.Domain + "/news/" + strconv.Itoa(item.Time),
+			Id:          config.C.Instance.Domain + "/news/" + strconv.Itoa(item.Time),
 			Title:       item.Title,
-			Link:        &feeds.Link{Href: config.Domain + "/news/" + strconv.Itoa(item.Time)},
+			Link:        &feeds.Link{Href: config.C.Instance.Domain + "/news/" + strconv.Itoa(item.Time)},
 			Description: string(item.Content),
 			Created:     time.Unix(int64(item.Time), 0),
 		}

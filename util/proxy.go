@@ -10,7 +10,7 @@ import (
 )
 
 func GetPathProxyType(path string) string {
-	if config.TorProxy != "" {
+	if config.C.TorProxy != "" {
 		re := regexp.MustCompile(`(http://|http://)?(www.)?(\w+\.onion|\w+\.loki|\w+\.i2p)`)
 		onion := re.MatchString(path)
 
@@ -23,7 +23,7 @@ func GetPathProxyType(path string) string {
 }
 
 func MediaProxy(url string) string {
-	re := regexp.MustCompile("(.+)?" + config.Domain + "(.+)?")
+	re := regexp.MustCompile("(.+)?" + config.C.Instance.Domain + "(.+)?")
 	if re.MatchString(url) {
 		return url
 	}
@@ -41,10 +41,10 @@ func MediaProxy(url string) string {
 func RouteProxy(req *http.Request) (*http.Response, error) {
 	var proxyType = GetPathProxyType(req.URL.Host)
 
-	req.Header.Set("User-Agent", "FChannel/"+config.InstanceName)
+	req.Header.Set("User-Agent", "FChannel/"+config.C.Instance.Name)
 
 	if proxyType == "tor" {
-		proxyUrl, err := url.Parse(config.TorProxy)
+		proxyUrl, err := url.Parse(config.C.TorProxy)
 
 		if err != nil {
 			return nil, MakeError(err, "RouteProxy")

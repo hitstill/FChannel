@@ -30,8 +30,9 @@ func CreateTripCode(input string) string {
 	return hex.EncodeToString(out[:])
 }
 
+// FIXME: appeers cookiekey is not not userd anywhere
 func GetCookieKey() (string, error) {
-	if config.CookieKey == "" {
+	if config.C.CookieKey == "" {
 		var file *os.File
 		var err error
 
@@ -41,11 +42,11 @@ func GetCookieKey() (string, error) {
 
 		defer file.Close()
 
-		config.CookieKey = encryptcookie.GenerateKey()
-		file.WriteString("\ncookiekey:" + config.CookieKey)
+		config.C.CookieKey = encryptcookie.GenerateKey()
+		file.WriteString("\ncookiekey:" + config.C.CookieKey)
 	}
 
-	return config.CookieKey, nil
+	return config.C.CookieKey, nil
 }
 
 func RandomID(size int) string {

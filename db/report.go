@@ -80,7 +80,7 @@ func GetLocalReport(board string) (map[string]Reports, error) {
 			Count:  1,
 			Object: col.OrderedItems[0],
 			OP:     OP,
-			Actor:  activitypub.Actor{Name: board, Outbox: config.Domain + "/" + board + "/outbox"},
+			Actor:  activitypub.Actor{Name: board, Outbox: config.C.Instance.Domain + "/" + board + "/outbox"},
 			Reason: []string{r.Reason},
 		}
 	}

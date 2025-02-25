@@ -36,7 +36,7 @@ func GetThemeCookie(c *fiber.Ctx) string {
 }
 
 func GetActorPost(ctx *fiber.Ctx, path string) error {
-	obj := activitypub.ObjectBase{Id: config.Domain + path}
+	obj := activitypub.ObjectBase{Id: config.C.Instance.Domain + path}
 	collection, err := obj.GetCollectionFromPath()
 
 	if err != nil {
@@ -77,8 +77,8 @@ func ParseOutboxRequest(ctx *fiber.Ctx, actor activitypub.Actor) error {
 			if header != nil {
 				f, _ := header.Open()
 				defer f.Close()
-				if header.Size > (int64(config.MaxAttachmentSize) << 20) {
-					return Send400(ctx, "File too large, maximum file size is "+util.ConvertSize(int64(config.MaxAttachmentSize)))
+				if header.Size > (int64(config.C.Posts.MaxAttachmentSize) << 20) {
+					return Send400(ctx, "File too large, maximum file size is "+util.ConvertSize(int64(config.C.Posts.MaxAttachmentSize)))
 				} else if isBanned, err := db.IsMediaBanned(f); err == nil && isBanned {
 					return Send403(ctx, "Attached file is banned")
 				} else if err != nil { //TODO: remove this?
@@ -129,7 +129,7 @@ func ParseOutboxRequest(ctx *fiber.Ctx, actor activitypub.Actor) error {
 				}
 			}
 
-			nObj.Actor = config.Domain + "/" + actor.Name
+			nObj.Actor = config.C.Instance.Domain + "/" + actor.Name
 
 			if locked, _ := nObj.InReplyTo[0].IsLocked(); locked {
 				return Send403(ctx, "Thread is locked")
@@ -234,7 +234,7 @@ func ParseOutboxRequest(ctx *fiber.Ctx, actor activitypub.Actor) error {
 					}
 				}
 
-				actor, _ := activitypub.GetActorFromDB(config.Domain)
+				actor, _ := activitypub.GetActorFromDB(config.C.Instance.Domain)
 				activitypub.FollowingBoards, err = actor.GetFollowing()
 
 				if err != nil {
@@ -580,13 +580,13 @@ func TemplateFunctions(engine *html.Engine) {
 	})
 
 	engine.AddFunc("maxFileSize", func() string {
-		return util.ConvertSize(int64(config.MaxAttachmentSize))
+		return util.ConvertSize(int64(config.C.Posts.MaxAttachmentSize))
 	})
 
 	engine.AddFunc("boardtypeFromInReplyTo", func(id string) string {
 		//TODO: Hangs entire instance if remote instance is down
 		// so for now always fallback to "image" if remote
-		if !strings.Contains(id, config.Domain) {
+		if !strings.Contains(id, config.C.Instance.Domain) {
 			return "image"
 		}
 		re := regexp.MustCompile(`.+\/`)
@@ -640,7 +640,7 @@ func StatusTemplate(num int) func(ctx *fiber.Ctx, msg string, err ...error) erro
 
 		// Display error on page if instance admin
 		_, modcred := util.GetPasswordFromSession(ctx)
-		if hasAuth, modlevel := util.HasAuth(modcred, config.Domain); (hasAuth) && (modlevel == "admin") && (err != nil) {
+		if hasAuth, modlevel := util.HasAuth(modcred, config.C.Instance.Domain); (hasAuth) && (modlevel == "admin") && (err != nil) {
 			statusData.Error = err
 		}
 

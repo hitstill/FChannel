@@ -41,8 +41,8 @@ func MultiDelete(ctx *fiber.Ctx) error {
 		return ctx.Redirect(ctx.BaseURL()+"/banned", 301)
 	}
 
-	minduration := config.MinPostDelete
-	maxduration := config.MaxPostDelete
+	minduration := config.C.Posts.RemovableNotBeforeSeconds
+	maxduration := config.C.Posts.RemovableNotAfterSeconds
 
 	pwd := ctx.FormValue("pwd")
 

@@ -13,11 +13,11 @@ func NodeInfoDiscover(ctx *fiber.Ctx) error {
 	jsonData := map[string]interface{}{
 		"links": []map[string]string{
 			{
-				"href": config.Domain + "/nodeinfo/2.0.json",
+				"href": config.C.Instance.Domain + "/nodeinfo/2.0.json",
 				"rel":  "http://nodeinfo.diaspora.software/ns/schema/2.0",
 			},
 			{
-				"href": config.Domain + "/nodeinfo/2.1.json",
+				"href": config.C.Instance.Domain + "/nodeinfo/2.1.json",
 				"rel":  "http://nodeinfo.diaspora.software/ns/schema/2.1",
 			},
 		},
@@ -71,8 +71,8 @@ func NodeInfo(ctx *fiber.Ctx) error {
 			"inbound":  []string{},
 			"outbound": []string{},
 		},
-		"nodeName":        config.InstanceName,
-		"nodeDescription": config.InstanceSummary,
+		"nodeName":        config.C.Instance.Name,
+		"nodeDescription": config.C.Instance.Summary,
 		"metadata": map[string]interface{}{
 			"remotePosts":    remotePosts,
 			"archivedPosts":  archivedPosts,

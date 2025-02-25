@@ -32,7 +32,7 @@ func Webfinger(c *fiber.Ctx) error {
 		actorDomain[0] = "/" + actorDomain[0]
 	}
 
-	actor := activitypub.Actor{Id: config.TP + "" + actorDomain[1] + "" + actorDomain[0]}
+	actor := activitypub.Actor{Id: config.C.Instance.Tp + "" + actorDomain[1] + "" + actorDomain[0]}
 	if res, _ := actor.IsLocal(); !res {
 		c.Status(fiber.StatusBadRequest)
 		return c.Send([]byte("actor not local"))
@@ -44,7 +44,7 @@ func Webfinger(c *fiber.Ctx) error {
 	finger.Subject = "acct:" + actorDomain[0] + "@" + actorDomain[1]
 	link.Rel = "self"
 	link.Type = "application/activity+json"
-	link.Href = config.TP + "" + actorDomain[1] + "" + actorDomain[0]
+	link.Href = config.C.Instance.Tp + "" + actorDomain[1] + "" + actorDomain[0]
 
 	finger.Links = append(finger.Links, link)
 

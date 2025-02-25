@@ -9,7 +9,7 @@ import (
 )
 
 func Index(ctx *fiber.Ctx) error {
-	actor, err := activitypub.GetActorFromDB(config.Domain)
+	actor, err := activitypub.GetActorFromDB(config.C.Instance.Domain)
 	if err != nil {
 		return util.MakeError(err, "Index")
 	}
@@ -38,8 +38,8 @@ func Index(ctx *fiber.Ctx) error {
 	data.Boards = activitypub.Boards
 	data.Posts = collection.OrderedItems
 	data.Board.Name = ""
-	data.Key = config.Key
-	data.Board.Domain = config.Domain
+	data.Key = config.C.ModKey
+	data.Board.Domain = config.C.Instance.Domain
 	data.Board.ModCred, _ = util.GetPasswordFromSession(ctx)
 	data.Board.Actor = actor
 	data.Board.Post.Actor = actor.Id
@@ -87,11 +87,11 @@ func Outbox(ctx *fiber.Ctx) error {
 }
 
 func Following(ctx *fiber.Ctx) error {
-	actor, _ := activitypub.GetActorFromDB(config.Domain)
+	actor, _ := activitypub.GetActorFromDB(config.C.Instance.Domain)
 	return actor.GetFollowingResp(ctx)
 }
 
 func Followers(ctx *fiber.Ctx) error {
-	actor, _ := activitypub.GetActorFromDB(config.Domain)
+	actor, _ := activitypub.GetActorFromDB(config.C.Instance.Domain)
 	return actor.GetFollowersResp(ctx)
 }

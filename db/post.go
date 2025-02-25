@@ -50,7 +50,7 @@ func ParseCommentForReplies(comment string, op string) ([]activitypub.ObjectBase
 		str = strings.Replace(str, "www.", "", 1)
 		str = strings.Replace(str, "http://", "", 1)
 		str = strings.Replace(str, "https://", "", 1)
-		str = config.TP + "" + str
+		str = config.C.Instance.Tp + "" + str
 		_, isReply, err := IsReplyToOP(op, str)
 
 		if err != nil {
@@ -276,7 +276,7 @@ func ObjectFromForm(ctx *fiber.Ctx, obj activitypub.ObjectBase) (activitypub.Obj
 
 		re := regexp.MustCompile(`image/(jpe?g|png|webp)`)
 		if re.MatchString(obj.Attachment[0].MediaType) {
-			fileLoc := strings.ReplaceAll(obj.Attachment[0].Href, config.Domain, "")
+			fileLoc := strings.ReplaceAll(obj.Attachment[0].Href, config.C.Instance.Domain, "")
 
 			cmd := exec.Command("exiv2", "rm", "."+fileLoc)
 

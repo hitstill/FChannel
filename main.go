@@ -49,9 +49,9 @@ func main() {
 		ReadTimeout:  30 * time.Second,
 		WriteTimeout: 30 * time.Second,
 		IdleTimeout:  60 * time.Second,
-		ServerHeader: "FChannel/" + config.InstanceName,
-		ProxyHeader:  config.ProxyHeader,
-		BodyLimit:    config.MaxAttachmentSize + 594, // max attachment size + some extra for overhead/headers etc
+		ServerHeader: "FChannel/" + config.C.Instance.Name,
+		ProxyHeader:  config.C.ProxyHeader,
+		BodyLimit:    config.C.Posts.MaxAttachmentSize + 594, // max attachment size + some extra for overhead/headers etc
 	})
 
 	app.Use(logger.New())
@@ -79,18 +79,18 @@ func main() {
 	app.Get("/feed.:feedtype", routes.GetBoardFeed)
 
 	// Admin routes
-	app.All("/"+config.Key+"/", routes.AdminIndex)
-	app.Post("/"+config.Key+"/verify", routes.AdminVerify)
-	app.All("/"+config.Key+"/follow", routes.AdminFollow)
-	app.Post("/"+config.Key+"/addboard", routes.AdminAddBoard)
-	app.Post("/"+config.Key+"/newspost", routes.NewsPost)
-	app.Get("/"+config.Key+"/newsdelete/:ts", routes.NewsDelete)
-	app.Post("/"+config.Key+"/:actor/addjanny", routes.AdminAddJanny)
-	app.Post("/"+config.Key+"/:actor/editsummary", routes.AdminEditSummary)
-	app.Post("/"+config.Key+"/:actor/setboardtype", routes.AdminSetBoardType)
-	app.Get("/"+config.Key+"/:actor/deletejanny", routes.AdminDeleteJanny)
-	app.All("/"+config.Key+"/:actor/follow", routes.AdminFollow)
-	app.Get("/"+config.Key+"/:actor", routes.AdminActorIndex)
+	app.All("/"+config.C.ModKey+"/", routes.AdminIndex)
+	app.Post("/"+config.C.ModKey+"/verify", routes.AdminVerify)
+	app.All("/"+config.C.ModKey+"/follow", routes.AdminFollow)
+	app.Post("/"+config.C.ModKey+"/addboard", routes.AdminAddBoard)
+	app.Post("/"+config.C.ModKey+"/newspost", routes.NewsPost)
+	app.Get("/"+config.C.ModKey+"/newsdelete/:ts", routes.NewsDelete)
+	app.Post("/"+config.C.ModKey+"/:actor/addjanny", routes.AdminAddJanny)
+	app.Post("/"+config.C.ModKey+"/:actor/editsummary", routes.AdminEditSummary)
+	app.Post("/"+config.C.ModKey+"/:actor/setboardtype", routes.AdminSetBoardType)
+	app.Get("/"+config.C.ModKey+"/:actor/deletejanny", routes.AdminDeleteJanny)
+	app.All("/"+config.C.ModKey+"/:actor/follow", routes.AdminFollow)
+	app.Get("/"+config.C.ModKey+"/:actor", routes.AdminActorIndex)
 
 	app.Get("/banned", routes.BannedGet)
 
@@ -147,7 +147,7 @@ func main() {
 
 	db.PrintAdminAuth()
 
-	app.Listen(fmt.Sprintf(":%v", config.Port))
+	app.Listen(fmt.Sprintf(":%v", config.C.Instance.Port))
 }
 
 func Init() {
@@ -176,7 +176,7 @@ func Init() {
 		config.Log.Println(err)
 	}
 
-	if actor, err = activitypub.GetActorFromDB(config.Domain); err != nil {
+	if actor, err = activitypub.GetActorFromDB(config.C.Instance.Domain); err != nil {
 		config.Log.Println(err)
 	}
 
@@ -188,8 +188,8 @@ func Init() {
 		config.Log.Println(err)
 	}
 
-	if config.Key == "" {
-		if config.Key, err = util.CreateKey(32); err != nil {
+	if config.C.ModKey == "" {
+		if config.C.ModKey, err = util.CreateKey(32); err != nil {
 			config.Log.Println(err)
 		}
 	}

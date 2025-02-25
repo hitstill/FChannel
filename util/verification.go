@@ -151,9 +151,9 @@ func (verify Verify) HasBoardAccess() (bool, string) {
 func (verify Verify) SendVerification() error {
 	config.Log.Println("sending email")
 
-	from := config.SiteEmail
-	user := config.SiteEmailUsername
-	pass := config.SiteEmailPassword
+	from := config.C.Email.Address
+	user := config.C.Email.User
+	pass := config.C.Email.Password
 	to := verify.Identifier
 	body := fmt.Sprintf("You can use either\r\nEmail: %s \r\n Verfication Code: %s\r\n for the board %s", verify.Identifier, verify.Code, verify.Board)
 
@@ -162,8 +162,8 @@ func (verify Verify) SendVerification() error {
 		"Subject: IB Verification\n\n" +
 		body
 
-	err := smtp.SendMail(config.SiteEmailServer+":"+config.SiteEmailPort,
-		smtp.PlainAuth(from, user, pass, config.SiteEmailServer),
+	err := smtp.SendMail(fmt.Sprintf("%v:%v", config.C.Email.Server, config.C.Email.Port),
+		smtp.PlainAuth(from, user, pass, config.C.Email.Server),
 		from, []string{to}, []byte(msg))
 
 	return MakeError(err, "SendVerification")
@@ -243,8 +243,8 @@ func CreateNewCaptcha() error {
 		return MakeError(err, "CreateNewCaptcha")
 	}
 
-	if len(config.CaptchaFont) > 0 {
-		cmd = exec.Command("convert", file, "-font", config.CaptchaFont, "-fill", "blue", "-pointsize", "62", "-annotate", "+0+70", captcha, "-tile", "pattern:left30", "-gravity", "center", "-transparent", "white", file)
+	if len(config.C.CaptchaFont) > 0 {
+		cmd = exec.Command("convert", file, "-font", config.C.CaptchaFont, "-fill", "blue", "-pointsize", "62", "-annotate", "+0+70", captcha, "-tile", "pattern:left30", "-gravity", "center", "-transparent", "white", file)
 	} else {
 		cmd = exec.Command("convert", file, "-fill", "blue", "-pointsize", "62", "-annotate", "+0+70", captcha, "-tile", "pattern:left30", "-gravity", "center", "-transparent", "white", file)
 	}
@@ -374,7 +374,7 @@ func HasAuth(code string, board string) (bool, string) {
 		return false, ""
 	}
 
-	if res, _type := verify.HasBoardAccess(); verify.Board == config.Domain || (res && verify.Board == board) {
+	if res, _type := verify.HasBoardAccess(); verify.Board == config.C.Instance.Domain || (res && verify.Board == board) {
 		return true, _type
 	}
 
@@ -382,7 +382,10 @@ func HasAuth(code string, board string) (bool, string) {
 }
 
 func IsEmailSetup() bool {
-	return config.SiteEmail != "" || config.SiteEmailPassword != "" || config.SiteEmailServer != "" || config.SiteEmailPort != ""
+	return config.C.Email.Address != "" ||
+		config.C.Email.Password != "" ||
+		config.C.Email.User != "" ||
+		config.C.Email.Server != ""
 }
 
 func VerficationCooldown() error {

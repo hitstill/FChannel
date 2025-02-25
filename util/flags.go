@@ -37,8 +37,8 @@ func GetCC(ip string) string {
 	if IsTorExit(ip) || ip == "172.16.0.1" {
 		return "xp"
 	}
-	
-	db, err := maxminddb.Open(config.MaxMindDB)
+
+	db, err := maxminddb.Open(config.C.MaxMindDb)
 	if err != nil {
 		return "xx"
 	}
