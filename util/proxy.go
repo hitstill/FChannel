@@ -10,7 +10,7 @@ import (
 )
 
 func GetPathProxyType(path string) string {
-	if config.C.TorProxy != "" {
+	if config.C.Proxy != "" {
 		re := regexp.MustCompile(`(http://|http://)?(www.)?(\w+\.onion|\w+\.loki|\w+\.i2p)`)
 		onion := re.MatchString(path)
 
@@ -44,7 +44,7 @@ func RouteProxy(req *http.Request) (*http.Response, error) {
 	req.Header.Set("User-Agent", "FChannel/"+config.C.Instance.Name)
 
 	if proxyType == "tor" {
-		proxyUrl, err := url.Parse(config.C.TorProxy)
+		proxyUrl, err := url.Parse(config.C.Proxy)
 
 		if err != nil {
 			return nil, MakeError(err, "RouteProxy")

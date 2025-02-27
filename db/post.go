@@ -50,7 +50,7 @@ func ParseCommentForReplies(comment string, op string) ([]activitypub.ObjectBase
 		str = strings.Replace(str, "www.", "", 1)
 		str = strings.Replace(str, "http://", "", 1)
 		str = strings.Replace(str, "https://", "", 1)
-		str = config.C.Instance.Tp + "" + str
+		str = config.C.Instance.Scheme + "" + str
 		_, isReply, err := IsReplyToOP(op, str)
 
 		if err != nil {

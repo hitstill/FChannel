@@ -254,7 +254,7 @@ func AdminActorIndex(ctx *fiber.Ctx) error {
 	data.Board.Name = actor.Name
 	data.Board.Actor = actor
 	data.Key = config.C.ModKey
-	data.Board.TP = config.C.Instance.Tp
+	data.Board.Scheme = config.C.Instance.Scheme
 
 	data.Board.Post.Actor = actor.Id
 

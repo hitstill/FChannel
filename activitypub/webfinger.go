@@ -41,7 +41,7 @@ type Board struct {
 	CaptchaCode string
 	ModCred     string
 	Domain      string
-	TP          string
+	Scheme      string
 	Restricted  bool
 	Post        ObjectBase
 	BoardType   string

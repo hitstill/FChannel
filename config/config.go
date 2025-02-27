@@ -7,7 +7,7 @@ import (
 type AppConfig struct {
 	Instance struct {
 		Port    int
-		Tp      string
+		Scheme  string
 		Name    string
 		Domain  string
 		Summary string
@@ -39,7 +39,7 @@ type AppConfig struct {
 		RemovableNotAfterSeconds  int
 	}
 
-	TorProxy    string
+	Proxy       string
 	CookieKey   string
 	ModKey      string
 	MaxMindDb   string
