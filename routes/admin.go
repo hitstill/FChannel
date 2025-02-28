@@ -2,6 +2,7 @@ package routes
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"regexp"
 	"sort"
@@ -49,7 +50,7 @@ func AdminIndex(ctx *fiber.Ctx) error {
 		return ctx.Render("verify", fiber.Map{"key": config.C.ModKey})
 	}
 
-	actor, err := activitypub.GetActor(config.C.Instance.Domain)
+	actor, err := activitypub.GetActor(fmt.Sprintf("%v%v:%v", config.C.Instance.Scheme, config.C.Instance.Domain, config.C.Instance.Port))
 
 	if err != nil {
 		return util.MakeError(err, "AdminIndex")
