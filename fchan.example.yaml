@@ -2,7 +2,7 @@ instance:
     domain: fchan.xyz
     port: 3000
     name: FChan
-    summary: FChan is a federated image board instance.
+    summary: FChan is a federated image board
 
     ## For `instancetp` if you plan to support https
     ## make sure you setup the ssl certs before running the server initially
@@ -91,3 +91,5 @@ captcha_font: ""
 #proxy_header: X-Real-IP
 
 debug: false
+
+cookie_key: some_secure_value

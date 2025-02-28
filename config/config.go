@@ -19,7 +19,7 @@ type AppConfig struct {
 		Password string
 		Server   string
 		Port     int
-		NotifyTo string
+		NotifyTo string `mapstructure:"notify_to"`
 	}
 	Db struct {
 		Host     string
@@ -34,19 +34,19 @@ type AppConfig struct {
 	}
 
 	Posts struct {
-		MaxAttachmentSize         int
-		RemovableNotBeforeSeconds int
-		RemovableNotAfterSeconds  int
+		MaxAttachmentSize         int `mapstructure:"max_attachment_size"`
+		RemovableNotBeforeSeconds int `mapstructure:"removable_not_before_seconds"`
+		RemovableNotAfterSeconds  int `mapstructure:"removable_not_after_seconds"`
 	}
 
 	Proxy       string
-	CookieKey   string
-	ModKey      string
-	MaxMindDb   string
-	TorExitList string
+	CookieKey   string `mapstructure:"cookie_key"`
+	ModKey      string `mapstructure:"mod_key"`
+	MaxMindDb   string `mapstructure:"max_mind_db"`
+	TorExitList string `mapstructure:"tor_exit_list"`
 	Salt        string
-	ProxyHeader string
-	CaptchaFont string
+	ProxyHeader string `mapstructure:"proxy_header"`
+	CaptchaFont string `mapstructure:"captcha_font"`
 	Debug       bool
 }
 
@@ -82,7 +82,7 @@ func setDefaults() {
 	viper.SetDefault("db.user", "postgres")
 	viper.SetDefault("db.password", "postgres")
 	viper.SetDefault("db.host", "localhost")
-	viper.SetDefault("db.name", "fchan")
+	viper.SetDefault("db.database", "server")
 
 	viper.SetDefault("posts.removable_not_before_seconds", 60)
 	viper.SetDefault("posts.removable_not_after_seconds", 1800)

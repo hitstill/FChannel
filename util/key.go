@@ -5,11 +5,9 @@ import (
 	"encoding/hex"
 	"errors"
 	"math/rand"
-	"os"
 	"strings"
 
 	"github.com/anomalous69/fchannel/config"
-	"github.com/gofiber/fiber/v2/middleware/encryptcookie"
 )
 
 const domain = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -30,20 +28,9 @@ func CreateTripCode(input string) string {
 	return hex.EncodeToString(out[:])
 }
 
-// FIXME: appeers cookiekey is not not userd anywhere
 func GetCookieKey() (string, error) {
 	if config.C.CookieKey == "" {
-		var file *os.File
-		var err error
-
-		if file, err = os.OpenFile("config/config-init", os.O_APPEND|os.O_WRONLY, 0644); err != nil {
-			return "", MakeError(err, "GetCookieKey")
-		}
-
-		defer file.Close()
-
-		config.C.CookieKey = encryptcookie.GenerateKey()
-		file.WriteString("\ncookiekey:" + config.C.CookieKey)
+		panic("cookie_key in not set in the fchan.yaml file\n Run openssl rand -base64 32 to generate")
 	}
 
 	return config.C.CookieKey, nil
