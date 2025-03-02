@@ -31,7 +31,7 @@ email:
     password: ""
 
     ## comma seperated emails To
-    notify: ""
+    notify_to: ""
 
 ntfy:
     ## Use ntfy for post reports
@@ -92,4 +92,4 @@ captcha_font: ""
 
 debug: false
 
-cookie_key: some_secure_value
+cookie_key: ""
