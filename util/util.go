@@ -168,8 +168,6 @@ func GetUniqueFilename(ext string) string {
 			return "/public/" + id + "." + ext
 		}
 	}
-
-	return ""
 }
 
 func HashMedia(media string) string {

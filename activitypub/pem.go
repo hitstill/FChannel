@@ -67,14 +67,12 @@ func CreatePem(actor Actor) error {
 	if os.IsNotExist(err) {
 		return util.MakeError(err, "CreatePem")
 	} else {
+		config.Log.Println(`Created PEM keypair for the "` + actor.Name + `" board. Please keep in mind that
+	the PEM key is crucial in identifying yourself as the legitimate owner of the board,
+	so DO NOT LOSE IT!!! If you lose it, YOU WILL LOSE ACCESS TO YOUR BOARD!`)
 		return StorePemToDB(actor)
 	}
 
-	config.Log.Println(`Created PEM keypair for the "` + actor.Name + `" board. Please keep in mind that
-the PEM key is crucial in identifying yourself as the legitimate owner of the board,
-so DO NOT LOSE IT!!! If you lose it, YOU WILL LOSE ACCESS TO YOUR BOARD!`)
-
-	return nil
 }
 
 func CreatePublicKeyFromPrivate(actor *Actor, publicKeyPem string) error {

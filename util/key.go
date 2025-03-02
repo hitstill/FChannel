@@ -35,7 +35,7 @@ func GetCookieKey() (string, error) {
 		var file *os.File
 		var err error
 
-		if file, err = os.OpenFile("config/config-init", os.O_APPEND|os.O_WRONLY, 0644); err != nil {
+		if file, err = os.OpenFile("fchan.cfg", os.O_APPEND|os.O_WRONLY, 0644); err != nil {
 			return "", MakeError(err, "GetCookieKey")
 		}
 

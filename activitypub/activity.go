@@ -297,7 +297,7 @@ func (activity Activity) SetActorFollowing() (Activity, error) {
 	var query string
 
 	if alreadyFollowing && alreadyFollower {
-		if res, _ := activity.Actor.IsLocal(); !res {
+		if res, err := activity.Actor.IsLocal(); !res {
 			go activity.Actor.DeleteCache()
 		} else if err != nil {
 			return activity, util.MakeError(err, "SetActorFollowing")
