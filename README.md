@@ -33,7 +33,7 @@ and to fix errors reported by `go vet` and make your code better with
 
 ### Minimum Server Requirements
 
-- Go v1.19+
+- Go v1.23+
 - PostgreSQL (pgcrypto extension required for user post deletion)
 - ImageMagick
 - exiv2

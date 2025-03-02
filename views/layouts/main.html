@@ -58,7 +58,6 @@
         {{ end }}
         {{ end }}
 	{{ template "partials/extboards" }}
-	<li style="float:right;"> [<a href="#" onclick="setYTHost();">Settings</a>]</li>
       </ul>
       {{ if .page.Board.ModCred }}
       {{ if or (eq .page.Board.ModCred .page.Board.Domain) (eq .page.Board.ModCred .page.Board.Actor.Id) }}

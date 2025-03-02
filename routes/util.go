@@ -21,7 +21,7 @@ import (
 	"github.com/anomalous69/fchannel/config"
 	"github.com/anomalous69/fchannel/db"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/template/html"
+	"github.com/gofiber/template/html/v2"
 	country "github.com/mikekonan/go-countries"
 )
 
@@ -37,24 +37,20 @@ func GetThemeCookie(c *fiber.Ctx) string {
 
 func GetActorPost(ctx *fiber.Ctx, path string) error {
 	obj := activitypub.ObjectBase{Id: config.C.Instance.Domain + path}
-	collection, err := obj.GetCollectionFromPath()
+	post, err := obj.GetFromPath()
 
 	if err != nil {
 		return Send404(ctx, "Post not found", util.MakeError(err, "GetActorPost"))
 	}
 
-	if len(collection.OrderedItems) > 0 {
-		enc, err := json.MarshalIndent(collection, "", "\t")
-		if err != nil {
-			return Send500(ctx, "Failed to get thread", util.MakeError(err, "GetActorPost"))
-		}
-
-		ctx.Response().Header.Set("Content-Type", "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"")
-		_, err = ctx.Write(enc)
-		return util.MakeError(err, "GetActorPost")
+	enc, err := json.MarshalIndent(post, "", "\t")
+	if err != nil {
+		return Send500(ctx, "Failed to get post", util.MakeError(err, "GetActorPost"))
 	}
 
-	return nil
+	ctx.Response().Header.Set("Content-Type", "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\"")
+	_, err = ctx.Write(enc)
+	return util.MakeError(err, "GetActorPost")
 }
 
 func ParseOutboxRequest(ctx *fiber.Ctx, actor activitypub.Actor) error {
