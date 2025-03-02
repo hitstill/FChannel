@@ -21,7 +21,7 @@ import (
 	"github.com/anomalous69/fchannel/config"
 	"github.com/anomalous69/fchannel/db"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/template/html"
+	"github.com/gofiber/template/html/v2"
 	country "github.com/mikekonan/go-countries"
 )
 
