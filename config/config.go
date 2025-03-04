@@ -42,7 +42,7 @@ type AppConfig struct {
 	Proxy       string
 	CookieKey   string `mapstructure:"cookie_key"`
 	ModKey      string `mapstructure:"mod_key"`
-	MaxMindDb   string `mapstructure:"max_mind_db"`
+	MaxMindDb   string `mapstructure:"maxmind_db"`
 	TorExitList string `mapstructure:"tor_exit_list"`
 	Salt        string
 	ProxyHeader string `mapstructure:"proxy_header"`
